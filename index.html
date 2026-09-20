@@ -1,794 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>Ngessumin Comprehensive School</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #222;
-    }
-
-    button,
-    input,
-    select {
-      font: inherit;
-    }
-
-    .hidden {
-      display: none !important;
-    }
-
-    /* LOGIN */
-    #loginPage {
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      background: #eef3f8;
-    }
-
-    .login-box {
-      width: 100%;
-      max-width: 420px;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-
-    .login-box h1 {
-      margin-top: 0;
-      text-align: center;
-      color: #164e63;
-    }
-
-    .login-box p {
-      text-align: center;
-      color: #666;
-    }
-
-    .login-box input {
-      width: 100%;
-      padding: 13px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 7px;
-    }
-
-    .login-box button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 7px;
-      background: #164e63;
-      color: white;
-      cursor: pointer;
-    }
-
-    /* APP */
-    #appDashboard {
-      display: none;
-    }
-
-    .topbar {
-      background: #164e63;
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    .topbar h1 {
-      margin: 0;
-      font-size: 20px;
-    }
-
-    .topbar button {
-      background: white;
-      color: #164e63;
-      border: none;
-      padding: 9px 15px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .layout {
-      display: flex;
-      min-height: calc(100vh - 62px);
-    }
-
-    .sidebar {
-      width: 230px;
-      background: #0f172a;
-      padding: 15px;
-      color: white;
-    }
-
-    .sidebar button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 6px;
-      text-align: left;
-      border: none;
-      border-radius: 6px;
-      background: transparent;
-      color: white;
-      cursor: pointer;
-    }
-
-    .sidebar button:hover {
-      background: #1e293b;
-    }
-
-    .content {
-      flex: 1;
-      padding: 25px;
-      min-width: 0;
-    }
-
-    .section {
-      display: none;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    .section h2 {
-      margin-top: 0;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .card,
-    .panel {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    .card h3 {
-      margin-top: 0;
-      color: #555;
-      font-size: 15px;
-    }
-
-    .number {
-      font-size: 30px;
-      font-weight: bold;
-      color: #164e63;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-
-    .form-grid input,
-    .form-grid select {
-      width: 100%;
-      padding: 11px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: white;
-    }
-
-    .form-grid button {
-      padding: 12px;
-      border: none;
-      border-radius: 6px;
-      background: #164e63;
-      color: white;
-      cursor: pointer;
-    }
-
-    .message {
-      margin-top: 12px;
-      font-weight: bold;
-    }
-
-    .search-area {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 15px 0;
-    }
-
-    .search-area input,
-    .search-area select {
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      margin-top: 15px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-
-    th,
-    td {
-      padding: 11px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    th {
-      background: #e9eef2;
-    }
-
-    .area-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-    }
-
-    .area-item {
-      padding: 12px;
-      background: #f1f5f9;
-      border-radius: 6px;
-    }
-
-    @media (max-width: 750px) {
-      .layout {
-        display: block;
-      }
-
-      .sidebar {
-        width: 100%;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 5px;
-      }
-
-      .sidebar button {
-        margin: 0;
-      }
-
-      .content {
-        padding: 15px;
-      }
-
-      .topbar h1 {
-        font-size: 17px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-
-<!-- ================= LOGIN ================= -->
-
-<div id="loginPage">
-
-  <div class="login-box">
-
-    <h1>Ngessumin Comprehensive School</h1>
-
-    <p>School Management System</p>
-
-    <form id="loginForm">
-
-      <input
-        type="email"
-        id="email"
-        placeholder="Email address"
-        required
-      >
-
-      <input
-        type="password"
-        id="password"
-        placeholder="Password"
-        required
-      >
-
-      <button type="submit">
-        Sign In
-      </button>
-
-    </form>
-
-    <div id="loginMessage" class="message"></div>
-
-  </div>
-
-</div>
-
-
-<!-- ================= APPLICATION ================= -->
-
-<div id="appDashboard">
-
-  <div class="topbar">
-
-    <h1>NGESSUMIN COMPREHENSIVE SCHOOL</h1>
-
-    <button id="logoutButton">
-      Logout
-    </button>
-
-  </div>
-
-
-  <div class="layout">
-
-    <!-- SIDEBAR -->
-
-    <aside class="sidebar">
-
-      <button data-section="dashboard">
-        Dashboard
-      </button>
-
-      <button data-section="learners">
-        Learners
-      </button>
-
-      <button data-section="learningAreas">
-        Learning Areas
-      </button>
-
-      <button data-section="assessments">
-        Assessments & Results
-      </button>
-
-      <button data-section="analysis">
-        Results Analysis
-      </button>
-
-      <button data-section="fees">
-        Fees & Payments
-      </button>
-
-      <button data-section="receipts">
-        Receipts & Statements
-      </button>
-
-      <button data-section="reports">
-        Reports / Report Cards
-      </button>
-
-      <button data-section="users">
-        Users & Permissions
-      </button>
-
-      <button data-section="settings">
-        Settings
-      </button>
-
-    </aside>
-
-
-    <!-- MAIN CONTENT -->
-
-    <main class="content">
-
-
-      <!-- ================= DASHBOARD ================= -->
-
-      <section id="dashboard" class="section active">
-
-        <h2>Dashboard</h2>
-
-        <div class="cards">
-
-          <div class="card">
-            <h3>Total Learners</h3>
-            <div class="number" id="learnerCount">0</div>
-          </div>
-
-          <div class="card">
-            <h3>Total Grades</h3>
-            <div class="number" id="gradeCount">0</div>
-          </div>
-
-          <div class="card">
-            <h3>Learning Areas</h3>
-            <div class="number" id="areaCount">0</div>
-          </div>
-
-          <div class="card">
-            <h3>Academic Year</h3>
-            <div class="number" id="yearValue">2026</div>
-          </div>
-
-        </div>
-
-        <div class="panel">
-
-          <h3>System Status</h3>
-
-          <p id="statusMessage">
-            Connecting to school database...
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= LEARNERS ================= -->
-
-      <section id="learners" class="section">
-
-        <h2>Learners</h2>
-
-        <p>
-          Register and manage learners.
-        </p>
-
-
-        <div class="panel">
-
-          <h3>Register Learner</h3>
-
-          <form id="learnerForm" class="form-grid">
-
-            <input
-              id="admissionNumber"
-              type="text"
-              placeholder="Admission number"
-              required
-            >
-
-            <input
-              id="fullName"
-              type="text"
-              placeholder="Full name"
-              required
-            >
-
-            <select id="gender">
-
-              <option value="">
-                Gender
-              </option>
-
-              <option value="Male">
-                Male
-              </option>
-
-              <option value="Female">
-                Female
-              </option>
-
-            </select>
-
-
-            <select id="grade" required>
-
-              <option value="">
-                Select grade
-              </option>
-
-            </select>
-
-
-            <input
-              id="guardianName"
-              type="text"
-              placeholder="Parent / Guardian name"
-            >
-
-            <input
-              id="guardianPhone"
-              type="text"
-              placeholder="Parent / Guardian phone"
-            >
-
-            <input
-              id="admissionDate"
-              type="date"
-            >
-
-
-            <select id="learnerStatus">
-
-              <option value="Active">
-                Active
-              </option>
-
-              <option value="Transferred">
-                Transferred
-              </option>
-
-              <option value="Graduated">
-                Graduated
-              </option>
-
-              <option value="Inactive">
-                Inactive
-              </option>
-
-            </select>
-
-
-            <button type="submit">
-              Register Learner
-            </button>
-
-          </form>
-
-
-          <p
-            id="learnerMessage"
-            class="message"
-          ></p>
-
-        </div>
-
-
-        <!-- SEARCH -->
-
-        <div class="panel">
-
-          <h3>Registered Learners</h3>
-
-          <div class="search-area">
-
-            <input
-              id="learnerSearch"
-              type="text"
-              placeholder="Search by name or admission number"
-            >
-
-            <select id="learnerGradeFilter">
-
-              <option value="">
-                All Grades
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="table-container">
-
-            <table>
-
-              <thead>
-
-                <tr>
-
-                  <th>Admission No.</th>
-
-                  <th>Full Name</th>
-
-                  <th>Gender</th>
-
-                  <th>Grade</th>
-
-                  <th>Parent / Guardian</th>
-
-                  <th>Status</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody id="learnersTableBody">
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= LEARNING AREAS ================= -->
-
-      <section id="learningAreas" class="section">
-
-        <h2>Learning Areas</h2>
-
-        <div class="panel">
-
-          <div
-            id="learningAreasList"
-            class="area-list"
-          ></div>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= ASSESSMENTS ================= -->
-
-      <section id="assessments" class="section">
-
-        <h2>Assessments & Results</h2>
-
-        <div class="panel">
-
-          <p>
-            CBE assessment results will be entered
-            and managed here.
-          </p>
-
-          <p>
-            Achievement levels:
-            <strong>EE, ME, AE, BE</strong>
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= ANALYSIS ================= -->
-
-      <section id="analysis" class="section">
-
-        <h2>Results Analysis</h2>
-
-        <div class="panel">
-
-          <p>
-            CBE performance analysis will appear here.
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= FEES ================= -->
-
-      <section id="fees" class="section">
-
-        <h2>Fees & Payments</h2>
-
-        <div class="panel">
-
-          <p>
-            School fees assignments, payments and
-            balances will be managed here.
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= RECEIPTS ================= -->
-
-      <section id="receipts" class="section">
-
-        <h2>Receipts & Statements</h2>
-
-        <div class="panel">
-
-          <p>
-            Receipts and learner fee statements
-            will appear here.
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= REPORTS ================= -->
-
-      <section id="reports" class="section">
-
-        <h2>Reports / Report Cards</h2>
-
-        <div class="panel">
-
-          <p>
-            Learner reports and CBE report cards
-            will be generated here.
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= USERS ================= -->
-
-      <section id="users" class="section">
-
-        <h2>Users & Permissions</h2>
-
-        <div class="panel">
-
-          <p>
-            User accounts and permissions will
-            be managed here.
-          </p>
-
-        </div>
-
-      </section>
-
-
-      <!-- ================= SETTINGS ================= -->
-
-      <section id="settings" class="section">
-
-        <h2>Settings</h2>
-
-        <div class="panel">
-
-          <p>
-            School system settings will be managed here.
-          </p>
-
-          <p>
-            <strong>School:</strong>
-            Ngessumin Comprehensive School
-          </p>
-
-          <p>
-            <strong>Curriculum:</strong>
-            CBE
-          </p>
-
-          <p>
-            <strong>Grades:</strong>
-            1–9
-          </p>
-
-          <p>
-            <strong>Academic Year:</strong>
-            2026
-          </p>
-
-        </div>
-
-      </section>
-
-
-    </main>
-
-  </div>
-
-</div>
-
-
-<!-- ================= JAVASCRIPT ================= -->
-
 <script>
 
 const SUPABASE_URL =
@@ -797,12 +6,10 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
 
-const db =
-  window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 let grades = [];
 let learners = [];
@@ -811,102 +18,45 @@ let areas = [];
 
 /* ================= START ================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  async function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-    document
-      .getElementById("loginForm")
-      .addEventListener(
-        "submit",
-        login
-      );
+  document
+    .getElementById("loginForm")
+    .addEventListener("submit", login);
 
+  document
+    .getElementById("logoutButton")
+    .addEventListener("click", logout);
 
-    document
-      .getElementById("logoutButton")
-      .addEventListener(
-        "click",
-        logout
-      );
+  document
+    .getElementById("learnerForm")
+    .addEventListener("submit", addLearner);
 
+  document
+    .getElementById("learnerSearch")
+    .addEventListener("input", showLearners);
 
-    document
-      .getElementById("learnerForm")
-      .addEventListener(
-        "submit",
-        addLearner
-      );
+  document
+    .getElementById("learnerGradeFilter")
+    .addEventListener("change", showLearners);
 
+  document
+    .querySelectorAll("[data-section]")
+    .forEach(function (button) {
 
-    document
-      .getElementById("learnerSearch")
-      .addEventListener(
-        "input",
-        showLearners
-      );
+      button.addEventListener("click", function () {
 
+        showSection(this.dataset.section);
 
-    document
-      .getElementById("learnerGradeFilter")
-      .addEventListener(
-        "change",
-        showLearners
-      );
+      });
 
+    });
 
-    document
-      .querySelectorAll(
-        "[data-section]"
-      )
-      .forEach(
-        button => {
+  /* Start with login page */
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("appDashboard").style.display = "none";
 
-          button.addEventListener(
-            "click",
-            function () {
-
-              showSection(
-                this.dataset.section
-              );
-
-            }
-          );
-
-        }
-      );
-
-
-    await checkSession();
-
-  }
-);
-
-
-/* ================= SESSION ================= */
-
-async function checkSession() {
-
-  const result =
-    await db.auth.getSession();
-
-  if (result.data.session) {
-
-    await startApp();
-
-  } else {
-
-    document
-      .getElementById("loginPage")
-      .style.display = "flex";
-
-    document
-      .getElementById("appDashboard")
-      .style.display = "none";
-
-  }
-
-}
+});
 
 
 /* ================= LOGIN ================= */
@@ -916,60 +66,55 @@ async function login(event) {
   event.preventDefault();
 
   const email =
-    document
-      .getElementById("email")
-      .value
-      .trim();
+    document.getElementById("email").value.trim();
 
   const password =
-    document
-      .getElementById("password")
-      .value;
+    document.getElementById("password").value;
 
   const message =
-    document
-      .getElementById("loginMessage");
-
-
-  message.textContent =
-    "Signing in...";
-
-
-  async function login(event) {
-
-  event.preventDefault();
-
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value;
-  const message = document.getElementById("loginMessage");
+    document.getElementById("loginMessage");
 
   message.textContent = "Signing in...";
 
   try {
 
-    const result = await db.auth.signInWithPassword({
-      email: email,
-      password: password
-    });
+    const result =
+      await db.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
     if (result.error) {
-      message.textContent = result.error.message;
+
+      message.textContent =
+        result.error.message;
+
       return;
     }
 
     if (!result.data.session) {
-      message.textContent = "Login succeeded, but no session was created.";
+
+      message.textContent =
+        "Login failed: no session was created.";
+
       return;
     }
 
-    message.textContent = "Login successful. Loading system...";
+    /* LOGIN SUCCESS */
+
+    message.textContent = "";
 
     document.getElementById("loginPage").style.display = "none";
+
     document.getElementById("appDashboard").style.display = "block";
 
-    console.log("LOGIN SUCCESS");
-
     showSection("dashboard");
+
+    /* Load data after dashboard is visible */
+    loadSchool();
+    loadGrades();
+    loadAreas();
+    loadLearners();
 
   } catch (error) {
 
@@ -979,50 +124,6 @@ async function login(event) {
       "Login error: " + error.message;
 
   }
-  }
-
-
-  if (result.error) {
-
-    message.textContent =
-      result.error.message;
-
-    return;
-
-  }
-
-
-  message.textContent = "";
-
-  await startApp();
-
-}
-
-
-/* ================= START APP ================= */
-
-async function startApp() {
-
-  document
-    .getElementById("loginPage")
-    .style.display = "none";
-
-
-  document
-    .getElementById("appDashboard")
-    .style.display = "block";
-
-
-  await loadSchool();
-
-  await loadGrades();
-
-  await loadAreas();
-
-  await loadLearners();
-
-
-  showSection("dashboard");
 
 }
 
@@ -1041,27 +142,17 @@ async function loadSchool() {
       )
       .single();
 
-
   if (result.error) {
 
-    console.error(
-      result.error
-    );
+    console.error(result.error);
 
     return;
-
   }
 
+  document.getElementById("yearValue").textContent = "2026";
 
-  document
-    .getElementById("yearValue")
-    .textContent = "2026";
-
-
-  document
-    .getElementById("statusMessage")
-    .textContent =
-      "Connected to Ngessumin Comprehensive School database.";
+  document.getElementById("statusMessage").textContent =
+    "Connected to Ngessumin Comprehensive School database.";
 
 }
 
@@ -1073,75 +164,46 @@ async function loadGrades() {
   const result =
     await db
       .from("grades")
-      .select(
-        "id, grade_number"
-      )
-      .order(
-        "grade_number"
-      );
-
+      .select("id, grade_number")
+      .order("grade_number");
 
   if (result.error) {
 
-    console.error(
-      result.error
-    );
+    console.error(result.error);
 
     return;
-
   }
 
+  grades = result.data || [];
 
-  grades =
-    result.data || [];
-
-
-  const gradeSelect =
-    document.getElementById(
-      "grade"
-    );
-
+  const grade =
+    document.getElementById("grade");
 
   const filter =
-    document.getElementById(
-      "learnerGradeFilter"
-    );
+    document.getElementById("learnerGradeFilter");
 
-
-  gradeSelect.innerHTML =
+  grade.innerHTML =
     '<option value="">Select grade</option>';
-
 
   filter.innerHTML =
     '<option value="">All Grades</option>';
 
+  grades.forEach(function (item) {
 
-  grades.forEach(
-    grade => {
+    grade.innerHTML +=
+      `<option value="${item.id}">
+        Grade ${item.grade_number}
+      </option>`;
 
-      gradeSelect.innerHTML +=
-        `
-        <option value="${grade.id}">
-          Grade ${grade.grade_number}
-        </option>
-        `;
+    filter.innerHTML +=
+      `<option value="${item.id}">
+        Grade ${item.grade_number}
+      </option>`;
 
+  });
 
-      filter.innerHTML +=
-        `
-        <option value="${grade.id}">
-          Grade ${grade.grade_number}
-        </option>
-        `;
-
-    }
-  );
-
-
-  document
-    .getElementById("gradeCount")
-    .textContent =
-      grades.length;
+  document.getElementById("gradeCount").textContent =
+    grades.length;
 
 }
 
@@ -1153,71 +215,39 @@ async function loadAreas() {
   const result =
     await db
       .from("learning_areas")
-      .select(
-        "id,name,code"
-      )
-      .eq(
-        "active",
-        true
-      )
-      .order(
-        "name"
-      );
-
+      .select("id,name,code")
+      .eq("active", true)
+      .order("name");
 
   if (result.error) {
 
-    console.error(
-      result.error
-    );
+    console.error(result.error);
 
     return;
-
   }
 
-
-  areas =
-    result.data || [];
-
+  areas = result.data || [];
 
   const list =
-    document.getElementById(
-      "learningAreasList"
-    );
-
+    document.getElementById("learningAreasList");
 
   list.innerHTML = "";
 
+  areas.forEach(function (area) {
 
-  areas.forEach(
-    area => {
+    const item =
+      document.createElement("div");
 
-      const item =
-        document.createElement(
-          "div"
-        );
+    item.className = "area-item";
 
+    item.textContent = area.name;
 
-      item.className =
-        "area-item";
+    list.appendChild(item);
 
+  });
 
-      item.textContent =
-        area.name;
-
-
-      list.appendChild(
-        item
-      );
-
-    }
-  );
-
-
-  document
-    .getElementById("areaCount")
-    .textContent =
-      areas.length;
+  document.getElementById("areaCount").textContent =
+    areas.length;
 
 }
 
@@ -1243,47 +273,275 @@ async function loadLearners() {
           grade_number
         )
       `)
-      .order(
-        "full_name"
-      );
-
+      .order("full_name");
 
   if (result.error) {
 
-    console.error(
-      result.error
-    );
-
-    document
-      .getElementById(
-        "learnerMessage"
-      )
-      .textContent =
-        "Could not load learners: " +
-        result.error.message;
+    console.error(result.error);
 
     return;
-
   }
 
-
-  learners =
-    result.data || [];
-
+  learners = result.data || [];
 
   showLearners();
 
-
-  document
-    .getElementById(
-      "learnerCount"
-    )
-    .textContent =
-      learners.length;
+  document.getElementById("learnerCount").textContent =
+    learners.length;
 
 }
 
 
-/* ================= DISPLAY LEARNERS ================= */
+/* ================= SHOW LEARNERS ================= */
 
 function showLearners() {
+
+  const table =
+    document.getElementById("learnersTableBody");
+
+  if (!table) return;
+
+  const search =
+    document.getElementById("learnerSearch")
+      .value
+      .trim()
+      .toLowerCase();
+
+  const filter =
+    document.getElementById("learnerGradeFilter")
+      .value;
+
+  table.innerHTML = "";
+
+  const list =
+    learners.filter(function (learner) {
+
+      const name =
+        (learner.full_name || "").toLowerCase();
+
+      const admission =
+        (learner.admission_number || "").toLowerCase();
+
+      const matchesSearch =
+        name.includes(search) ||
+        admission.includes(search);
+
+      const matchesGrade =
+        !filter ||
+        learner.grade_id === filter;
+
+      return matchesSearch && matchesGrade;
+
+    });
+
+  if (list.length === 0) {
+
+    table.innerHTML = `
+      <tr>
+        <td colspan="6">
+          No learners found.
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
+  list.forEach(function (learner) {
+
+    const row =
+      document.createElement("tr");
+
+    row.innerHTML = `
+      <td>${escapeHTML(learner.admission_number)}</td>
+      <td>${escapeHTML(learner.full_name)}</td>
+      <td>${escapeHTML(learner.gender || "")}</td>
+      <td>Grade ${
+        learner.grades
+          ? learner.grades.grade_number
+          : ""
+      }</td>
+      <td>${escapeHTML(learner.guardian_name || "")}</td>
+      <td>${escapeHTML(learner.status || "")}</td>
+    `;
+
+    table.appendChild(row);
+
+  });
+
+}
+
+
+/* ================= ADD LEARNER ================= */
+
+async function addLearner(event) {
+
+  event.preventDefault();
+
+  const message =
+    document.getElementById("learnerMessage");
+
+  const admissionNumber =
+    document.getElementById("admissionNumber")
+      .value.trim();
+
+  const fullName =
+    document.getElementById("fullName")
+      .value.trim();
+
+  const gender =
+    document.getElementById("gender").value;
+
+  const gradeId =
+    document.getElementById("grade").value;
+
+  const guardianName =
+    document.getElementById("guardianName")
+      .value.trim();
+
+  const guardianPhone =
+    document.getElementById("guardianPhone")
+      .value.trim();
+
+  const admissionDate =
+    document.getElementById("admissionDate").value;
+
+  const status =
+    document.getElementById("learnerStatus").value;
+
+  if (!admissionNumber || !fullName || !gradeId) {
+
+    message.textContent =
+      "Please enter admission number, full name and grade.";
+
+    return;
+  }
+
+  message.textContent =
+    "Saving learner...";
+
+  const schoolResult =
+    await db
+      .from("schools")
+      .select("id")
+      .eq(
+        "name",
+        "Ngessumin Comprehensive School"
+      )
+      .single();
+
+  if (schoolResult.error) {
+
+    message.textContent =
+      "School error: " +
+      schoolResult.error.message;
+
+    return;
+  }
+
+  const result =
+    await db
+      .from("learners")
+      .insert({
+
+        school_id:
+          schoolResult.data.id,
+
+        admission_number:
+          admissionNumber,
+
+        full_name:
+          fullName,
+
+        gender:
+          gender || null,
+
+        grade_id:
+          gradeId,
+
+        guardian_name:
+          guardianName || null,
+
+        guardian_phone:
+          guardianPhone || null,
+
+        admission_date:
+          admissionDate || null,
+
+        status:
+          status || "Active"
+
+      });
+
+  if (result.error) {
+
+    message.textContent =
+      "Error: " +
+      result.error.message;
+
+    return;
+  }
+
+  message.textContent =
+    "Learner added successfully.";
+
+  document
+    .getElementById("learnerForm")
+    .reset();
+
+  await loadLearners();
+
+}
+
+
+/* ================= NAVIGATION ================= */
+
+function showSection(section) {
+
+  document
+    .querySelectorAll(".section")
+    .forEach(function (item) {
+
+      item.classList.remove("active");
+
+    });
+
+  const target =
+    document.getElementById(section);
+
+  if (target) {
+
+    target.classList.add("active");
+
+  }
+
+}
+
+
+/* ================= LOGOUT ================= */
+
+async function logout() {
+
+  await db.auth.signOut();
+
+  document.getElementById("appDashboard").style.display = "none";
+
+  document.getElementById("loginPage").style.display = "flex";
+
+}
+
+
+/* ================= HTML SECURITY ================= */
+
+function escapeHTML(value) {
+
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+
+}
+
+</script>

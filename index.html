@@ -1,25 +1,404 @@
-    <main class="main">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      <header class="topbar">
+  <title>Ngessumin Comprehensive School</title>
 
-        <div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-          <strong id="pageTitle">
-            Dashboard
-          </strong>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-          <small id="userName"></small>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #222;
+    }
 
-        </div>
+    button,
+    input,
+    select {
+      font: inherit;
+    }
 
-        <span class="badge">
-          CBE • Grades 1–9
-        </span>
+    .hidden {
+      display: none !important;
+    }
 
-      </header>
+    /* LOGIN */
+    #loginPage {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      background: #eef3f8;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .login-box h1 {
+      margin-top: 0;
+      text-align: center;
+      color: #164e63;
+    }
+
+    .login-box p {
+      text-align: center;
+      color: #666;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 13px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 7px;
+    }
+
+    .login-box button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 7px;
+      background: #164e63;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* APP */
+    #appDashboard {
+      display: none;
+    }
+
+    .topbar {
+      background: #164e63;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .topbar button {
+      background: white;
+      color: #164e63;
+      border: none;
+      padding: 9px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .layout {
+      display: flex;
+      min-height: calc(100vh - 62px);
+    }
+
+    .sidebar {
+      width: 230px;
+      background: #0f172a;
+      padding: 15px;
+      color: white;
+    }
+
+    .sidebar button {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 6px;
+      text-align: left;
+      border: none;
+      border-radius: 6px;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+    }
+
+    .sidebar button:hover {
+      background: #1e293b;
+    }
+
+    .content {
+      flex: 1;
+      padding: 25px;
+      min-width: 0;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section h2 {
+      margin-top: 0;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .card,
+    .panel {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #555;
+      font-size: 15px;
+    }
+
+    .number {
+      font-size: 30px;
+      font-weight: bold;
+      color: #164e63;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .form-grid input,
+    .form-grid select {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+    }
+
+    .form-grid button {
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: #164e63;
+      color: white;
+      cursor: pointer;
+    }
+
+    .message {
+      margin-top: 12px;
+      font-weight: bold;
+    }
+
+    .search-area {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    .search-area input,
+    .search-area select {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    th,
+    td {
+      padding: 11px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #e9eef2;
+    }
+
+    .area-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+    }
+
+    .area-item {
+      padding: 12px;
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 750px) {
+      .layout {
+        display: block;
+      }
+
+      .sidebar {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+      }
+
+      .sidebar button {
+        margin: 0;
+      }
+
+      .content {
+        padding: 15px;
+      }
+
+      .topbar h1 {
+        font-size: 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ================= LOGIN ================= -->
+
+<div id="loginPage">
+
+  <div class="login-box">
+
+    <h1>Ngessumin Comprehensive School</h1>
+
+    <p>School Management System</p>
+
+    <form id="loginForm">
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Email address"
+        required
+      >
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        required
+      >
+
+      <button type="submit">
+        Sign In
+      </button>
+
+    </form>
+
+    <div id="loginMessage" class="message"></div>
+
+  </div>
+
+</div>
 
 
-      <!-- DASHBOARD -->
+<!-- ================= APPLICATION ================= -->
+
+<div id="appDashboard">
+
+  <div class="topbar">
+
+    <h1>NGESSUMIN COMPREHENSIVE SCHOOL</h1>
+
+    <button id="logoutButton">
+      Logout
+    </button>
+
+  </div>
+
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <button data-section="dashboard">
+        Dashboard
+      </button>
+
+      <button data-section="learners">
+        Learners
+      </button>
+
+      <button data-section="learningAreas">
+        Learning Areas
+      </button>
+
+      <button data-section="assessments">
+        Assessments & Results
+      </button>
+
+      <button data-section="analysis">
+        Results Analysis
+      </button>
+
+      <button data-section="fees">
+        Fees & Payments
+      </button>
+
+      <button data-section="receipts">
+        Receipts & Statements
+      </button>
+
+      <button data-section="reports">
+        Reports / Report Cards
+      </button>
+
+      <button data-section="users">
+        Users & Permissions
+      </button>
+
+      <button data-section="settings">
+        Settings
+      </button>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+
+    <main class="content">
+
+
+      <!-- ================= DASHBOARD ================= -->
+
       <section id="dashboard" class="section active">
 
         <h2>Dashboard</h2>
@@ -27,33 +406,33 @@
         <div class="cards">
 
           <div class="card">
-            <span>Learners</span>
-            <strong id="learnerCount">0</strong>
+            <h3>Total Learners</h3>
+            <div class="number" id="learnerCount">0</div>
           </div>
 
           <div class="card">
-            <span>Grades</span>
-            <strong id="gradeCount">0</strong>
+            <h3>Total Grades</h3>
+            <div class="number" id="gradeCount">0</div>
           </div>
 
           <div class="card">
-            <span>Learning Areas</span>
-            <strong id="areaCount">0</strong>
+            <h3>Learning Areas</h3>
+            <div class="number" id="areaCount">0</div>
           </div>
 
           <div class="card">
-            <span>Academic Year</span>
-            <strong id="yearValue">2026</strong>
+            <h3>Academic Year</h3>
+            <div class="number" id="yearValue">2026</div>
           </div>
 
         </div>
 
         <div class="panel">
 
-          <h3>System status</h3>
+          <h3>System Status</h3>
 
           <p id="statusMessage">
-            Checking connection...
+            Connecting to school database...
           </p>
 
         </div>
@@ -61,128 +440,135 @@
       </section>
 
 
-      <!-- LEARNERS -->
+      <!-- ================= LEARNERS ================= -->
+
       <section id="learners" class="section">
 
-        <div class="section-head">
+        <h2>Learners</h2>
 
-          <div>
-
-            <h2>Learners</h2>
-
-            <p class="muted">
-              Register and manage learners.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <form id="learnerForm" class="panel form-grid" onsubmit="addLearner(event); return false;">
-
-          <input
-            id="admissionNumber"
-            required
-            placeholder="Admission number"
-          >
-
-          <input
-            id="fullName"
-            required
-            placeholder="Full name"
-          >
-
-          <select id="gender">
-
-            <option value="">
-              Gender
-            </option>
-
-            <option value="Male">
-              Male
-            </option>
-
-            <option value="Female">
-              Female
-            </option>
-
-          </select>
-
-
-          <select id="grade" required>
-    <option value="">Select grade</option>
-    <option value="grade-1">Grade 1</option>
-    <option value="grade-2">Grade 2</option>
-    <option value="grade-3">Grade 3</option>
-    <option value="grade-4">Grade 4</option>
-    <option value="grade-5">Grade 5</option>
-    <option value="grade-6">Grade 6</option>
-    <option value="grade-7">Grade 7</option>
-    <option value="grade-8">Grade 8</option>
-    <option value="grade-9">Grade 9</option>
-          </select>
-
-
-          <input
-            id="guardianName"
-            placeholder="Parent / Guardian name"
-          >
-
-          <input
-            id="guardianPhone"
-            placeholder="Parent / Guardian phone"
-          >
-
-          <input
-            id="admissionDate"
-            type="date"
-          >
-
-
-          <select id="status">
-
-            <option value="Active">
-              Active
-            </option>
-
-            <option value="Transferred">
-              Transferred
-            </option>
-
-            <option value="Graduated">
-              Graduated
-            </option>
-
-            <option value="Inactive">
-              Inactive
-            </option>
-
-          </select>
-
-
-          <button type="submit">
-            Register learner
-          </button>
-
-          <p id="learnerMessage" class="message"></p>
-
-        </form>
+        <p>
+          Register and manage learners.
+        </p>
 
 
         <div class="panel">
 
-          <div class="toolbar">
+          <h3>Register Learner</h3>
+
+          <form id="learnerForm" class="form-grid">
+
+            <input
+              id="admissionNumber"
+              type="text"
+              placeholder="Admission number"
+              required
+            >
+
+            <input
+              id="fullName"
+              type="text"
+              placeholder="Full name"
+              required
+            >
+
+            <select id="gender">
+
+              <option value="">
+                Gender
+              </option>
+
+              <option value="Male">
+                Male
+              </option>
+
+              <option value="Female">
+                Female
+              </option>
+
+            </select>
+
+
+            <select id="grade" required>
+
+              <option value="">
+                Select grade
+              </option>
+
+            </select>
+
+
+            <input
+              id="guardianName"
+              type="text"
+              placeholder="Parent / Guardian name"
+            >
+
+            <input
+              id="guardianPhone"
+              type="text"
+              placeholder="Parent / Guardian phone"
+            >
+
+            <input
+              id="admissionDate"
+              type="date"
+            >
+
+
+            <select id="learnerStatus">
+
+              <option value="Active">
+                Active
+              </option>
+
+              <option value="Transferred">
+                Transferred
+              </option>
+
+              <option value="Graduated">
+                Graduated
+              </option>
+
+              <option value="Inactive">
+                Inactive
+              </option>
+
+            </select>
+
+
+            <button type="submit">
+              Register Learner
+            </button>
+
+          </form>
+
+
+          <p
+            id="learnerMessage"
+            class="message"
+          ></p>
+
+        </div>
+
+
+        <!-- SEARCH -->
+
+        <div class="panel">
+
+          <h3>Registered Learners</h3>
+
+          <div class="search-area">
 
             <input
               id="learnerSearch"
-              placeholder="Search by admission number or name"
+              type="text"
+              placeholder="Search by name or admission number"
             >
 
-            <select id="gradeFilter">
+            <select id="learnerGradeFilter">
 
               <option value="">
-                All grades
+                All Grades
               </option>
 
             </select>
@@ -190,7 +576,7 @@
           </div>
 
 
-          <div class="table-wrap">
+          <div class="table-container">
 
             <table>
 
@@ -199,17 +585,22 @@
                 <tr>
 
                   <th>Admission No.</th>
-                  <th>Name</th>
+
+                  <th>Full Name</th>
+
                   <th>Gender</th>
+
                   <th>Grade</th>
-                  <th>Guardian</th>
+
+                  <th>Parent / Guardian</th>
+
                   <th>Status</th>
 
                 </tr>
 
               </thead>
 
-              <tbody id="learnerTable">
+              <tbody id="learnersTableBody">
 
               </tbody>
 
@@ -222,57 +613,40 @@
       </section>
 
 
-      <!-- LEARNING AREAS -->
+      <!-- ================= LEARNING AREAS ================= -->
+
       <section id="learningAreas" class="section">
 
         <h2>Learning Areas</h2>
 
         <div class="panel">
 
-          <div class="table-wrap">
-
-            <table>
-
-              <thead>
-
-                <tr>
-
-                  <th>Grade</th>
-                  <th>Learning Area</th>
-                  <th>Code</th>
-
-                </tr>
-
-              </thead>
-
-              <tbody id="areasTable">
-
-              </tbody>
-
-            </table>
-
-          </div>
+          <div
+            id="learningAreasList"
+            class="area-list"
+          ></div>
 
         </div>
 
       </section>
 
 
-      <!-- RESULTS -->
-      <section id="results" class="section">
+      <!-- ================= ASSESSMENTS ================= -->
+
+      <section id="assessments" class="section">
 
         <h2>Assessments & Results</h2>
 
         <div class="panel">
 
           <p>
-            CBE assessment and achievement-level entry
-            module.
+            CBE assessment results will be entered
+            and managed here.
           </p>
 
           <p>
-            <strong>Achievement levels:</strong>
-            EE, ME, AE, BE.
+            Achievement levels:
+            <strong>EE, ME, AE, BE</strong>
           </p>
 
         </div>
@@ -280,7 +654,25 @@
       </section>
 
 
-      <!-- FEES -->
+      <!-- ================= ANALYSIS ================= -->
+
+      <section id="analysis" class="section">
+
+        <h2>Results Analysis</h2>
+
+        <div class="panel">
+
+          <p>
+            CBE performance analysis will appear here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================= FEES ================= -->
+
       <section id="fees" class="section">
 
         <h2>Fees & Payments</h2>
@@ -288,12 +680,8 @@
         <div class="panel">
 
           <p>
-            Fees and payment management.
-          </p>
-
-          <p>
-            Fees can be assigned per learner,
-            academic year and term.
+            School fees assignments, payments and
+            balances will be managed here.
           </p>
 
         </div>
@@ -301,16 +689,17 @@
       </section>
 
 
-      <!-- REPORTS -->
-      <section id="reports" class="section">
+      <!-- ================= RECEIPTS ================= -->
 
-        <h2>Reports</h2>
+      <section id="receipts" class="section">
+
+        <h2>Receipts & Statements</h2>
 
         <div class="panel">
 
           <p>
-            School reports and CBE performance
-            analysis will appear here.
+            Receipts and learner fee statements
+            will appear here.
           </p>
 
         </div>
@@ -318,7 +707,26 @@
       </section>
 
 
-      <!-- USERS -->
+      <!-- ================= REPORTS ================= -->
+
+      <section id="reports" class="section">
+
+        <h2>Reports / Report Cards</h2>
+
+        <div class="panel">
+
+          <p>
+            Learner reports and CBE report cards
+            will be generated here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ================= USERS ================= -->
+
       <section id="users" class="section">
 
         <h2>Users & Permissions</h2>
@@ -334,14 +742,511 @@
 
       </section>
 
+
+      <!-- ================= SETTINGS ================= -->
+
+      <section id="settings" class="section">
+
+        <h2>Settings</h2>
+
+        <div class="panel">
+
+          <p>
+            School system settings will be managed here.
+          </p>
+
+          <p>
+            <strong>School:</strong>
+            Ngessumin Comprehensive School
+          </p>
+
+          <p>
+            <strong>Curriculum:</strong>
+            CBE
+          </p>
+
+          <p>
+            <strong>Grades:</strong>
+            1–9
+          </p>
+
+          <p>
+            <strong>Academic Year:</strong>
+            2026
+          </p>
+
+        </div>
+
+      </section>
+
+
     </main>
 
   </div>
 
+</div>
 
-  <!-- JAVASCRIPT -->
-  <script src="app.js"></script>
 
-</body>
-</html>
+<!-- ================= JAVASCRIPT ================= -->
 
+<script>
+
+const SUPABASE_URL =
+  "https://awazhdqlkjscfrhsoghe.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
+
+const db =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+let grades = [];
+let learners = [];
+let areas = [];
+
+
+/* ================= START ================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async function () {
+
+    document
+      .getElementById("loginForm")
+      .addEventListener(
+        "submit",
+        login
+      );
+
+
+    document
+      .getElementById("logoutButton")
+      .addEventListener(
+        "click",
+        logout
+      );
+
+
+    document
+      .getElementById("learnerForm")
+      .addEventListener(
+        "submit",
+        addLearner
+      );
+
+
+    document
+      .getElementById("learnerSearch")
+      .addEventListener(
+        "input",
+        showLearners
+      );
+
+
+    document
+      .getElementById("learnerGradeFilter")
+      .addEventListener(
+        "change",
+        showLearners
+      );
+
+
+    document
+      .querySelectorAll(
+        "[data-section]"
+      )
+      .forEach(
+        button => {
+
+          button.addEventListener(
+            "click",
+            function () {
+
+              showSection(
+                this.dataset.section
+              );
+
+            }
+          );
+
+        }
+      );
+
+
+    await checkSession();
+
+  }
+);
+
+
+/* ================= SESSION ================= */
+
+async function checkSession() {
+
+  const result =
+    await db.auth.getSession();
+
+  if (result.data.session) {
+
+    await startApp();
+
+  } else {
+
+    document
+      .getElementById("loginPage")
+      .style.display = "flex";
+
+    document
+      .getElementById("appDashboard")
+      .style.display = "none";
+
+  }
+
+}
+
+
+/* ================= LOGIN ================= */
+
+async function login(event) {
+
+  event.preventDefault();
+
+  const email =
+    document
+      .getElementById("email")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("password")
+      .value;
+
+  const message =
+    document
+      .getElementById("loginMessage");
+
+
+  message.textContent =
+    "Signing in...";
+
+
+  const result =
+    await db.auth.signInWithPassword({
+
+      email: email,
+
+      password: password
+
+    });
+
+
+  if (result.error) {
+
+    message.textContent =
+      result.error.message;
+
+    return;
+
+  }
+
+
+  message.textContent = "";
+
+  await startApp();
+
+}
+
+
+/* ================= START APP ================= */
+
+async function startApp() {
+
+  document
+    .getElementById("loginPage")
+    .style.display = "none";
+
+
+  document
+    .getElementById("appDashboard")
+    .style.display = "block";
+
+
+  await loadSchool();
+
+  await loadGrades();
+
+  await loadAreas();
+
+  await loadLearners();
+
+
+  showSection("dashboard");
+
+}
+
+
+/* ================= SCHOOL ================= */
+
+async function loadSchool() {
+
+  const result =
+    await db
+      .from("schools")
+      .select("name")
+      .eq(
+        "name",
+        "Ngessumin Comprehensive School"
+      )
+      .single();
+
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById("yearValue")
+    .textContent = "2026";
+
+
+  document
+    .getElementById("statusMessage")
+    .textContent =
+      "Connected to Ngessumin Comprehensive School database.";
+
+}
+
+
+/* ================= GRADES ================= */
+
+async function loadGrades() {
+
+  const result =
+    await db
+      .from("grades")
+      .select(
+        "id, grade_number"
+      )
+      .order(
+        "grade_number"
+      );
+
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    return;
+
+  }
+
+
+  grades =
+    result.data || [];
+
+
+  const gradeSelect =
+    document.getElementById(
+      "grade"
+    );
+
+
+  const filter =
+    document.getElementById(
+      "learnerGradeFilter"
+    );
+
+
+  gradeSelect.innerHTML =
+    '<option value="">Select grade</option>';
+
+
+  filter.innerHTML =
+    '<option value="">All Grades</option>';
+
+
+  grades.forEach(
+    grade => {
+
+      gradeSelect.innerHTML +=
+        `
+        <option value="${grade.id}">
+          Grade ${grade.grade_number}
+        </option>
+        `;
+
+
+      filter.innerHTML +=
+        `
+        <option value="${grade.id}">
+          Grade ${grade.grade_number}
+        </option>
+        `;
+
+    }
+  );
+
+
+  document
+    .getElementById("gradeCount")
+    .textContent =
+      grades.length;
+
+}
+
+
+/* ================= LEARNING AREAS ================= */
+
+async function loadAreas() {
+
+  const result =
+    await db
+      .from("learning_areas")
+      .select(
+        "id,name,code"
+      )
+      .eq(
+        "active",
+        true
+      )
+      .order(
+        "name"
+      );
+
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    return;
+
+  }
+
+
+  areas =
+    result.data || [];
+
+
+  const list =
+    document.getElementById(
+      "learningAreasList"
+    );
+
+
+  list.innerHTML = "";
+
+
+  areas.forEach(
+    area => {
+
+      const item =
+        document.createElement(
+          "div"
+        );
+
+
+      item.className =
+        "area-item";
+
+
+      item.textContent =
+        area.name;
+
+
+      list.appendChild(
+        item
+      );
+
+    }
+  );
+
+
+  document
+    .getElementById("areaCount")
+    .textContent =
+      areas.length;
+
+}
+
+
+/* ================= LEARNERS ================= */
+
+async function loadLearners() {
+
+  const result =
+    await db
+      .from("learners")
+      .select(`
+        id,
+        admission_number,
+        full_name,
+        gender,
+        guardian_name,
+        guardian_phone,
+        admission_date,
+        status,
+        grade_id,
+        grades (
+          grade_number
+        )
+      `)
+      .order(
+        "full_name"
+      );
+
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    document
+      .getElementById(
+        "learnerMessage"
+      )
+      .textContent =
+        "Could not load learners: " +
+        result.error.message;
+
+    return;
+
+  }
+
+
+  learners =
+    result.data || [];
+
+
+  showLearners();
+
+
+  document
+    .getElementById(
+      "learnerCount"
+    )
+    .textContent =
+      learners.length;
+
+}
+
+
+/* ================= DISPLAY LEARNERS ================= */
+
+function showLearners() {

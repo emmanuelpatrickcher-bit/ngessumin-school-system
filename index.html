@@ -79,7 +79,7 @@
         </div>
 
 
-        <form id="learnerForm" onsubmit="event.preventDefault(); document.getElementById('learnerMessage').textContent='FORM IS WORKING';"> class="panel form-grid">
+        <form id="learnerForm" class="panel form-grid" onsubmit="addLearner(event); return false;">
 
           <input
             id="admissionNumber"

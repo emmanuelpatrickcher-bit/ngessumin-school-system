@@ -931,3 +931,4 @@ function escapeHtml(value) {
 // =====================================================
 
 checkExistingSession();
+    

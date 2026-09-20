@@ -1143,16 +1143,16 @@ db.auth.onAuthStateChange((event, session) => {
 
       if (result.error) {
 
-        console.error(result.error);
+  console.error("SUPABASE LOGIN ERROR:", result.error);
 
-        document
-          .getElementById("statusMessage")
-          .textContent =
-          "Connected, but school information could not be loaded.";
+  message.textContent =
+    "Login failed: " +
+    result.error.message;
 
-        return;
+  button.disabled = false;
 
-      }
+  return;
+    }
 
 
       document

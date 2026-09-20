@@ -935,14 +935,54 @@ async function login(event) {
     "Signing in...";
 
 
-  const result =
-    await db.auth.signInWithPassword({
+  async function login(event) {
 
+  event.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const message = document.getElementById("loginMessage");
+
+  message.textContent = "Signing in...";
+
+  try {
+
+    const result = await db.auth.signInWithPassword({
       email: email,
-
       password: password
-
     });
+
+    if (result.error) {
+      message.textContent = result.error.message;
+      return;
+    }
+
+    if (!result.data.session) {
+      message.textContent = "Login succeeded, but no session was created.";
+      return;
+    }
+
+    message.textContent = "Login successful. Loading system...";
+
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("appDashboard").style.display = "block";
+
+    await loadSchool();
+    await loadGrades();
+    await loadAreas();
+    await loadLearners();
+
+    showSection("dashboard");
+
+  } catch (error) {
+
+    console.error(error);
+
+    message.textContent =
+      "Login error: " + error.message;
+
+  }
+  }
 
 
   if (result.error) {

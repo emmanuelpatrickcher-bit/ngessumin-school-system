@@ -46,29 +46,54 @@ $("loginForm").addEventListener("submit", async function (event) {
 
   showMessage($("loginMessage"), "Signing in...");
 
-  const { data, error } =
-    await db.auth.signInWithPassword({
-      email,
-      password
-    });
+  try {
 
-  if (error) {
+    const { data, error } =
+      await db.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+    if (error) {
+
+      console.error("Login error:", error);
+
+      showMessage(
+        $("loginMessage"),
+        "Login error: " + error.message
+      );
+
+      return;
+    }
+
+    if (!data || !data.user) {
+
+      showMessage(
+        $("loginMessage"),
+        "Login failed: no user was returned."
+      );
+
+      return;
+    }
 
     showMessage(
       $("loginMessage"),
-      error.message
+      "Login successful.",
+      true
     );
 
-    return;
+    await showApplication();
+
+  } catch (error) {
+
+    console.error("Unexpected login error:", error);
+
+    showMessage(
+      $("loginMessage"),
+      "System error: " + error.message
+    );
+
   }
-
-  showMessage(
-    $("loginMessage"),
-    "Login successful.",
-    true
-  );
-
-  await showApplication();
 
 });
 
@@ -710,3 +735,4 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 
 }
+// Login troubleshooting

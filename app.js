@@ -1,4 +1,13 @@
-const SUPABASE_URL = "https://awazhdqlkjscfrhsoghe.supabase.co";
+// ======================================================
+// NGESSUMIN COMPREHENSIVE SCHOOL MANAGEMENT SYSTEM
+// ======================================================
+
+// ------------------------------
+// SUPABASE CONNECTION
+// ------------------------------
+
+const SUPABASE_URL =
+    "https://awazhdqlkjscfrhsoghe.supabase.co";
 
 const SUPABASE_KEY =
     "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
@@ -9,78 +18,113 @@ const db = window.supabase.createClient(
 );
 
 
-// ===============================
-// GLOBAL DATA
-// ===============================
+// ------------------------------
+// GLOBAL VARIABLES
+// ------------------------------
 
 let currentUser = null;
 let currentProfile = null;
 let school = null;
+
 let grades = [];
 let learningAreas = [];
 let learners = [];
 
 
-// ===============================
+// ======================================================
 // LOGIN
-// ===============================
+// ======================================================
 
-const loginForm = document.getElementById("loginForm");
+const loginForm =
+    document.getElementById("loginForm");
 
 if (loginForm) {
 
-    loginForm.addEventListener("submit", async function (event) {
+    loginForm.addEventListener(
+        "submit",
+        async function (event) {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        const email =
-            document.getElementById("email").value.trim();
+            const email =
+                document
+                    .getElementById("email")
+                    .value
+                    .trim();
 
-        const password =
-            document.getElementById("password").value;
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
 
-        const loginMessage =
-            document.getElementById("loginMessage");
+            const message =
+                document.getElementById(
+                    "loginMessage"
+                );
 
-        loginMessage.textContent = "Signing in...";
+            message.textContent =
+                "Signing in...";
 
-        const { data, error } =
-            await db.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
 
-        if (error) {
+            const { data, error } =
+                await db.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
 
-            console.error(error);
 
-            loginMessage.textContent =
-                "Login failed: " + error.message;
+            if (error) {
 
-            return;
+                console.error(error);
+
+                message.textContent =
+                    "Login failed: " +
+                    error.message;
+
+                return;
+            }
+
+
+            currentUser = data.user;
+
+            await showApplication();
+
         }
+    );
 
-        currentUser = data.user;
-
-        await showApplication();
-
-    });
 }
 
 
-// ===============================
+// ======================================================
 // SHOW APPLICATION
-// ===============================
+// ======================================================
 
 async function showApplication() {
 
-    document.getElementById("loginPage").style.display =
-        "none";
+    const loginPage =
+        document.getElementById(
+            "loginPage"
+        );
 
-    document.getElementById("appDashboard").style.display =
-        "flex";
+    const appDashboard =
+        document.getElementById(
+            "appDashboard"
+        );
 
-    await loadSchoolData();
+
+    if (loginPage) {
+        loginPage.style.display = "none";
+    }
+
+
+    if (appDashboard) {
+        appDashboard.style.display = "flex";
+    }
+
+
+    // Load data in the correct order
+
+    await loadSchool();
 
     await loadGrades();
 
@@ -88,29 +132,34 @@ async function showApplication() {
 
     await loadLearners();
 
+
+    // Set up the interface
+
     setupNavigation();
 
     setupLearnerForm();
 
     setupLearnerSearch();
 
-    populateGradeSelectors();
-
 }
 
 
-// ===============================
+// ======================================================
 // LOAD SCHOOL
-// ===============================
+// ======================================================
 
-async function loadSchoolData() {
+async function loadSchool() {
 
     const { data, error } =
         await db
             .from("schools")
             .select("*")
-            .eq("name", "Ngessumin Comprehensive School")
+            .eq(
+                "name",
+                "Ngessumin Comprehensive School"
+            )
             .single();
+
 
     if (error) {
 
@@ -122,30 +171,48 @@ async function loadSchoolData() {
         return;
     }
 
+
     school = data;
 
-    document.getElementById("schoolName").textContent =
-        school.name;
+
+    const schoolName =
+        document.getElementById(
+            "schoolName"
+        );
+
+
+    if (schoolName) {
+
+        schoolName.textContent =
+            school.name;
+
+    }
+
 
     await loadProfile();
 
 }
 
 
-// ===============================
-// LOAD PROFILE
-// ===============================
+// ======================================================
+// LOAD USER PROFILE
+// ======================================================
 
 async function loadProfile() {
 
     if (!currentUser) return;
 
+
     const { data, error } =
         await db
             .from("profiles")
             .select("*")
-            .eq("id", currentUser.id)
+            .eq(
+                "id",
+                currentUser.id
+            )
             .single();
+
 
     if (error) {
 
@@ -157,28 +224,48 @@ async function loadProfile() {
         return;
     }
 
+
     currentProfile = data;
 
-    document.getElementById("userName").textContent =
-        `${data.full_name} (${data.role})`;
+
+    const userName =
+        document.getElementById(
+            "userName"
+        );
+
+
+    if (userName) {
+
+        userName.textContent =
+            data.full_name +
+            " (" +
+            data.role +
+            ")";
+
+    }
 
 }
 
 
-// ===============================
+// ======================================================
 // LOAD GRADES
-// ===============================
+// ======================================================
 
 async function loadGrades() {
-
-    if (!school) return;
 
     const { data, error } =
         await db
             .from("grades")
-            .select("*")
-            .eq("school_id", school.id)
-            .order("grade_number");
+            .select(
+                "id, grade_number"
+            )
+            .order(
+                "grade_number",
+                {
+                    ascending: true
+                }
+            );
+
 
     if (error) {
 
@@ -190,26 +277,130 @@ async function loadGrades() {
         return;
     }
 
+
     grades = data || [];
+
+
+    console.log(
+        "Grades loaded:",
+        grades
+    );
+
+
+    populateGradeSelectors();
 
 }
 
 
-// ===============================
+// ======================================================
+// POPULATE GRADE DROPDOWNS
+// ======================================================
+
+function populateGradeSelectors() {
+
+    const gradeSelect =
+        document.getElementById(
+            "grade"
+        );
+
+
+    const gradeFilter =
+        document.getElementById(
+            "learnerGradeFilter"
+        );
+
+
+    // ------------------------------
+    // Registration grade dropdown
+    // ------------------------------
+
+    if (gradeSelect) {
+
+        gradeSelect.innerHTML =
+            '<option value="">Select grade</option>';
+
+
+        grades.forEach(function (grade) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                grade.id;
+
+            option.textContent =
+                "Grade " +
+                grade.grade_number;
+
+            gradeSelect.appendChild(
+                option
+            );
+
+        });
+
+    }
+
+
+    // ------------------------------
+    // Search/filter grade dropdown
+    // ------------------------------
+
+    if (gradeFilter) {
+
+        gradeFilter.innerHTML =
+            '<option value="">All Grades</option>';
+
+
+        grades.forEach(function (grade) {
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+            option.value =
+                grade.id;
+
+            option.textContent =
+                "Grade " +
+                grade.grade_number;
+
+            gradeFilter.appendChild(
+                option
+            );
+
+        });
+
+    }
+
+}
+
+
+// ======================================================
 // LOAD LEARNING AREAS
-// ===============================
+// ======================================================
 
 async function loadLearningAreas() {
 
     if (!school) return;
 
+
     const { data, error } =
         await db
             .from("learning_areas")
             .select("*")
-            .eq("school_id", school.id)
-            .eq("active", true)
+            .eq(
+                "school_id",
+                school.id
+            )
+            .eq(
+                "active",
+                true
+            )
             .order("name");
+
 
     if (error) {
 
@@ -221,23 +412,30 @@ async function loadLearningAreas() {
         return;
     }
 
-    learningAreas = data || [];
+
+    learningAreas =
+        data || [];
+
 
     renderLearningAreas();
 
 }
 
 
-// ===============================
-// RENDER LEARNING AREAS
-// ===============================
+// ======================================================
+// DISPLAY LEARNING AREAS
+// ======================================================
 
 function renderLearningAreas() {
 
     const container =
-        document.getElementById("learningAreasList");
+        document.getElementById(
+            "learningAreasList"
+        );
+
 
     if (!container) return;
+
 
     if (learningAreas.length === 0) {
 
@@ -247,28 +445,53 @@ function renderLearningAreas() {
         return;
     }
 
-    container.innerHTML =
-        learningAreas.map(area => `
-            <div class="learning-area-item">
-                <strong>${escapeHTML(area.name)}</strong>
-                ${
+
+    container.innerHTML = "";
+
+
+    learningAreas.forEach(
+        function (area) {
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+            item.className =
+                "learning-area-item";
+
+
+            item.innerHTML =
+                "<strong>" +
+                escapeHTML(area.name) +
+                "</strong>" +
+                (
                     area.code
-                    ? `<span> (${escapeHTML(area.code)})</span>`
+                    ? " (" +
+                      escapeHTML(area.code) +
+                      ")"
                     : ""
-                }
-            </div>
-        `).join("");
+                );
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
 
 }
 
 
-// ===============================
+// ======================================================
 // LOAD LEARNERS
-// ===============================
+// ======================================================
 
 async function loadLearners() {
 
     if (!school) return;
+
 
     const { data, error } =
         await db
@@ -287,8 +510,17 @@ async function loadLearners() {
                     grade_number
                 )
             `)
-            .eq("school_id", school.id)
-            .order("full_name");
+            .eq(
+                "school_id",
+                school.id
+            )
+            .order(
+                "full_name",
+                {
+                    ascending: true
+                }
+            );
+
 
     if (error) {
 
@@ -300,7 +532,10 @@ async function loadLearners() {
         return;
     }
 
-    learners = data || [];
+
+    learners =
+        data || [];
+
 
     renderLearners();
 
@@ -309,16 +544,34 @@ async function loadLearners() {
 }
 
 
-// ===============================
+// ======================================================
 // REGISTER LEARNER
-// ===============================
+// ======================================================
 
 function setupLearnerForm() {
 
     const form =
-        document.getElementById("learnerForm");
+        document.getElementById(
+            "learnerForm"
+        );
+
 
     if (!form) return;
+
+
+    // Prevent duplicate event listeners
+
+    if (
+        form.dataset.initialized ===
+        "true"
+    ) {
+        return;
+    }
+
+
+    form.dataset.initialized =
+        "true";
+
 
     form.addEventListener(
         "submit",
@@ -326,13 +579,25 @@ function setupLearnerForm() {
 
             event.preventDefault();
 
+
             const message =
                 document.getElementById(
                     "learnerMessage"
                 );
 
+
             message.textContent =
                 "Registering learner...";
+
+
+            if (!school) {
+
+                message.textContent =
+                    "School information could not be loaded.";
+
+                return;
+            }
+
 
             const admissionNumber =
                 document
@@ -342,40 +607,57 @@ function setupLearnerForm() {
                     .value
                     .trim();
 
+
             const fullName =
                 document
-                    .getElementById("fullName")
+                    .getElementById(
+                        "fullName"
+                    )
                     .value
                     .trim();
+
 
             const gender =
                 document
-                    .getElementById("gender")
+                    .getElementById(
+                        "gender"
+                    )
                     .value;
+
 
             const gradeId =
                 document
-                    .getElementById("grade")
+                    .getElementById(
+                        "grade"
+                    )
                     .value;
+
 
             const guardianName =
                 document
-                    .getElementById("guardianName")
+                    .getElementById(
+                        "guardianName"
+                    )
                     .value
                     .trim();
 
+
             const guardianPhone =
                 document
-                    .getElementById("guardianPhone")
+                    .getElementById(
+                        "guardianPhone"
+                    )
                     .value
                     .trim();
+
 
             const admissionDate =
                 document
                     .getElementById(
                         "admissionDate"
                     )
-                    .value || null;
+                    .value;
+
 
             const status =
                 document
@@ -383,6 +665,28 @@ function setupLearnerForm() {
                         "learnerStatus"
                     )
                     .value;
+
+
+            // ------------------------------
+            // Validation
+            // ------------------------------
+
+            if (!admissionNumber) {
+
+                message.textContent =
+                    "Please enter the admission number.";
+
+                return;
+            }
+
+
+            if (!fullName) {
+
+                message.textContent =
+                    "Please enter the learner's full name.";
+
+                return;
+            }
 
 
             if (!gradeId) {
@@ -394,12 +698,17 @@ function setupLearnerForm() {
             }
 
 
+            // ------------------------------
+            // Insert learner
+            // ------------------------------
+
             const { error } =
                 await db
                     .from("learners")
                     .insert({
 
-                        school_id: school.id,
+                        school_id:
+                            school.id,
 
                         admission_number:
                             admissionNumber,
@@ -408,42 +717,70 @@ function setupLearnerForm() {
                             fullName,
 
                         gender:
-                            gender || null,
+                            gender ||
+                            null,
 
                         grade_id:
                             gradeId,
 
                         guardian_name:
-                            guardianName || null,
+                            guardianName ||
+                            null,
 
                         guardian_phone:
-                            guardianPhone || null,
+                            guardianPhone ||
+                            null,
 
                         admission_date:
-                            admissionDate,
+                            admissionDate ||
+                            null,
 
                         status:
-                            status
+                            status ||
+                            "Active"
 
                     });
 
 
             if (error) {
 
-                console.error(error);
+                console.error(
+                    "Learner registration error:",
+                    error
+                );
 
-                message.textContent =
-                    "Could not register learner: " +
-                    error.message;
+
+                if (
+                    error.code ===
+                    "23505"
+                ) {
+
+                    message.textContent =
+                        "That admission number already exists.";
+
+                } else {
+
+                    message.textContent =
+                        "Could not register learner: " +
+                        error.message;
+
+                }
+
 
                 return;
             }
 
 
+            // ------------------------------
+            // Success
+            // ------------------------------
+
             message.textContent =
                 "Learner registered successfully.";
 
+
             form.reset();
+
 
             await loadLearners();
 
@@ -453,56 +790,9 @@ function setupLearnerForm() {
 }
 
 
-// ===============================
-// POPULATE GRADE SELECTORS
-// ===============================
-
-function populateGradeSelectors() {
-
-    const gradeSelect =
-        document.getElementById("grade");
-
-    const filter =
-        document.getElementById(
-            "learnerGradeFilter"
-        );
-
-
-    if (gradeSelect) {
-
-        gradeSelect.innerHTML =
-            `<option value="">
-                Select grade
-            </option>` +
-            grades.map(grade => `
-                <option value="${grade.id}">
-                    Grade ${grade.grade_number}
-                </option>
-            `).join("");
-
-    }
-
-
-    if (filter) {
-
-        filter.innerHTML =
-            `<option value="">
-                All Grades
-            </option>` +
-            grades.map(grade => `
-                <option value="${grade.id}">
-                    Grade ${grade.grade_number}
-                </option>
-            `).join("");
-
-    }
-
-}
-
-
-// ===============================
-// SEARCH & FILTER
-// ===============================
+// ======================================================
+// LEARNER SEARCH
+// ======================================================
 
 function setupLearnerSearch() {
 
@@ -511,7 +801,8 @@ function setupLearnerSearch() {
             "learnerSearch"
         );
 
-    const filter =
+
+    const gradeFilter =
         document.getElementById(
             "learnerGradeFilter"
         );
@@ -521,17 +812,25 @@ function setupLearnerSearch() {
 
         search.addEventListener(
             "input",
-            renderLearners
+            function () {
+
+                renderLearners();
+
+            }
         );
 
     }
 
 
-    if (filter) {
+    if (gradeFilter) {
 
-        filter.addEventListener(
+        gradeFilter.addEventListener(
             "change",
-            renderLearners
+            function () {
+
+                renderLearners();
+
+            }
         );
 
     }
@@ -539,9 +838,9 @@ function setupLearnerSearch() {
 }
 
 
-// ===============================
+// ======================================================
 // DISPLAY LEARNERS
-// ===============================
+// ======================================================
 
 function renderLearners() {
 
@@ -550,54 +849,79 @@ function renderLearners() {
             "learnersTableBody"
         );
 
+
     if (!table) return;
 
 
-    const search =
-        document
-            .getElementById(
-                "learnerSearch"
-            )
-            ?.value
-            .toLowerCase()
-            .trim() || "";
+    const searchInput =
+        document.getElementById(
+            "learnerSearch"
+        );
 
 
     const gradeFilter =
-        document
-            .getElementById(
-                "learnerGradeFilter"
-            )
-            ?.value || "";
+        document.getElementById(
+            "learnerGradeFilter"
+        );
 
 
-    const filtered =
-        learners.filter(learner => {
-
-            const matchesSearch =
-                !search ||
-                learner.full_name
-                    .toLowerCase()
-                    .includes(search) ||
-                learner.admission_number
-                    .toLowerCase()
-                    .includes(search);
+    const search =
+        searchInput
+        ? searchInput.value
+            .toLowerCase()
+            .trim()
+        : "";
 
 
-            const matchesGrade =
-                !gradeFilter ||
-                learner.grade_id === gradeFilter;
+    const selectedGrade =
+        gradeFilter
+        ? gradeFilter.value
+        : "";
 
 
-            return (
-                matchesSearch &&
-                matchesGrade
-            );
+    const filteredLearners =
+        learners.filter(
+            function (learner) {
 
-        });
+                const name =
+                    (
+                        learner.full_name ||
+                        ""
+                    ).toLowerCase();
 
 
-    if (filtered.length === 0) {
+                const admission =
+                    (
+                        learner.admission_number ||
+                        ""
+                    ).toLowerCase();
+
+
+                const matchesSearch =
+                    !search ||
+                    name.includes(search) ||
+                    admission.includes(search);
+
+
+                const matchesGrade =
+                    !selectedGrade ||
+                    learner.grade_id ===
+                    selectedGrade;
+
+
+                return (
+                    matchesSearch &&
+                    matchesGrade
+                );
+
+            }
+        );
+
+
+    if (
+        filteredLearners.length ===
+        0
+    ) {
 
         table.innerHTML = `
             <tr>
@@ -611,8 +935,17 @@ function renderLearners() {
     }
 
 
-    table.innerHTML =
-        filtered.map(learner => {
+    table.innerHTML = "";
+
+
+    filteredLearners.forEach(
+        function (learner) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
 
             const gradeNumber =
                 learner.grades
@@ -620,60 +953,68 @@ function renderLearners() {
                 : "";
 
 
-            return `
-                <tr>
+            row.innerHTML = `
 
-                    <td>
-                        ${escapeHTML(
-                            learner.admission_number
-                        )}
-                    </td>
+                <td>
+                    ${escapeHTML(
+                        learner.admission_number
+                    )}
+                </td>
 
-                    <td>
-                        ${escapeHTML(
-                            learner.full_name
-                        )}
-                    </td>
+                <td>
+                    ${escapeHTML(
+                        learner.full_name
+                    )}
+                </td>
 
-                    <td>
-                        ${escapeHTML(
-                            learner.gender || "-"
-                        )}
-                    </td>
+                <td>
+                    ${escapeHTML(
+                        learner.gender ||
+                        "-"
+                    )}
+                </td>
 
-                    <td>
-                        Grade ${gradeNumber}
-                    </td>
+                <td>
+                    Grade ${escapeHTML(
+                        gradeNumber
+                    )}
+                </td>
 
-                    <td>
-                        ${escapeHTML(
-                            learner.guardian_name || "-"
-                        )}
-                    </td>
+                <td>
+                    ${escapeHTML(
+                        learner.guardian_name ||
+                        "-"
+                    )}
+                </td>
 
-                    <td>
-                        ${escapeHTML(
-                            learner.guardian_phone || "-"
-                        )}
-                    </td>
+                <td>
+                    ${escapeHTML(
+                        learner.guardian_phone ||
+                        "-"
+                    )}
+                </td>
 
-                    <td>
-                        ${escapeHTML(
-                            learner.status
-                        )}
-                    </td>
+                <td>
+                    ${escapeHTML(
+                        learner.status ||
+                        "-"
+                    )}
+                </td>
 
-                </tr>
             `;
 
-        }).join("");
+
+            table.appendChild(row);
+
+        }
+    );
 
 }
 
 
-// ===============================
+// ======================================================
 // DASHBOARD
-// ===============================
+// ======================================================
 
 function updateDashboard() {
 
@@ -682,12 +1023,14 @@ function updateDashboard() {
             "totalLearners"
         );
 
+
     const totalGrades =
         document.getElementById(
             "totalGrades"
         );
 
-    const totalAreas =
+
+    const totalLearningAreas =
         document.getElementById(
             "totalLearningAreas"
         );
@@ -709,152 +1052,30 @@ function updateDashboard() {
     }
 
 
-    if (totalAreas) {
+    if (totalLearningAreas) {
 
-        totalAreas.textContent =
+        totalLearningAreas.textContent =
             learningAreas.length;
 
     }
 
-}
 
-
-// ===============================
-// NAVIGATION
-// ===============================
-
-function setupNavigation() {
-
-    const buttons =
-        document.querySelectorAll(
-            ".nav-link"
+    const currentYear =
+        document.getElementById(
+            "currentYear"
         );
 
 
-    buttons.forEach(button => {
+    if (currentYear) {
 
-        button.addEventListener(
-            "click",
-            function () {
-
-                const sectionId =
-                    this.dataset.section;
-
-
-                document
-                    .querySelectorAll(
-                        ".nav-link"
-                    )
-                    .forEach(btn =>
-                        btn.classList.remove(
-                            "active"
-                        )
-                    );
-
-
-                this.classList.add(
-                    "active"
-                );
-
-
-                document
-                    .querySelectorAll(
-                        ".content-section"
-                    )
-                    .forEach(section =>
-                        section.classList.remove(
-                            "active"
-                        )
-                    );
-
-
-                const section =
-                    document.getElementById(
-                        sectionId
-                    );
-
-
-                if (section) {
-
-                    section.classList.add(
-                        "active"
-                    );
-
-                }
-
-            }
-        );
-
-    });
-
-}
-
-
-// ===============================
-// LOGOUT
-// ===============================
-
-const logoutButton =
-    document.getElementById(
-        "logoutButton"
-    );
-
-
-if (logoutButton) {
-
-    logoutButton.addEventListener(
-        "click",
-        async function () {
-
-            await db.auth.signOut();
-
-            location.reload();
-
-        }
-    );
-
-}
-
-
-// ===============================
-// EXISTING SESSION
-// ===============================
-
-async function checkExistingSession() {
-
-    const { data } =
-        await db.auth.getSession();
-
-    if (data.session) {
-
-        currentUser =
-            data.session.user;
-
-        await showApplication();
+        currentYear.textContent =
+            "2026";
 
     }
 
 }
 
 
-// ===============================
-// HTML SECURITY
-// ===============================
-
-function escapeHTML(value) {
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-
-// ===============================
-// START APPLICATION
-// ===============================
-
-checkExistingSession();
+// ======================================================
+// NAVIGATION
+// ===============

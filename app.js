@@ -1,1081 +1,301 @@
-// ======================================================
-// NGESSUMIN COMPREHENSIVE SCHOOL MANAGEMENT SYSTEM
-// ======================================================
+const SUPABASE_URL="https://awazhdqlkjscfrhsoghe.supabase.co";
+const SUPABASE_KEY="sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
 
-// ------------------------------
-// SUPABASE CONNECTION
-// ------------------------------
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-const SUPABASE_URL =
-    "https://awazhdqlkjscfrhsoghe.supabase.co";
-
-const SUPABASE_KEY =
-    "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
-
-const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+let user,school,grades=[],areas=[],learners=[];
 
 
-// ------------------------------
-// GLOBAL VARIABLES
-// ------------------------------
-
-let currentUser = null;
-let currentProfile = null;
-let school = null;
-
-let grades = [];
-let learningAreas = [];
-let learners = [];
-
-
-// ======================================================
 // LOGIN
-// ======================================================
+document.getElementById("loginForm").addEventListener("submit",async e=>{
+    e.preventDefault();
 
-const loginForm =
-    document.getElementById("loginForm");
+    const email=document.getElementById("email").value;
+    const password=document.getElementById("password").value;
+    const msg=document.getElementById("loginMessage");
 
-if (loginForm) {
+    msg.textContent="Signing in...";
 
-    loginForm.addEventListener(
-        "submit",
-        async function (event) {
+    const {data,error}=await db.auth.signInWithPassword({email,password});
 
-            event.preventDefault();
-
-            const email =
-                document
-                    .getElementById("email")
-                    .value
-                    .trim();
-
-            const password =
-                document
-                    .getElementById("password")
-                    .value;
-
-            const message =
-                document.getElementById(
-                    "loginMessage"
-                );
-
-            message.textContent =
-                "Signing in...";
-
-
-            const { data, error } =
-                await db.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
-
-
-            if (error) {
-
-                console.error(error);
-
-                message.textContent =
-                    "Login failed: " +
-                    error.message;
-
-                return;
-            }
-
-
-            currentUser = data.user;
-
-            await showApplication();
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// SHOW APPLICATION
-// ======================================================
-
-async function showApplication() {
-
-    const loginPage =
-        document.getElementById(
-            "loginPage"
-        );
-
-    const appDashboard =
-        document.getElementById(
-            "appDashboard"
-        );
-
-
-    if (loginPage) {
-        loginPage.style.display = "none";
+    if(error){
+        msg.textContent="Login failed: "+error.message;
+        return;
     }
 
+    user=data.user;
+    await startApp();
+});
 
-    if (appDashboard) {
-        appDashboard.style.display = "flex";
-    }
 
+// START APP
+async function startApp(){
 
-    // Load data in the correct order
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("appDashboard").style.display="flex";
 
     await loadSchool();
-
     await loadGrades();
-
-    await loadLearningAreas();
-
+    await loadAreas();
     await loadLearners();
 
-
-    // Set up the interface
-
-    setupNavigation();
-
-    setupLearnerForm();
-
-    setupLearnerSearch();
-
+    navigation();
+    learnerForm();
+    learnerSearch();
 }
 
 
-// ======================================================
-// LOAD SCHOOL
-// ======================================================
+// SCHOOL
+async function loadSchool(){
 
-async function loadSchool() {
+    const {data}=await db
+        .from("schools")
+        .select("*")
+        .eq("name","Ngessumin Comprehensive School")
+        .single();
 
-    const { data, error } =
-        await db
-            .from("schools")
-            .select("*")
-            .eq(
-                "name",
-                "Ngessumin Comprehensive School"
-            )
-            .single();
+    school=data;
+
+    if(school){
+        document.getElementById("schoolName").textContent=school.name;
+    }
+
+    const {data:profile}=await db
+        .from("profiles")
+        .select("*")
+        .eq("id",user.id)
+        .single();
+
+    if(profile){
+        document.getElementById("userName").textContent=
+            profile.full_name+" ("+profile.role+")";
+    }
+}
 
 
-    if (error) {
+// GRADES
+async function loadGrades(){
 
-        console.error(
-            "School loading error:",
-            error
-        );
+    const {data,error}=await db
+        .from("grades")
+        .select("id,grade_number")
+        .order("grade_number");
 
+    if(error){
+        console.error(error);
         return;
     }
 
+    grades=data||[];
 
-    school = data;
+    const select=document.getElementById("grade");
+    const filter=document.getElementById("learnerGradeFilter");
 
+    select.innerHTML='<option value="">Select grade</option>';
+    filter.innerHTML='<option value="">All Grades</option>';
 
-    const schoolName =
-        document.getElementById(
-            "schoolName"
-        );
+    grades.forEach(g=>{
 
+        select.innerHTML+=
+            `<option value="${g.id}">Grade ${g.grade_number}</option>`;
 
-    if (schoolName) {
+        filter.innerHTML+=
+            `<option value="${g.id}">Grade ${g.grade_number}</option>`;
+    });
 
-        schoolName.textContent =
-            school.name;
-
-    }
-
-
-    await loadProfile();
-
+    document.getElementById("totalGrades").textContent=grades.length;
 }
 
 
-// ======================================================
-// LOAD USER PROFILE
-// ======================================================
+// LEARNING AREAS
+async function loadAreas(){
 
-async function loadProfile() {
+    const {data}=await db
+        .from("learning_areas")
+        .select("*")
+        .eq("school_id",school.id)
+        .eq("active",true)
+        .order("name");
 
-    if (!currentUser) return;
+    areas=data||[];
+
+    document.getElementById("totalLearningAreas").textContent=areas.length;
+
+    const box=document.getElementById("learningAreasList");
+
+    box.innerHTML=areas.map(a=>
+        `<p><strong>${a.name}</strong> ${a.code||""}</p>`
+    ).join("");
+}
 
 
-    const { data, error } =
-        await db
-            .from("profiles")
-            .select("*")
-            .eq(
-                "id",
-                currentUser.id
-            )
-            .single();
+// LEARNERS
+async function loadLearners(){
 
+    const {data,error}=await db
+        .from("learners")
+        .select(`
+            id,
+            admission_number,
+            full_name,
+            gender,
+            guardian_name,
+            guardian_phone,
+            admission_date,
+            status,
+            grade_id,
+            grades(grade_number)
+        `)
+        .eq("school_id",school.id)
+        .order("full_name");
 
-    if (error) {
-
-        console.error(
-            "Profile loading error:",
-            error
-        );
-
+    if(error){
+        console.error(error);
         return;
     }
 
-
-    currentProfile = data;
-
-
-    const userName =
-        document.getElementById(
-            "userName"
-        );
-
-
-    if (userName) {
-
-        userName.textContent =
-            data.full_name +
-            " (" +
-            data.role +
-            ")";
-
-    }
-
+    learners=data||[];
+    showLearners();
 }
 
 
-// ======================================================
-// LOAD GRADES
-// ======================================================
-
-async function loadGrades() {
-
-    const { data, error } =
-        await db
-            .from("grades")
-            .select(
-                "id, grade_number"
-            )
-            .order(
-                "grade_number",
-                {
-                    ascending: true
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Grades loading error:",
-            error
-        );
-
-        return;
-    }
-
-
-    grades = data || [];
-
-
-    console.log(
-        "Grades loaded:",
-        grades
-    );
-
-
-    populateGradeSelectors();
-
-}
-
-
-// ======================================================
-// POPULATE GRADE DROPDOWNS
-// ======================================================
-
-function populateGradeSelectors() {
-
-    const gradeSelect =
-        document.getElementById(
-            "grade"
-        );
-
-
-    const gradeFilter =
-        document.getElementById(
-            "learnerGradeFilter"
-        );
-
-
-    // ------------------------------
-    // Registration grade dropdown
-    // ------------------------------
-
-    if (gradeSelect) {
-
-        gradeSelect.innerHTML =
-            '<option value="">Select grade</option>';
-
-
-        grades.forEach(function (grade) {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                grade.id;
-
-            option.textContent =
-                "Grade " +
-                grade.grade_number;
-
-            gradeSelect.appendChild(
-                option
-            );
-
-        });
-
-    }
-
-
-    // ------------------------------
-    // Search/filter grade dropdown
-    // ------------------------------
-
-    if (gradeFilter) {
-
-        gradeFilter.innerHTML =
-            '<option value="">All Grades</option>';
-
-
-        grades.forEach(function (grade) {
-
-            const option =
-                document.createElement(
-                    "option"
-                );
-
-            option.value =
-                grade.id;
-
-            option.textContent =
-                "Grade " +
-                grade.grade_number;
-
-            gradeFilter.appendChild(
-                option
-            );
-
-        });
-
-    }
-
-}
-
-
-// ======================================================
-// LOAD LEARNING AREAS
-// ======================================================
-
-async function loadLearningAreas() {
-
-    if (!school) return;
-
-
-    const { data, error } =
-        await db
-            .from("learning_areas")
-            .select("*")
-            .eq(
-                "school_id",
-                school.id
-            )
-            .eq(
-                "active",
-                true
-            )
-            .order("name");
-
-
-    if (error) {
-
-        console.error(
-            "Learning areas loading error:",
-            error
-        );
-
-        return;
-    }
-
-
-    learningAreas =
-        data || [];
-
-
-    renderLearningAreas();
-
-}
-
-
-// ======================================================
-// DISPLAY LEARNING AREAS
-// ======================================================
-
-function renderLearningAreas() {
-
-    const container =
-        document.getElementById(
-            "learningAreasList"
-        );
-
-
-    if (!container) return;
-
-
-    if (learningAreas.length === 0) {
-
-        container.innerHTML =
-            "<p>No learning areas found.</p>";
-
-        return;
-    }
-
-
-    container.innerHTML = "";
-
-
-    learningAreas.forEach(
-        function (area) {
-
-            const item =
-                document.createElement(
-                    "div"
-                );
-
-            item.className =
-                "learning-area-item";
-
-
-            item.innerHTML =
-                "<strong>" +
-                escapeHTML(area.name) +
-                "</strong>" +
-                (
-                    area.code
-                    ? " (" +
-                      escapeHTML(area.code) +
-                      ")"
-                    : ""
-                );
-
-
-            container.appendChild(
-                item
-            );
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// LOAD LEARNERS
-// ======================================================
-
-async function loadLearners() {
-
-    if (!school) return;
-
-
-    const { data, error } =
-        await db
-            .from("learners")
-            .select(`
-                id,
-                admission_number,
-                full_name,
-                gender,
-                guardian_name,
-                guardian_phone,
-                admission_date,
-                status,
-                grade_id,
-                grades (
-                    grade_number
-                )
-            `)
-            .eq(
-                "school_id",
-                school.id
-            )
-            .order(
-                "full_name",
-                {
-                    ascending: true
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Learners loading error:",
-            error
-        );
-
-        return;
-    }
-
-
-    learners =
-        data || [];
-
-
-    renderLearners();
-
-    updateDashboard();
-
-}
-
-
-// ======================================================
-// REGISTER LEARNER
-// ======================================================
-
-function setupLearnerForm() {
-
-    const form =
-        document.getElementById(
-            "learnerForm"
-        );
-
-
-    if (!form) return;
-
-
-    // Prevent duplicate event listeners
-
-    if (
-        form.dataset.initialized ===
-        "true"
-    ) {
-        return;
-    }
-
-
-    form.dataset.initialized =
-        "true";
-
-
-    form.addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-
-            const message =
-                document.getElementById(
-                    "learnerMessage"
-                );
-
-
-            message.textContent =
-                "Registering learner...";
-
-
-            if (!school) {
-
-                message.textContent =
-                    "School information could not be loaded.";
-
-                return;
-            }
-
-
-            const admissionNumber =
-                document
-                    .getElementById(
-                        "admissionNumber"
-                    )
-                    .value
-                    .trim();
-
-
-            const fullName =
-                document
-                    .getElementById(
-                        "fullName"
-                    )
-                    .value
-                    .trim();
-
-
-            const gender =
-                document
-                    .getElementById(
-                        "gender"
-                    )
-                    .value;
-
-
-            const gradeId =
-                document
-                    .getElementById(
-                        "grade"
-                    )
-                    .value;
-
-
-            const guardianName =
-                document
-                    .getElementById(
-                        "guardianName"
-                    )
-                    .value
-                    .trim();
-
-
-            const guardianPhone =
-                document
-                    .getElementById(
-                        "guardianPhone"
-                    )
-                    .value
-                    .trim();
-
-
-            const admissionDate =
-                document
-                    .getElementById(
-                        "admissionDate"
-                    )
-                    .value;
-
-
-            const status =
-                document
-                    .getElementById(
-                        "learnerStatus"
-                    )
-                    .value;
-
-
-            // ------------------------------
-            // Validation
-            // ------------------------------
-
-            if (!admissionNumber) {
-
-                message.textContent =
-                    "Please enter the admission number.";
-
-                return;
-            }
-
-
-            if (!fullName) {
-
-                message.textContent =
-                    "Please enter the learner's full name.";
-
-                return;
-            }
-
-
-            if (!gradeId) {
-
-                message.textContent =
-                    "Please select a grade.";
-
-                return;
-            }
-
-
-            // ------------------------------
-            // Insert learner
-            // ------------------------------
-
-            const { error } =
-                await db
-                    .from("learners")
-                    .insert({
-
-                        school_id:
-                            school.id,
-
-                        admission_number:
-                            admissionNumber,
-
-                        full_name:
-                            fullName,
-
-                        gender:
-                            gender ||
-                            null,
-
-                        grade_id:
-                            gradeId,
-
-                        guardian_name:
-                            guardianName ||
-                            null,
-
-                        guardian_phone:
-                            guardianPhone ||
-                            null,
-
-                        admission_date:
-                            admissionDate ||
-                            null,
-
-                        status:
-                            status ||
-                            "Active"
-
-                    });
-
-
-            if (error) {
-
-                console.error(
-                    "Learner registration error:",
-                    error
-                );
-
-
-                if (
-                    error.code ===
-                    "23505"
-                ) {
-
-                    message.textContent =
-                        "That admission number already exists.";
-
-                } else {
-
-                    message.textContent =
-                        "Could not register learner: " +
-                        error.message;
-
-                }
-
-
-                return;
-            }
-
-
-            // ------------------------------
-            // Success
-            // ------------------------------
-
-            message.textContent =
-                "Learner registered successfully.";
-
-
-            form.reset();
-
-
-            await loadLearners();
-
-        }
-    );
-
-}
-
-
-// ======================================================
-// LEARNER SEARCH
-// ======================================================
-
-function setupLearnerSearch() {
-
-    const search =
-        document.getElementById(
-            "learnerSearch"
-        );
-
-
-    const gradeFilter =
-        document.getElementById(
-            "learnerGradeFilter"
-        );
-
-
-    if (search) {
-
-        search.addEventListener(
-            "input",
-            function () {
-
-                renderLearners();
-
-            }
-        );
-
-    }
-
-
-    if (gradeFilter) {
-
-        gradeFilter.addEventListener(
-            "change",
-            function () {
-
-                renderLearners();
-
-            }
-        );
-
-    }
-
-}
-
-
-// ======================================================
 // DISPLAY LEARNERS
-// ======================================================
+function showLearners(){
 
-function renderLearners() {
+    const table=document.getElementById("learnersTableBody");
 
-    const table =
-        document.getElementById(
-            "learnersTableBody"
-        );
+    const search=document
+        .getElementById("learnerSearch")
+        .value.toLowerCase();
 
+    const grade=document
+        .getElementById("learnerGradeFilter")
+        .value;
 
-    if (!table) return;
-
-
-    const searchInput =
-        document.getElementById(
-            "learnerSearch"
-        );
-
-
-    const gradeFilter =
-        document.getElementById(
-            "learnerGradeFilter"
-        );
-
-
-    const search =
-        searchInput
-        ? searchInput.value
-            .toLowerCase()
-            .trim()
-        : "";
-
-
-    const selectedGrade =
-        gradeFilter
-        ? gradeFilter.value
-        : "";
-
-
-    const filteredLearners =
-        learners.filter(
-            function (learner) {
-
-                const name =
-                    (
-                        learner.full_name ||
-                        ""
-                    ).toLowerCase();
-
-
-                const admission =
-                    (
-                        learner.admission_number ||
-                        ""
-                    ).toLowerCase();
-
-
-                const matchesSearch =
-                    !search ||
-                    name.includes(search) ||
-                    admission.includes(search);
-
-
-                const matchesGrade =
-                    !selectedGrade ||
-                    learner.grade_id ===
-                    selectedGrade;
-
-
-                return (
-                    matchesSearch &&
-                    matchesGrade
-                );
-
-            }
-        );
-
-
-    if (
-        filteredLearners.length ===
-        0
-    ) {
-
-        table.innerHTML = `
-            <tr>
-                <td colspan="7">
-                    No learners found.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-
-    table.innerHTML = "";
-
-
-    filteredLearners.forEach(
-        function (learner) {
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            const gradeNumber =
-                learner.grades
-                ? learner.grades.grade_number
-                : "";
-
-
-            row.innerHTML = `
-
-                <td>
-                    ${escapeHTML(
-                        learner.admission_number
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        learner.full_name
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        learner.gender ||
-                        "-"
-                    )}
-                </td>
-
-                <td>
-                    Grade ${escapeHTML(
-                        gradeNumber
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        learner.guardian_name ||
-                        "-"
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        learner.guardian_phone ||
-                        "-"
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        learner.status ||
-                        "-"
-                    )}
-                </td>
-
-            `;
-
-
-            table.appendChild(row);
-
-        }
+    const list=learners.filter(l=>
+        (!search ||
+        l.full_name.toLowerCase().includes(search) ||
+        l.admission_number.toLowerCase().includes(search))
+        &&
+        (!grade || l.grade_id===grade)
     );
 
+    if(!list.length){
+        table.innerHTML=
+            `<tr><td colspan="7">No learners found.</td></tr>`;
+    }else{
+
+        table.innerHTML=list.map(l=>`
+            <tr>
+                <td>${l.admission_number}</td>
+                <td>${l.full_name}</td>
+                <td>${l.gender||"-"}</td>
+                <td>Grade ${l.grades?.grade_number||""}</td>
+                <td>${l.guardian_name||"-"}</td>
+                <td>${l.guardian_phone||"-"}</td>
+                <td>${l.status}</td>
+            </tr>
+        `).join("");
+    }
+
+    document.getElementById("totalLearners").textContent=learners.length;
 }
 
 
-// ======================================================
-// DASHBOARD
-// ======================================================
+// REGISTER LEARNER
+function learnerForm(){
 
-function updateDashboard() {
+    document.getElementById("learnerForm").addEventListener("submit",async e=>{
 
-    const totalLearners =
-        document.getElementById(
-            "totalLearners"
-        );
+        e.preventDefault();
 
+        const msg=document.getElementById("learnerMessage");
 
-    const totalGrades =
-        document.getElementById(
-            "totalGrades"
-        );
+        const learner={
+            school_id:school.id,
+            admission_number:document.getElementById("admissionNumber").value.trim(),
+            full_name:document.getElementById("fullName").value.trim(),
+            gender:document.getElementById("gender").value||null,
+            grade_id:document.getElementById("grade").value,
+            guardian_name:document.getElementById("guardianName").value.trim()||null,
+            guardian_phone:document.getElementById("guardianPhone").value.trim()||null,
+            admission_date:document.getElementById("admissionDate").value||null,
+            status:document.getElementById("learnerStatus").value
+        };
 
+        if(!learner.grade_id){
+            msg.textContent="Please select a grade.";
+            return;
+        }
 
-    const totalLearningAreas =
-        document.getElementById(
-            "totalLearningAreas"
-        );
+        const {error}=await db
+            .from("learners")
+            .insert(learner);
 
+        if(error){
+            msg.textContent="Error: "+error.message;
+            return;
+        }
 
-    if (totalLearners) {
+        msg.textContent="Learner registered successfully.";
 
-        totalLearners.textContent =
-            learners.length;
+        document.getElementById("learnerForm").reset();
 
-    }
-
-
-    if (totalGrades) {
-
-        totalGrades.textContent =
-            grades.length;
-
-    }
-
-
-    if (totalLearningAreas) {
-
-        totalLearningAreas.textContent =
-            learningAreas.length;
-
-    }
-
-
-    const currentYear =
-        document.getElementById(
-            "currentYear"
-        );
-
-
-    if (currentYear) {
-
-        currentYear.textContent =
-            "2026";
-
-    }
-
+        await loadLearners();
+    });
 }
 
 
-// ======================================================
+// SEARCH
+function learnerSearch(){
+
+    document
+        .getElementById("learnerSearch")
+        .addEventListener("input",showLearners);
+
+    document
+        .getElementById("learnerGradeFilter")
+        .addEventListener("change",showLearners);
+}
+
+
 // NAVIGATION
-// ===============
+function navigation(){
+
+    document.querySelectorAll(".nav-link").forEach(button=>{
+
+        button.addEventListener("click",()=>{
+
+            document.querySelectorAll(".nav-link")
+                .forEach(b=>b.classList.remove("active"));
+
+            button.classList.add("active");
+
+            document.querySelectorAll(".content-section")
+                .forEach(s=>s.classList.remove("active"));
+
+            document.getElementById(button.dataset.section)
+                .classList.add("active");
+        });
+    });
+}
+
+
+// LOGOUT
+document.getElementById("logoutButton").addEventListener("click",async()=>{
+    await db.auth.signOut();
+    location.reload();
+});
+
+
+// CHECK LOGIN
+(async()=>{
+
+    const {data}=await db.auth.getSession();
+
+    if(data.session){
+        user=data.session.user;
+        await startApp();
+    }
+
+})();

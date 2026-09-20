@@ -921,7 +921,10 @@
         SUPABASE_URL,
         SUPABASE_KEY
       );
-
+db.auth.onAuthStateChange((event, session) => {
+  console.log("AUTH EVENT:", event);
+  console.log("SESSION EXISTS:", !!session);
+});
 
     let grades = [];
     let learners = [];

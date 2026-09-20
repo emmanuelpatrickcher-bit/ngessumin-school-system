@@ -1,934 +1,860 @@
 const SUPABASE_URL = "https://awazhdqlkjscfrhsoghe.supabase.co";
 
-const SUPABASE_PUBLISHABLE_KEY =
-  "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
+const SUPABASE_KEY =
+    "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
 
-const db = supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
 );
 
 
-// =====================================================
+// ===============================
 // GLOBAL DATA
-// =====================================================
+// ===============================
 
+let currentUser = null;
+let currentProfile = null;
 let school = null;
 let grades = [];
 let learningAreas = [];
 let learners = [];
-let profile = null;
 
 
-// =====================================================
-// HELPER
-// =====================================================
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-
-function showMessage(element, message, success = false) {
-  if (!element) return;
-
-  element.textContent = message;
-  element.style.color = success ? "#067647" : "#b42318";
-}
-
-
-// =====================================================
+// ===============================
 // LOGIN
-// =====================================================
+// ===============================
 
-const loginForm = $("loginForm");
+const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
 
-  loginForm.addEventListener("submit", async function (event) {
+    loginForm.addEventListener("submit", async function (event) {
 
-    event.preventDefault();
+        event.preventDefault();
 
-    const email = $("email").value.trim();
-    const password = $("password").value;
+        const email =
+            document.getElementById("email").value.trim();
 
-    if (!email || !password) {
+        const password =
+            document.getElementById("password").value;
 
-      showMessage(
-        $("loginMessage"),
-        "Please enter your email and password."
-      );
+        const loginMessage =
+            document.getElementById("loginMessage");
 
-      return;
-    }
+        loginMessage.textContent = "Signing in...";
 
-    showMessage(
-      $("loginMessage"),
-      "Signing in..."
-    );
+        const { data, error } =
+            await db.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
 
-    try {
+        if (error) {
 
-      const { data, error } =
-        await db.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
+            console.error(error);
 
-      if (error) {
+            loginMessage.textContent =
+                "Login failed: " + error.message;
 
-        console.error("Login error:", error);
+            return;
+        }
 
-        showMessage(
-          $("loginMessage"),
-          "Login error: " + error.message
-        );
+        currentUser = data.user;
 
-        return;
-      }
+        await showApplication();
 
-      if (!data || !data.user) {
-
-        showMessage(
-          $("loginMessage"),
-          "Login failed: no user was returned."
-        );
-
-        return;
-      }
-
-      showMessage(
-        $("loginMessage"),
-        "Login successful.",
-        true
-      );
-
-      await showApplication();
-
-    } catch (error) {
-
-      console.error("Unexpected login error:", error);
-
-      showMessage(
-        $("loginMessage"),
-        "System error: " + error.message
-      );
-
-    }
-
-  });
-
+    });
 }
 
 
-// =====================================================
+// ===============================
 // SHOW APPLICATION
-// =====================================================
+// ===============================
 
 async function showApplication() {
 
-  if ($("loginView")) {
-    $("loginView").classList.add("hidden");
-  }
+    document.getElementById("loginPage").style.display =
+        "none";
 
-  if ($("appView")) {
-    $("appView").classList.remove("hidden");
-  }
+    document.getElementById("appDashboard").style.display =
+        "flex";
 
-  await loadProfile();
-  await loadSchool();
-  await loadGrades();
-  await loadLearningAreas();
-  await loadLearners();
+    await loadSchoolData();
 
-  updateDashboard();
-  renderLearners();
-  renderLearningAreas();
+    await loadGrades();
 
-}
+    await loadLearningAreas();
 
+    await loadLearners();
 
-// =====================================================
-// LOAD PROFILE
-// =====================================================
+    setupNavigation();
 
-async function loadProfile() {
+    setupLearnerForm();
 
-  try {
+    setupLearnerSearch();
 
-    const {
-      data: { user },
-      error: userError
-    } = await db.auth.getUser();
-
-    if (userError) {
-      console.error("User error:", userError);
-      return;
-    }
-
-    if (!user) {
-      console.log("No authenticated user.");
-      return;
-    }
-
-    const { data, error } = await db
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (error) {
-
-      console.error("Profile error:", error);
-
-      return;
-    }
-
-    profile = data;
-
-    if ($("userName")) {
-      $("userName").textContent =
-        profile?.full_name || user.email;
-    }
-
-    if ($("userRole")) {
-      $("userRole").textContent =
-        profile?.role || "User";
-    }
-
-  } catch (error) {
-
-    console.error("Unexpected profile error:", error);
-
-  }
+    populateGradeSelectors();
 
 }
 
 
-// =====================================================
+// ===============================
 // LOAD SCHOOL
-// =====================================================
+// ===============================
 
-async function loadSchool() {
+async function loadSchoolData() {
 
-  try {
-
-    const { data, error } = await db
-      .from("schools")
-      .select("*")
-      .limit(1)
-      .maybeSingle();
+    const { data, error } =
+        await db
+            .from("schools")
+            .select("*")
+            .eq("name", "Ngessumin Comprehensive School")
+            .single();
 
     if (error) {
 
-      console.error("School error:", error);
+        console.error(
+            "School loading error:",
+            error
+        );
 
-      return;
+        return;
     }
 
     school = data;
 
-    if ($("schoolName")) {
-      $("schoolName").textContent =
-        school?.name || "Ngessumin Comprehensive School";
-    }
+    document.getElementById("schoolName").textContent =
+        school.name;
 
-  } catch (error) {
-
-    console.error("Unexpected school error:", error);
-
-  }
+    await loadProfile();
 
 }
 
 
-// =====================================================
-// LOAD GRADES
-// =====================================================
+// ===============================
+// LOAD PROFILE
+// ===============================
 
-async function loadGrades() {
+async function loadProfile() {
 
-  try {
+    if (!currentUser) return;
 
-    const { data, error } = await db
-      .from("grades")
-      .select("*")
-      .order("grade_number");
+    const { data, error } =
+        await db
+            .from("profiles")
+            .select("*")
+            .eq("id", currentUser.id)
+            .single();
 
     if (error) {
 
-      console.error("Grades error:", error);
+        console.error(
+            "Profile loading error:",
+            error
+        );
 
-      return;
+        return;
+    }
+
+    currentProfile = data;
+
+    document.getElementById("userName").textContent =
+        `${data.full_name} (${data.role})`;
+
+}
+
+
+// ===============================
+// LOAD GRADES
+// ===============================
+
+async function loadGrades() {
+
+    if (!school) return;
+
+    const { data, error } =
+        await db
+            .from("grades")
+            .select("*")
+            .eq("school_id", school.id)
+            .order("grade_number");
+
+    if (error) {
+
+        console.error(
+            "Grades loading error:",
+            error
+        );
+
+        return;
     }
 
     grades = data || [];
 
-    populateGradeSelectors();
-
-  } catch (error) {
-
-    console.error("Unexpected grades error:", error);
-
-  }
-
 }
 
 
-// =====================================================
-// POPULATE GRADE SELECTORS
-// =====================================================
-
-function populateGradeSelectors() {
-
-  const selectors = [
-    $("learnerGrade"),
-    $("filterGrade")
-  ];
-
-  selectors.forEach(function (select) {
-
-    if (!select) return;
-
-    const currentValue = select.value;
-
-    if (select.id === "filterGrade") {
-
-      select.innerHTML =
-        '<option value="">All Grades</option>';
-
-    } else {
-
-      select.innerHTML =
-        '<option value="">Select Grade</option>';
-
-    }
-
-    grades.forEach(function (grade) {
-
-      const option = document.createElement("option");
-
-      option.value = grade.id;
-
-      option.textContent =
-        "Grade " + grade.grade_number;
-
-      select.appendChild(option);
-
-    });
-
-    if (currentValue) {
-      select.value = currentValue;
-    }
-
-  });
-
-}
-
-
-// =====================================================
+// ===============================
 // LOAD LEARNING AREAS
-// =====================================================
+// ===============================
 
 async function loadLearningAreas() {
 
-  try {
+    if (!school) return;
 
-    const { data, error } = await db
-      .from("learning_areas")
-      .select("*")
-      .eq("active", true)
-      .order("name");
+    const { data, error } =
+        await db
+            .from("learning_areas")
+            .select("*")
+            .eq("school_id", school.id)
+            .eq("active", true)
+            .order("name");
 
     if (error) {
 
-      console.error("Learning areas error:", error);
+        console.error(
+            "Learning areas loading error:",
+            error
+        );
 
-      return;
+        return;
     }
 
     learningAreas = data || [];
 
-  } catch (error) {
-
-    console.error(
-      "Unexpected learning areas error:",
-      error
-    );
-
-  }
+    renderLearningAreas();
 
 }
 
 
-// =====================================================
+// ===============================
+// RENDER LEARNING AREAS
+// ===============================
+
+function renderLearningAreas() {
+
+    const container =
+        document.getElementById("learningAreasList");
+
+    if (!container) return;
+
+    if (learningAreas.length === 0) {
+
+        container.innerHTML =
+            "<p>No learning areas found.</p>";
+
+        return;
+    }
+
+    container.innerHTML =
+        learningAreas.map(area => `
+            <div class="learning-area-item">
+                <strong>${escapeHTML(area.name)}</strong>
+                ${
+                    area.code
+                    ? `<span> (${escapeHTML(area.code)})</span>`
+                    : ""
+                }
+            </div>
+        `).join("");
+
+}
+
+
+// ===============================
 // LOAD LEARNERS
-// =====================================================
+// ===============================
 
 async function loadLearners() {
 
-  try {
+    if (!school) return;
 
-    const { data, error } = await db
-      .from("learners")
-      .select(`
-        id,
-        admission_number,
-        full_name,
-        gender,
-        guardian_name,
-        guardian_phone,
-        admission_date,
-        status,
-        grade_id,
-        grades (
-          grade_number
-        )
-      `)
-      .order("full_name");
+    const { data, error } =
+        await db
+            .from("learners")
+            .select(`
+                id,
+                admission_number,
+                full_name,
+                gender,
+                guardian_name,
+                guardian_phone,
+                admission_date,
+                status,
+                grade_id,
+                grades (
+                    grade_number
+                )
+            `)
+            .eq("school_id", school.id)
+            .order("full_name");
 
     if (error) {
 
-      console.error("Learners error:", error);
+        console.error(
+            "Learners loading error:",
+            error
+        );
 
-      return;
+        return;
     }
 
     learners = data || [];
 
-  } catch (error) {
+    renderLearners();
 
-    console.error(
-      "Unexpected learners error:",
-      error
+    updateDashboard();
+
+}
+
+
+// ===============================
+// REGISTER LEARNER
+// ===============================
+
+function setupLearnerForm() {
+
+    const form =
+        document.getElementById("learnerForm");
+
+    if (!form) return;
+
+    form.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            const message =
+                document.getElementById(
+                    "learnerMessage"
+                );
+
+            message.textContent =
+                "Registering learner...";
+
+            const admissionNumber =
+                document
+                    .getElementById(
+                        "admissionNumber"
+                    )
+                    .value
+                    .trim();
+
+            const fullName =
+                document
+                    .getElementById("fullName")
+                    .value
+                    .trim();
+
+            const gender =
+                document
+                    .getElementById("gender")
+                    .value;
+
+            const gradeId =
+                document
+                    .getElementById("grade")
+                    .value;
+
+            const guardianName =
+                document
+                    .getElementById("guardianName")
+                    .value
+                    .trim();
+
+            const guardianPhone =
+                document
+                    .getElementById("guardianPhone")
+                    .value
+                    .trim();
+
+            const admissionDate =
+                document
+                    .getElementById(
+                        "admissionDate"
+                    )
+                    .value || null;
+
+            const status =
+                document
+                    .getElementById(
+                        "learnerStatus"
+                    )
+                    .value;
+
+
+            if (!gradeId) {
+
+                message.textContent =
+                    "Please select a grade.";
+
+                return;
+            }
+
+
+            const { error } =
+                await db
+                    .from("learners")
+                    .insert({
+
+                        school_id: school.id,
+
+                        admission_number:
+                            admissionNumber,
+
+                        full_name:
+                            fullName,
+
+                        gender:
+                            gender || null,
+
+                        grade_id:
+                            gradeId,
+
+                        guardian_name:
+                            guardianName || null,
+
+                        guardian_phone:
+                            guardianPhone || null,
+
+                        admission_date:
+                            admissionDate,
+
+                        status:
+                            status
+
+                    });
+
+
+            if (error) {
+
+                console.error(error);
+
+                message.textContent =
+                    "Could not register learner: " +
+                    error.message;
+
+                return;
+            }
+
+
+            message.textContent =
+                "Learner registered successfully.";
+
+            form.reset();
+
+            await loadLearners();
+
+        }
     );
 
-  }
+}
+
+
+// ===============================
+// POPULATE GRADE SELECTORS
+// ===============================
+
+function populateGradeSelectors() {
+
+    const gradeSelect =
+        document.getElementById("grade");
+
+    const filter =
+        document.getElementById(
+            "learnerGradeFilter"
+        );
+
+
+    if (gradeSelect) {
+
+        gradeSelect.innerHTML =
+            `<option value="">
+                Select grade
+            </option>` +
+            grades.map(grade => `
+                <option value="${grade.id}">
+                    Grade ${grade.grade_number}
+                </option>
+            `).join("");
+
+    }
+
+
+    if (filter) {
+
+        filter.innerHTML =
+            `<option value="">
+                All Grades
+            </option>` +
+            grades.map(grade => `
+                <option value="${grade.id}">
+                    Grade ${grade.grade_number}
+                </option>
+            `).join("");
+
+    }
 
 }
 
 
-// =====================================================
-// DASHBOARD
-// =====================================================
+// ===============================
+// SEARCH & FILTER
+// ===============================
 
-function updateDashboard() {
+function setupLearnerSearch() {
 
-  const totalLearners = learners.length;
+    const search =
+        document.getElementById(
+            "learnerSearch"
+        );
 
-  const activeLearners =
-    learners.filter(
-      learner => learner.status === "Active"
-    ).length;
+    const filter =
+        document.getElementById(
+            "learnerGradeFilter"
+        );
 
-  const totalLearningAreas =
-    learningAreas.length;
 
-  if ($("totalLearners")) {
-    $("totalLearners").textContent =
-      totalLearners;
-  }
+    if (search) {
 
-  if ($("activeLearners")) {
-    $("activeLearners").textContent =
-      activeLearners;
-  }
+        search.addEventListener(
+            "input",
+            renderLearners
+        );
 
-  if ($("totalLearningAreas")) {
-    $("totalLearningAreas").textContent =
-      totalLearningAreas;
-  }
+    }
 
-  if ($("totalGrades")) {
-    $("totalGrades").textContent =
-      grades.length;
-  }
+
+    if (filter) {
+
+        filter.addEventListener(
+            "change",
+            renderLearners
+        );
+
+    }
 
 }
 
 
-// =====================================================
-// RENDER LEARNERS
-// =====================================================
+// ===============================
+// DISPLAY LEARNERS
+// ===============================
 
 function renderLearners() {
 
-  const tableBody =
-    $("learnersTableBody");
+    const table =
+        document.getElementById(
+            "learnersTableBody"
+        );
 
-  if (!tableBody) return;
+    if (!table) return;
 
-  const searchInput =
-    $("learnerSearch");
 
-  const filterGrade =
-    $("filterGrade");
+    const search =
+        document
+            .getElementById(
+                "learnerSearch"
+            )
+            ?.value
+            .toLowerCase()
+            .trim() || "";
 
-  const search =
-    searchInput
-      ? searchInput.value.trim().toLowerCase()
-      : "";
 
-  const gradeFilter =
-    filterGrade
-      ? filterGrade.value
-      : "";
+    const gradeFilter =
+        document
+            .getElementById(
+                "learnerGradeFilter"
+            )
+            ?.value || "";
 
-  let filteredLearners =
-    learners.filter(function (learner) {
 
-      const matchesSearch =
-        !search ||
-        learner.full_name
-          .toLowerCase()
-          .includes(search) ||
-        learner.admission_number
-          .toLowerCase()
-          .includes(search);
+    const filtered =
+        learners.filter(learner => {
 
-      const matchesGrade =
-        !gradeFilter ||
-        learner.grade_id === gradeFilter;
+            const matchesSearch =
+                !search ||
+                learner.full_name
+                    .toLowerCase()
+                    .includes(search) ||
+                learner.admission_number
+                    .toLowerCase()
+                    .includes(search);
 
-      return matchesSearch && matchesGrade;
+
+            const matchesGrade =
+                !gradeFilter ||
+                learner.grade_id === gradeFilter;
+
+
+            return (
+                matchesSearch &&
+                matchesGrade
+            );
+
+        });
+
+
+    if (filtered.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="7">
+                    No learners found.
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    table.innerHTML =
+        filtered.map(learner => {
+
+            const gradeNumber =
+                learner.grades
+                ? learner.grades.grade_number
+                : "";
+
+
+            return `
+                <tr>
+
+                    <td>
+                        ${escapeHTML(
+                            learner.admission_number
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            learner.full_name
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            learner.gender || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        Grade ${gradeNumber}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            learner.guardian_name || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            learner.guardian_phone || "-"
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHTML(
+                            learner.status
+                        )}
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+}
+
+
+// ===============================
+// DASHBOARD
+// ===============================
+
+function updateDashboard() {
+
+    const totalLearners =
+        document.getElementById(
+            "totalLearners"
+        );
+
+    const totalGrades =
+        document.getElementById(
+            "totalGrades"
+        );
+
+    const totalAreas =
+        document.getElementById(
+            "totalLearningAreas"
+        );
+
+
+    if (totalLearners) {
+
+        totalLearners.textContent =
+            learners.length;
+
+    }
+
+
+    if (totalGrades) {
+
+        totalGrades.textContent =
+            grades.length;
+
+    }
+
+
+    if (totalAreas) {
+
+        totalAreas.textContent =
+            learningAreas.length;
+
+    }
+
+}
+
+
+// ===============================
+// NAVIGATION
+// ===============================
+
+function setupNavigation() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".nav-link"
+        );
+
+
+    buttons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            function () {
+
+                const sectionId =
+                    this.dataset.section;
+
+
+                document
+                    .querySelectorAll(
+                        ".nav-link"
+                    )
+                    .forEach(btn =>
+                        btn.classList.remove(
+                            "active"
+                        )
+                    );
+
+
+                this.classList.add(
+                    "active"
+                );
+
+
+                document
+                    .querySelectorAll(
+                        ".content-section"
+                    )
+                    .forEach(section =>
+                        section.classList.remove(
+                            "active"
+                        )
+                    );
+
+
+                const section =
+                    document.getElementById(
+                        sectionId
+                    );
+
+
+                if (section) {
+
+                    section.classList.add(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
 
     });
 
-
-  tableBody.innerHTML = "";
-
-
-  if (filteredLearners.length === 0) {
-
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="7">
-          No learners found.
-        </td>
-      </tr>
-    `;
-
-    return;
-  }
-
-
-  filteredLearners.forEach(function (learner) {
-
-    const row =
-      document.createElement("tr");
-
-    const gradeNumber =
-      learner.grades
-        ? learner.grades.grade_number
-        : "";
-
-    row.innerHTML = `
-      <td>${escapeHtml(learner.admission_number)}</td>
-
-      <td>${escapeHtml(learner.full_name)}</td>
-
-      <td>${escapeHtml(learner.gender || "")}</td>
-
-      <td>Grade ${escapeHtml(String(gradeNumber))}</td>
-
-      <td>${escapeHtml(learner.guardian_name || "")}</td>
-
-      <td>${escapeHtml(learner.guardian_phone || "")}</td>
-
-      <td>${escapeHtml(learner.status || "")}</td>
-    `;
-
-    tableBody.appendChild(row);
-
-  });
-
 }
 
 
-// =====================================================
-// RENDER LEARNING AREAS
-// =====================================================
-
-function renderLearningAreas() {
-
-  const container =
-    $("learningAreasList");
-
-  if (!container) return;
-
-  container.innerHTML = "";
-
-
-  if (learningAreas.length === 0) {
-
-    container.innerHTML =
-      "<p>No learning areas found.</p>";
-
-    return;
-  }
-
-
-  learningAreas.forEach(function (area) {
-
-    const item =
-      document.createElement("div");
-
-    item.className =
-      "learning-area-item";
-
-    item.innerHTML = `
-      <strong>${escapeHtml(area.name)}</strong>
-      ${
-        area.code
-          ? `<span>${escapeHtml(area.code)}</span>`
-          : ""
-      }
-    `;
-
-    container.appendChild(item);
-
-  });
-
-}
-
-
-// =====================================================
-// REGISTER LEARNER
-// =====================================================
-
-const learnerForm =
-  $("learnerForm");
-
-if (learnerForm) {
-
-  learnerForm.addEventListener(
-    "submit",
-    async function (event) {
-
-      event.preventDefault();
-
-
-      const admissionNumber =
-        $("admissionNumber")?.value.trim();
-
-      const fullName =
-        $("fullName")?.value.trim();
-
-      const gender =
-        $("gender")?.value;
-
-      const gradeId =
-        $("learnerGrade")?.value;
-
-      const guardianName =
-        $("guardianName")?.value.trim();
-
-      const guardianPhone =
-        $("guardianPhone")?.value.trim();
-
-      const admissionDate =
-        $("admissionDate")?.value;
-
-
-      if (
-        !admissionNumber ||
-        !fullName ||
-        !gradeId
-      ) {
-
-        alert(
-          "Please enter admission number, full name and grade."
-        );
-
-        return;
-      }
-
-
-      if (!school) {
-
-        alert(
-          "School information is not loaded yet."
-        );
-
-        return;
-      }
-
-
-      const { data, error } =
-        await db
-          .from("learners")
-          .insert({
-
-            school_id: school.id,
-
-            admission_number:
-              admissionNumber,
-
-            full_name:
-              fullName,
-
-            gender:
-              gender || null,
-
-            grade_id:
-              gradeId,
-
-            guardian_name:
-              guardianName || null,
-
-            guardian_phone:
-              guardianPhone || null,
-
-            admission_date:
-              admissionDate || null,
-
-            status:
-              "Active"
-
-          })
-          .select()
-          .single();
-
-
-      if (error) {
-
-        console.error(
-          "Add learner error:",
-          error
-        );
-
-        alert(
-          "Could not register learner: " +
-          error.message
-        );
-
-        return;
-      }
-
-
-      learners.push(data);
-
-      alert(
-        "Learner registered successfully."
-      );
-
-
-      learnerForm.reset();
-
-      await loadLearners();
-
-      updateDashboard();
-
-      renderLearners();
-
-    }
-  );
-
-}
-
-
-// =====================================================
-// SEARCH LEARNERS
-// =====================================================
-
-if ($("learnerSearch")) {
-
-  $("learnerSearch").addEventListener(
-    "input",
-    renderLearners
-  );
-
-}
-
-
-if ($("filterGrade")) {
-
-  $("filterGrade").addEventListener(
-    "change",
-    renderLearners
-  );
-
-}
-
-
-// =====================================================
+// ===============================
 // LOGOUT
-// =====================================================
+// ===============================
 
 const logoutButton =
-  $("logoutButton");
+    document.getElementById(
+        "logoutButton"
+    );
+
 
 if (logoutButton) {
 
-  logoutButton.addEventListener(
-    "click",
-    async function () {
+    logoutButton.addEventListener(
+        "click",
+        async function () {
 
-      const { error } =
-        await db.auth.signOut();
+            await db.auth.signOut();
 
-      if (error) {
+            location.reload();
 
-        console.error(
-          "Logout error:",
-          error
-        );
-
-        return;
-      }
-
-
-      if ($("appView")) {
-        $("appView")
-          .classList
-          .add("hidden");
-      }
-
-
-      if ($("loginView")) {
-        $("loginView")
-          .classList
-          .remove("hidden");
-      }
-
-
-      if ($("loginForm")) {
-        $("loginForm").reset();
-      }
-
-    }
-  );
+        }
+    );
 
 }
 
 
-// =====================================================
-// NAVIGATION
-// =====================================================
-
-document
-  .querySelectorAll("[data-section]")
-  .forEach(function (button) {
-
-    button.addEventListener(
-      "click",
-      function () {
-
-        const sectionId =
-          button.getAttribute(
-            "data-section"
-          );
-
-        document
-          .querySelectorAll(
-            ".app-section"
-          )
-          .forEach(function (section) {
-
-            section.classList.add(
-              "hidden"
-            );
-
-          });
-
-
-        const target =
-          $(sectionId);
-
-        if (target) {
-
-          target.classList.remove(
-            "hidden"
-          );
-
-        }
-
-
-        document
-          .querySelectorAll(
-            "[data-section]"
-          )
-          .forEach(function (item) {
-
-            item.classList.remove(
-              "active"
-            );
-
-          });
-
-
-        button.classList.add(
-          "active"
-        );
-
-      }
-    );
-
-  });
-
-
-// =====================================================
-// SECURITY / SESSION CHECK
-// =====================================================
+// ===============================
+// EXISTING SESSION
+// ===============================
 
 async function checkExistingSession() {
 
-  try {
+    const { data } =
+        await db.auth.getSession();
 
-    const {
-      data: { session },
-      error
-    } = await db.auth.getSession();
+    if (data.session) {
 
+        currentUser =
+            data.session.user;
 
-    if (error) {
-
-      console.error(
-        "Session error:",
-        error
-      );
-
-      return;
-    }
-
-
-    if (session) {
-
-      await showApplication();
+        await showApplication();
 
     }
-
-  } catch (error) {
-
-    console.error(
-      "Session check error:",
-      error
-    );
-
-  }
 
 }
 
 
-// =====================================================
-// ESCAPE HTML
-// =====================================================
+// ===============================
+// HTML SECURITY
+// ===============================
 
-function escapeHtml(value) {
+function escapeHTML(value) {
 
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
 
 
-// =====================================================
+// ===============================
 // START APPLICATION
-// =====================================================
+// ===============================
 
 checkExistingSession();
-    

@@ -3,66 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Ngessumin Comprehensive School</title>
+
   <link rel="stylesheet" href="style.css">
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
+
 <body>
 
+  <!-- LOGIN -->
   <div id="loginView" class="login-page">
+
     <div class="login-card">
+
       <h1>Ngessumin Comprehensive School</h1>
-      <p class="muted">CBE School Management System</p>
+
+      <p class="muted">
+        CBE School Management System
+      </p>
 
       <form id="loginForm">
-        <label>Email</label>
-        <input id="email" type="email" required placeholder="Administrator email">
 
-        <label>Password</label>
-        <input id="password" type="password" required placeholder="Password">
+        <label for="email">Email</label>
 
-        <button type="submit">Sign in</button>
+        <input
+          id="email"
+          type="email"
+          required
+          placeholder="Administrator email"
+        >
+
+        <label for="password">Password</label>
+
+        <input
+          id="password"
+          type="password"
+          required
+          placeholder="Password"
+        >
+
+        <button type="submit">
+          Sign in
+        </button>
+
         <p id="loginMessage" class="message"></p>
+
       </form>
+
     </div>
+
   </div>
 
+
+  <!-- APPLICATION -->
   <div id="appView" class="app hidden">
 
     <aside class="sidebar">
+
       <div class="brand">
-        NGESSUMIN<br>
+        NGESSUMIN
         <span>COMPREHENSIVE SCHOOL</span>
       </div>
 
       <nav>
-        <button data-section="dashboard">Dashboard</button>
-        <button data-section="learners">Learners</button>
-        <button data-section="learningAreas">Learning Areas</button>
-        <button data-section="results">Assessments & Results</button>
-        <button data-section="fees">Fees & Payments</button>
-        <button data-section="reports">Reports</button>
-        <button data-section="users">Users & Permissions</button>
+
+        <button data-section="dashboard">
+          Dashboard
+        </button>
+
+        <button data-section="learners">
+          Learners
+        </button>
+
+        <button data-section="learningAreas">
+          Learning Areas
+        </button>
+
+        <button data-section="results">
+          Assessments & Results
+        </button>
+
+        <button data-section="fees">
+          Fees & Payments
+        </button>
+
+        <button data-section="reports">
+          Reports
+        </button>
+
+        <button data-section="users">
+          Users & Permissions
+        </button>
+
       </nav>
 
-      <button id="logoutBtn" class="logout">Sign out</button>
+      <button id="logoutBtn" class="logout">
+        Sign out
+      </button>
+
     </aside>
+
 
     <main class="main">
 
       <header class="topbar">
+
         <div>
-          <strong id="pageTitle">Dashboard</strong>
+
+          <strong id="pageTitle">
+            Dashboard
+          </strong>
+
           <small id="userName"></small>
+
         </div>
 
-        <span class="badge">CBE • Grades 1–9</span>
+        <span class="badge">
+          CBE • Grades 1–9
+        </span>
+
       </header>
 
+
+      <!-- DASHBOARD -->
       <section id="dashboard" class="section active">
+
         <h2>Dashboard</h2>
 
         <div class="cards">
+
           <div class="card">
             <span>Learners</span>
             <strong id="learnerCount">0</strong>
@@ -82,24 +153,39 @@
             <span>Academic Year</span>
             <strong id="yearValue">2026</strong>
           </div>
+
         </div>
 
         <div class="panel">
+
           <h3>System status</h3>
-          <p id="statusMessage">Connected to Supabase.</p>
+
+          <p id="statusMessage">
+            Checking connection...
+          </p>
+
         </div>
+
       </section>
 
+
+      <!-- LEARNERS -->
       <section id="learners" class="section">
 
         <div class="section-head">
+
           <div>
+
             <h2>Learners</h2>
+
             <p class="muted">
-              Register and manage learners. This school is single-stream.
+              Register and manage learners.
             </p>
+
           </div>
+
         </div>
+
 
         <form id="learnerForm" class="panel form-grid">
 
@@ -116,14 +202,30 @@
           >
 
           <select id="gender">
-            <option value="">Gender</option>
-            <option>Male</option>
-            <option>Female</option>
+
+            <option value="">
+              Gender
+            </option>
+
+            <option value="Male">
+              Male
+            </option>
+
+            <option value="Female">
+              Female
+            </option>
+
           </select>
 
+
           <select id="gradeId" required>
-            <option value="">Select grade</option>
+
+            <option value="">
+              Select grade
+            </option>
+
           </select>
+
 
           <input
             id="guardianName"
@@ -140,12 +242,27 @@
             type="date"
           >
 
+
           <select id="status">
-            <option>Active</option>
-            <option>Transferred</option>
-            <option>Graduated</option>
-            <option>Inactive</option>
+
+            <option value="Active">
+              Active
+            </option>
+
+            <option value="Transferred">
+              Transferred
+            </option>
+
+            <option value="Graduated">
+              Graduated
+            </option>
+
+            <option value="Inactive">
+              Inactive
+            </option>
+
           </select>
+
 
           <button type="submit">
             Register learner
@@ -154,6 +271,7 @@
           <p id="learnerMessage" class="message"></p>
 
         </form>
+
 
         <div class="panel">
 
@@ -165,27 +283,38 @@
             >
 
             <select id="gradeFilter">
-              <option value="">All grades</option>
+
+              <option value="">
+                All grades
+              </option>
+
             </select>
 
           </div>
+
 
           <div class="table-wrap">
 
             <table>
 
               <thead>
+
                 <tr>
+
                   <th>Admission No.</th>
                   <th>Name</th>
                   <th>Gender</th>
                   <th>Grade</th>
                   <th>Guardian</th>
                   <th>Status</th>
+
                 </tr>
+
               </thead>
 
-              <tbody id="learnerTable"></tbody>
+              <tbody id="learnerTable">
+
+              </tbody>
 
             </table>
 
@@ -195,6 +324,8 @@
 
       </section>
 
+
+      <!-- LEARNING AREAS -->
       <section id="learningAreas" class="section">
 
         <h2>Learning Areas</h2>
@@ -206,14 +337,20 @@
             <table>
 
               <thead>
+
                 <tr>
+
                   <th>Grade</th>
                   <th>Learning Area</th>
                   <th>Code</th>
+
                 </tr>
+
               </thead>
 
-              <tbody id="areasTable"></tbody>
+              <tbody id="areasTable">
+
+              </tbody>
 
             </table>
 
@@ -223,6 +360,8 @@
 
       </section>
 
+
+      <!-- RESULTS -->
       <section id="results" class="section">
 
         <h2>Assessments & Results</h2>
@@ -230,8 +369,8 @@
         <div class="panel">
 
           <p>
-            Assessment and CBE achievement-level entry module
-            will be developed here.
+            CBE assessment and achievement-level entry
+            module.
           </p>
 
           <p>
@@ -243,6 +382,8 @@
 
       </section>
 
+
+      <!-- FEES -->
       <section id="fees" class="section">
 
         <h2>Fees & Payments</h2>
@@ -250,10 +391,59 @@
         <div class="panel">
 
           <p>
-            Fees and payment module is connected to the
-            database structure.
+            Fees and payment management.
           </p>
 
           <p>
-            Flexible fees can be assigned per learner,
-            academic year and
+            Fees can be assigned per learner,
+            academic year and term.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- REPORTS -->
+      <section id="reports" class="section">
+
+        <h2>Reports</h2>
+
+        <div class="panel">
+
+          <p>
+            School reports and CBE performance
+            analysis will appear here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- USERS -->
+      <section id="users" class="section">
+
+        <h2>Users & Permissions</h2>
+
+        <div class="panel">
+
+          <p>
+            User accounts and permissions will
+            be managed here.
+          </p>
+
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- JAVASCRIPT -->
+  <script src="app.js"></script>
+
+</body>
+</html>

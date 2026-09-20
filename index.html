@@ -967,10 +967,7 @@ async function login(event) {
     document.getElementById("loginPage").style.display = "none";
     document.getElementById("appDashboard").style.display = "block";
 
-    await loadSchool();
-    await loadGrades();
-    await loadAreas();
-    await loadLearners();
+    console.log("LOGIN SUCCESS");
 
     showSection("dashboard");
 

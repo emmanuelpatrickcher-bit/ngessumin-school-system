@@ -1124,49 +1124,45 @@ db.auth.onAuthStateChange((event, session) => {
       button.disabled = false;
 
     }
+/* ================= SCHOOL ================= */
+
+async function loadSchool() {
+
+  const result =
+    await db
+      .from("schools")
+      .select("name")
+      .eq(
+        "name",
+        "Ngessumin Comprehensive School"
+      )
+      .single();
 
 
-    /* ================= SCHOOL ================= */
+  if (result.error) {
 
-    async function loadSchool() {
+    console.error("SCHOOL ERROR:", result.error);
 
-      const result =
-        await db
-          .from("schools")
-          .select("name")
-          .eq(
-            "name",
-            "Ngessumin Comprehensive School"
-          )
-          .single();
+    document
+      .getElementById("statusMessage")
+      .textContent =
+      "School information could not be loaded.";
+
+    return;
+  }
 
 
-      if (result.error) {
-
-  console.error("SUPABASE LOGIN ERROR:", result.error);
-
-  message.textContent =
-    "Login failed: " +
-    result.error.message;
-
-  button.disabled = false;
-
-  return;
-    }
+  document
+    .getElementById("yearValue")
+    .textContent =
+    "2026";
 
 
-      document
-        .getElementById("yearValue")
-        .textContent =
-        "2026";
+  document
+    .getElementById("statusMessage")
+    .textContent =
+    "Connected to Ngessumin Comprehensive School database.";
 
+}
 
-      document
-        .getElementById("statusMessage")
-        .textContent =
-        "Connected to Ngessumin Comprehensive School database.";
-
-    }
-
-
-    /* ================= GRADES =============
+    

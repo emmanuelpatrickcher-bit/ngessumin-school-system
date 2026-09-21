@@ -2197,7 +2197,310 @@ document.addEventListener(
 
   }
 );
+ /* ================= LOAD ASSESSMENT LEARNERS ================= */
 
+document
+  .getElementById("assessmentArea")
+  .addEventListener(
+    "change",
+    loadAssessmentLearners
+  );
+
+
+async function loadAssessmentLearners() {
+
+  const gradeId =
+    document.getElementById(
+      "assessmentGrade"
+    ).value;
+
+  const areaId =
+    document.getElementById(
+      "assessmentArea"
+    ).value;
+
+  const container =
+    document.getElementById(
+      "assessmentLearners"
+    );
+
+  if (!gradeId || !areaId) {
+
+    container.innerHTML =
+      "<p>Select a grade and learning area to enter results.</p>";
+
+    return;
+
+  }
+
+  const result =
+    await db
+      .from("learners")
+      .select(
+        "id, admission_number, full_name"
+      )
+      .eq(
+        "grade_id",
+        gradeId
+      )
+      .eq(
+        "status",
+        "Active"
+      )
+      .order(
+        "full_name"
+      );
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load learners.</p>";
+
+    return;
+
+  }
+
+  const learnerList =
+    result.data || [];
+
+  if (learnerList.length === 0) {
+
+    container.innerHTML =
+      "<p>No active learners found in this grade.</p>";
+
+    return;
+
+  }
+
+  let html =
+    "<h3>Enter Achievement Levels</h3>";
+
+  html +=
+    "<div class='results-list'>";
+
+  learnerList.forEach(
+    function (learner) {
+
+      html += `
+        <div class="result-row">
+
+          <strong>
+            ${escapeHtml(
+              learner.full_name
+            )}
+          </strong>
+
+          <small>
+            ${escapeHtml(
+              learner.admission_number
+            )}
+          </small>
+
+          <select
+            class="learner-result"
+            data-learner-id="${learner.id}"
+          >
+
+            <option value="">
+              Select level
+            </option>
+
+            <option value="EE">
+              EE — Exceeding Expectations
+            </option>
+
+            <option value="ME">
+              ME — Meeting Expectations
+            </option>
+
+            <option value="AE">
+              AE — Approaching Expectations
+            </option>
+
+            <option value="BE">
+              BE — Below Expectations
+            </option>
+
+          </select>
+
+        </div>
+      `;
+
+    }
+  );
+
+  html += "</div>";
+
+  html += `
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="saveAssessmentResults()"
+    >
+      Save Results
+    </button>
+  `;
+
+  container.innerHTML =
+    html;
+
+} 
+/* ================= LOAD ASSESSMENT LEARNERS ================= */
+
+document
+  .getElementById("assessmentArea")
+  .addEventListener(
+    "change",
+    loadAssessmentLearners
+  );
+
+
+async function loadAssessmentLearners() {
+
+  const gradeId =
+    document.getElementById(
+      "assessmentGrade"
+    ).value;
+
+  const areaId =
+    document.getElementById(
+      "assessmentArea"
+    ).value;
+
+  const container =
+    document.getElementById(
+      "assessmentLearners"
+    );
+
+  if (!gradeId || !areaId) {
+
+    container.innerHTML =
+      "<p>Select a grade and learning area to enter results.</p>";
+
+    return;
+
+  }
+
+  const result =
+    await db
+      .from("learners")
+      .select(
+        "id, admission_number, full_name"
+      )
+      .eq(
+        "grade_id",
+        gradeId
+      )
+      .eq(
+        "status",
+        "Active"
+      )
+      .order(
+        "full_name"
+      );
+
+  if (result.error) {
+
+    console.error(
+      result.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load learners.</p>";
+
+    return;
+
+  }
+
+  const learnerList =
+    result.data || [];
+
+  if (learnerList.length === 0) {
+
+    container.innerHTML =
+      "<p>No active learners found in this grade.</p>";
+
+    return;
+
+  }
+
+  let html =
+    "<h3>Enter Achievement Levels</h3>";
+
+  html +=
+    "<div class='results-list'>";
+
+  learnerList.forEach(
+    function (learner) {
+
+      html += `
+        <div class="result-row">
+
+          <strong>
+            ${escapeHtml(
+              learner.full_name
+            )}
+          </strong>
+
+          <small>
+            ${escapeHtml(
+              learner.admission_number
+            )}
+          </small>
+
+          <select
+            class="learner-result"
+            data-learner-id="${learner.id}"
+          >
+
+            <option value="">
+              Select level
+            </option>
+
+            <option value="EE">
+              EE — Exceeding Expectations
+            </option>
+
+            <option value="ME">
+              ME — Meeting Expectations
+            </option>
+
+            <option value="AE">
+              AE — Approaching Expectations
+            </option>
+
+            <option value="BE">
+              BE — Below Expectations
+            </option>
+
+          </select>
+
+        </div>
+      `;
+
+    }
+  );
+
+  html += "</div>";
+
+  html += `
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="saveAssessmentResults()"
+    >
+      Save Results
+    </button>
+  `;
+
+  container.innerHTML =
+    html;
+
+}
 </script>
 
 </body>

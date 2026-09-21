@@ -2909,7 +2909,111 @@ async function saveAssessmentResults() {
 
   }
 }
-          
+ /* ================= RESULTS ANALYSIS ================= */
+
+async function setupResultsAnalysis() {
+
+  const gradeSelect =
+    document.getElementById("analysisGrade");
+
+  const areaSelect =
+    document.getElementById("analysisArea");
+
+  if (!gradeSelect || !areaSelect) {
+    return;
+  }
+
+  const gradeResult =
+    await db
+      .from("grades")
+      .select("id, grade_number")
+      .order("grade_number");
+
+  if (gradeResult.error) {
+    console.error(gradeResult.error);
+    return;
+  }
+
+  gradeSelect.innerHTML =
+    '<option value="">Select Grade</option>';
+
+  (gradeResult.data || []).forEach(
+    function (grade) {
+
+      const option =
+        document.createElement("option");
+
+      option.value = grade.id;
+
+      option.textContent =
+        "Grade " + grade.grade_number;
+
+      gradeSelect.appendChild(option);
+
+    }
+  );
+
+  gradeSelect.onchange =
+    async function () {
+
+      areaSelect.innerHTML =
+        '<option value="">Select Learning Area</option>';
+
+      if (!this.value) {
+        return;
+      }
+
+      const result =
+        await db
+          .from("grade_learning_areas")
+          .select(`
+            learning_area_id,
+            learning_areas (
+              id,
+              name
+            )
+          `)
+          .eq(
+            "grade_id",
+            this.value
+          );
+
+      if (result.error) {
+        console.error(result.error);
+        return;
+      }
+
+      (result.data || []).forEach(
+        function (item) {
+
+          if (!item.learning_areas) {
+            return;
+          }
+
+          const option =
+            document.createElement("option");
+
+          option.value =
+            item.learning_areas.id;
+
+          option.textContent =
+            item.learning_areas.name;
+
+          areaSelect.appendChild(option);
+
+        }
+      );
+
+    };
+
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    setupResultsAnalysis();
+  }
+);         
 </script>
 
 </body>

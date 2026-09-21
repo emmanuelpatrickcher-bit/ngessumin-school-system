@@ -3013,7 +3013,25 @@ document.addEventListener(
   function () {
     setupResultsAnalysis();
   }
-);         
+); 
+
+
+/* CONNECT ANALYSIS DROPDOWNS */
+
+document
+  .getElementById("analysisGrade")
+  .addEventListener(
+    "change",
+    loadResultsAnalysis
+  );
+
+document
+  .getElementById("analysisArea")
+  .addEventListener(
+    "change",
+    loadResultsAnalysis
+  );
+
 </script>
 
 </body>

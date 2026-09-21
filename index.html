@@ -820,42 +820,101 @@
       <!-- ===================================================== -->
 
       <section
-        id="assessments"
-        class="section"
-      >
+  id="assessments"
+  class="section"
+>
 
-        <h1>Assessments & Results</h1>
+  <h1>Assessments & Results</h1>
 
-        <div class="panel">
+  <div class="panel">
 
-          <h3>CBE Achievement Levels</h3>
+    <h2>Enter CBE Assessment Results</h2>
 
-          <ul>
+    <div class="form-grid">
 
-            <li>
-              EE — Exceeding Expectation
-            </li>
+      <div>
 
-            <li>
-              ME — Meeting Expectation
-            </li>
+        <label for="assessmentGrade">
+          Grade
+        </label>
 
-            <li>
-              AE — Approaching Expectation
-            </li>
+        <select id="assessmentGrade">
 
-            <li>
-              BE — Below Expectation
-            </li>
+          <option value="">
+            Select Grade
+          </option>
 
-          </ul>
+        </select>
 
-          <p>
-            Assessment entry will be developed in the
-            next stage.
-          </p>
+      </div>
 
-        </div>
+
+      <div>
+
+        <label for="assessmentArea">
+          Learning Area
+        </label>
+
+        <select id="assessmentArea">
+
+          <option value="">
+            Select Learning Area
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div>
+
+        <label for="assessmentName">
+          Assessment
+        </label>
+
+        <input
+          type="text"
+          id="assessmentName"
+          placeholder="e.g. Term 1 Assessment"
+        >
+
+      </div>
+
+
+      <div>
+
+        <label for="assessmentDate">
+          Assessment Date
+        </label>
+
+        <input
+          type="date"
+          id="assessmentDate"
+        >
+
+      </div>
+
+    </div>
+
+
+    <div
+      id="assessmentLearners"
+      class="panel"
+    >
+
+      <p>
+        Select a grade and learning area to enter results.
+      </p>
+
+    </div>
+
+
+    <div
+      id="assessmentMessage"
+      class="message"
+    ></div>
+
+  </div>
 
       </section>
 

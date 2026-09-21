@@ -1153,4 +1153,879 @@
     message.textContent =
       "Signing in...";
 
-    button.dis
+    button.disabled = true;
+
+
+    try {
+
+      const result =
+        await db.auth.signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
+
+      if (result.error) {
+
+        console.error(
+          "LOGIN ERROR:",
+          result.error
+        );
+
+        message.textContent =
+          result.error.message;
+
+        button.disabled = false;
+
+        return;
+
+      }
+
+
+      if (
+        !result.data ||
+        !result.data.session
+      ) {
+
+        message.textContent =
+          "Login failed. No session was created.";
+
+        button.disabled = false;
+
+        return;
+
+      }
+
+
+      message.textContent =
+        "Login successful.";
+
+      showDashboard();
+
+
+    } catch (error) {
+
+      console.error(
+        "LOGIN EXCEPTION:",
+        error
+      );
+
+      message.textContent =
+        "Login error: " +
+        error.message;
+
+    }
+
+
+    button.disabled = false;
+
+  }
+
+
+  /* =========================================================
+     SHOW LOGIN
+  ========================================================= */
+
+  function showLogin() {
+
+    document
+      .getElementById("loginPage")
+      .style.display = "flex";
+
+    document
+      .getElementById("appDashboard")
+      .style.display = "none";
+
+  }
+
+
+  /* =========================================================
+     SHOW DASHBOARD
+  ========================================================= */
+
+  async function showDashboard() {
+
+    document
+      .getElementById("loginPage")
+      .style.display = "none";
+
+    document
+      .getElementById("appDashboard")
+      .style.display = "block";
+
+    showSection("dashboard");
+
+    await loadDashboardData();
+
+  }
+
+
+  /* =========================================================
+     LOGOUT
+  ========================================================= */
+
+  async function logout() {
+
+    await db.auth.signOut();
+
+    showLogin();
+
+  }
+
+
+  /* =========================================================
+     AUTH STATE
+  ========================================================= */
+
+  db.auth.onAuthStateChange(
+    function (event, session) {
+
+      console.log(
+        "AUTH EVENT:",
+        event
+      );
+
+    }
+  );
+
+
+  /* =========================================================
+     SHOW SECTION
+  ========================================================= */
+
+  function showSection(sectionId) {
+
+    document
+      .querySelectorAll(".section")
+      .forEach(
+        function (section) {
+
+          section.classList.remove(
+            "active"
+          );
+
+        }
+      );
+
+
+    const section =
+      document.getElementById(sectionId);
+
+    if (section) {
+
+      section.classList.add("active");
+
+    }
+
+
+    if (
+      sectionId === "learners"
+    ) {
+
+      loadLearners();
+
+    }
+
+
+    if (
+      sectionId === "learningAreas"
+    ) {
+
+      loadLearningAreas();
+
+    }
+
+  }
+
+
+  /* =========================================================
+     DASHBOARD DATA
+  ========================================================= */
+
+  async function loadDashboardData() {
+
+    try {
+
+      const schoolResult =
+        await db
+          .from("schools")
+          .select("id,name")
+          .eq(
+            "name",
+            "Ngessumin Comprehensive School"
+          )
+          .single();
+
+
+      if (schoolResult.error) {
+
+        console.error(
+          schoolResult.error
+        );
+
+        document
+          .getElementById("statusMessage")
+          .textContent =
+          "Connected, but school data could not be loaded.";
+
+        return;
+
+      }
+
+
+      const schoolId =
+        schoolResult.data.id;
+
+
+      /* Grades */
+
+      const gradesResult =
+        await db
+          .from("grades")
+          .select("id,grade_number")
+          .eq(
+            "school_id",
+            schoolId
+          )
+          .order(
+            "grade_number"
+          );
+
+
+      if (!gradesResult.error) {
+
+        grades =
+          gradesResult.data || [];
+
+        document
+          .getElementById("gradeCount")
+          .textContent =
+          grades.length;
+
+        populateGradeSelects();
+
+      }
+
+
+      /* Learning areas */
+
+      const areasResult =
+        await db
+          .from("learning_areas")
+          .select("id,name,code")
+          .eq(
+            "school_id",
+            schoolId
+          )
+          .eq(
+            "active",
+            true
+          )
+          .order(
+            "name"
+          );
+
+
+      if (!areasResult.error) {
+
+        areas =
+          areasResult.data || [];
+
+        document
+          .getElementById("areaCount")
+          .textContent =
+          areas.length;
+
+      }
+
+
+      /* Learners */
+
+      const learnersResult =
+        await db
+          .from("learners")
+          .select("id")
+          .eq(
+            "school_id",
+            schoolId
+          );
+
+
+      if (!learnersResult.error) {
+
+        document
+          .getElementById("learnerCount")
+          .textContent =
+          learnersResult.data.length;
+
+      }
+
+
+      document
+        .getElementById("statusMessage")
+        .textContent =
+        "Connected to Ngessumin Comprehensive School database.";
+
+    } catch (error) {
+
+      console.error(error);
+
+      document
+        .getElementById("statusMessage")
+        .textContent =
+        "Database connection error.";
+
+    }
+
+  }
+
+
+  /* =========================================================
+     GRADE SELECTS
+  ========================================================= */
+
+  function populateGradeSelects() {
+
+    const gradeSelect =
+      document.getElementById("grade");
+
+    const filterSelect =
+      document.getElementById(
+        "learnerGradeFilter"
+      );
+
+
+    gradeSelect.innerHTML =
+      '<option value="">Select grade</option>';
+
+    filterSelect.innerHTML =
+      '<option value="">All Grades</option>';
+
+
+    grades.forEach(
+      function (grade) {
+
+        const option1 =
+          document.createElement("option");
+
+        option1.value =
+          grade.id;
+
+        option1.textContent =
+          "Grade " +
+          grade.grade_number;
+
+        gradeSelect.appendChild(
+          option1
+        );
+
+
+        const option2 =
+          document.createElement("option");
+
+        option2.value =
+          grade.id;
+
+        option2.textContent =
+          "Grade " +
+          grade.grade_number;
+
+        filterSelect.appendChild(
+          option2
+        );
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     REGISTER LEARNER
+  ========================================================= */
+
+  async function addLearner(event) {
+
+    event.preventDefault();
+
+    const message =
+      document.getElementById(
+        "learnerMessage"
+      );
+
+    message.textContent =
+      "Registering learner...";
+
+
+    try {
+
+      const schoolResult =
+        await db
+          .from("schools")
+          .select("id")
+          .eq(
+            "name",
+            "Ngessumin Comprehensive School"
+          )
+          .single();
+
+
+      if (schoolResult.error) {
+
+        message.textContent =
+          "School could not be found.";
+
+        return;
+
+      }
+
+
+      const schoolId =
+        schoolResult.data.id;
+
+
+      const learnerData = {
+
+        school_id:
+          schoolId,
+
+        admission_number:
+          document
+            .getElementById(
+              "admissionNumber"
+            )
+            .value
+            .trim(),
+
+        full_name:
+          document
+            .getElementById(
+              "fullName"
+            )
+            .value
+            .trim(),
+
+        gender:
+          document
+            .getElementById(
+              "gender"
+            )
+            .value || null,
+
+        grade_id:
+          document
+            .getElementById(
+              "grade"
+            )
+            .value,
+
+        guardian_name:
+          document
+            .getElementById(
+              "guardianName"
+            )
+            .value
+            .trim() || null,
+
+        guardian_phone:
+          document
+            .getElementById(
+              "guardianPhone"
+            )
+            .value
+            .trim() || null,
+
+        admission_date:
+          document
+            .getElementById(
+              "admissionDate"
+            )
+            .value || null,
+
+        status:
+          document
+            .getElementById(
+              "learnerStatus"
+            )
+            .value
+
+      };
+
+
+      const result =
+        await db
+          .from("learners")
+          .insert(
+            learnerData
+          );
+
+
+      if (result.error) {
+
+        console.error(
+          result.error
+        );
+
+        message.textContent =
+          "Registration failed: " +
+          result.error.message;
+
+        return;
+
+      }
+
+
+      message.textContent =
+        "Learner registered successfully.";
+
+
+      document
+        .getElementById(
+          "learnerForm"
+        )
+        .reset();
+
+
+      await loadLearners();
+
+      await loadDashboardData();
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      message.textContent =
+        "Error: " +
+        error.message;
+
+    }
+
+  }
+
+
+  /* =========================================================
+     LOAD LEARNERS
+  ========================================================= */
+
+  async function loadLearners() {
+
+    try {
+
+      const schoolResult =
+        await db
+          .from("schools")
+          .select("id")
+          .eq(
+            "name",
+            "Ngessumin Comprehensive School"
+          )
+          .single();
+
+
+      if (schoolResult.error) {
+
+        return;
+
+      }
+
+
+      const schoolId =
+        schoolResult.data.id;
+
+
+      const result =
+        await db
+          .from("learners")
+          .select(
+            `
+            id,
+            admission_number,
+            full_name,
+            gender,
+            guardian_name,
+            status,
+            grade_id,
+            grades (
+              grade_number
+            )
+            `
+          )
+          .eq(
+            "school_id",
+            schoolId
+          )
+          .order(
+            "full_name"
+          );
+
+
+      if (result.error) {
+
+        console.error(
+          result.error
+        );
+
+        return;
+
+      }
+
+
+      learners =
+        result.data || [];
+
+      showLearners();
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+
+
+  /* =========================================================
+     SHOW LEARNERS
+  ========================================================= */
+
+  function showLearners() {
+
+    const tbody =
+      document.getElementById(
+        "learnersTableBody"
+      );
+
+
+    const search =
+      document
+        .getElementById(
+          "learnerSearch"
+        )
+        .value
+        .toLowerCase()
+        .trim();
+
+
+    const gradeFilter =
+      document
+        .getElementById(
+          "learnerGradeFilter"
+        )
+        .value;
+
+
+    tbody.innerHTML = "";
+
+
+    const filtered =
+      learners.filter(
+        function (learner) {
+
+          const matchesSearch =
+            learner.full_name
+              .toLowerCase()
+              .includes(search) ||
+
+            learner.admission_number
+              .toLowerCase()
+              .includes(search);
+
+
+          const matchesGrade =
+            !gradeFilter ||
+            learner.grade_id === gradeFilter;
+
+
+          return (
+            matchesSearch &&
+            matchesGrade
+          );
+
+        }
+      );
+
+
+    filtered.forEach(
+      function (learner) {
+
+        const row =
+          document.createElement("tr");
+
+
+        row.innerHTML = `
+
+          <td>
+            ${escapeHtml(
+              learner.admission_number
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              learner.full_name
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              learner.gender || ""
+            )}
+          </td>
+
+          <td>
+            Grade ${
+              learner.grades
+                ? learner.grades.grade_number
+                : ""
+            }
+          </td>
+
+          <td>
+            ${escapeHtml(
+              learner.guardian_name || ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              learner.status
+            )}
+          </td>
+
+        `;
+
+
+        tbody.appendChild(row);
+
+      }
+    );
+
+  }
+
+
+  /* =========================================================
+     LOAD LEARNING AREAS
+  ========================================================= */
+
+  async function loadLearningAreas() {
+
+    const list =
+      document.getElementById(
+        "learningAreasList"
+      );
+
+
+    list.innerHTML =
+      "Loading learning areas...";
+
+
+    try {
+
+      const result =
+        await db
+          .from("learning_areas")
+          .select(
+            "name,code"
+          )
+          .eq(
+            "active",
+            true
+          )
+          .order(
+            "name"
+          );
+
+
+      if (result.error) {
+
+        list.textContent =
+          "Could not load learning areas.";
+
+        return;
+
+      }
+
+
+      list.innerHTML = "";
+
+
+      result.data.forEach(
+        function (area) {
+
+          const item =
+            document.createElement("div");
+
+          item.className =
+            "panel";
+
+          item.style.marginTop =
+            "10px";
+
+          item.innerHTML =
+            "<strong>" +
+            escapeHtml(area.name) +
+            "</strong>" +
+            (
+              area.code
+                ? " (" +
+                  escapeHtml(area.code) +
+                  ")"
+                : ""
+            );
+
+          list.appendChild(item);
+
+        }
+      );
+
+
+    } catch (error) {
+
+      console.error(error);
+
+      list.textContent =
+        "Error loading learning areas.";
+
+    }
+
+  }
+
+
+  /* =========================================================
+     SECURITY / HTML ESCAPE
+  ========================================================= */
+
+  function escapeHtml(value) {
+
+    return String(value)
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+      .replace(
+        /</g,
+        "&lt;"
+      )
+      .replace(
+        />/g,
+        "&gt;"
+      )
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+
+  }
+
+</script>
+
+</body>
+</html>

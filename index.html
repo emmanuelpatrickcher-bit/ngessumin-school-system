@@ -933,9 +933,57 @@ db.auth.onAuthStateChange((event, session) => {
 
     /* ================= START ================= */
 
-    document.addEventListener(
-      "DOMContentLoaded",
-      function () {
+    document.addEventListener("DOMContentLoaded", function () {
+
+  console.log("STARTUP RUNNING");
+
+  const loginForm = document.getElementById("loginForm");
+  const logoutButton = document.getElementById("logoutButton");
+  const learnerForm = document.getElementById("learnerForm");
+  const learnerSearch = document.getElementById("learnerSearch");
+  const learnerGradeFilter = document.getElementById("learnerGradeFilter");
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", login);
+    console.log("LOGIN LISTENER ATTACHED");
+  } else {
+    console.error("loginForm NOT FOUND");
+  }
+
+  if (logoutButton) {
+    logoutButton.addEventListener("click", logout);
+  }
+
+  if (learnerForm) {
+    learnerForm.addEventListener("submit", addLearner);
+  }
+
+  if (learnerSearch) {
+    learnerSearch.addEventListener("input", showLearners);
+  }
+
+  if (learnerGradeFilter) {
+    learnerGradeFilter.addEventListener("change", showLearners);
+  }
+
+  document.querySelectorAll("[data-section]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      showSection(this.dataset.section);
+    });
+  });
+
+  const loginPage = document.getElementById("loginPage");
+  const appDashboard = document.getElementById("appDashboard");
+
+  if (loginPage) {
+    loginPage.style.display = "flex";
+  }
+
+  if (appDashboard) {
+    appDashboard.style.display = "none";
+  }
+
+});
 document
   .getElementById("loginForm")
   .addEventListener("submit", login);

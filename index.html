@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-alert("JAVASCRIPT IS LOADING");
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Ngessumin Comprehensive School</title>
 
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
@@ -23,7 +21,9 @@ alert("JAVASCRIPT IS LOADING");
       color: #222;
     }
 
-    .login-page {
+    /* LOGIN */
+
+    #loginPage {
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -32,9 +32,9 @@ alert("JAVASCRIPT IS LOADING");
     }
 
     .login-box {
-      background: white;
       width: 100%;
       max-width: 420px;
+      background: white;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
@@ -42,13 +42,20 @@ alert("JAVASCRIPT IS LOADING");
 
     .login-box h1 {
       text-align: center;
-      margin-bottom: 5px;
       color: #174a2e;
+      margin-bottom: 5px;
     }
 
     .login-box p {
       text-align: center;
       color: #666;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
     }
 
     input,
@@ -67,7 +74,7 @@ alert("JAVASCRIPT IS LOADING");
       border-radius: 6px;
     }
 
-    button {and 
+    button {
       cursor: pointer;
       border: none;
       border-radius: 6px;
@@ -80,11 +87,22 @@ alert("JAVASCRIPT IS LOADING");
       color: white;
     }
 
+    .primary-btn:hover {
+      background: #21643d;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .message {
       margin-top: 12px;
       padding: 8px;
       text-align: center;
     }
+
+    /* DASHBOARD */
 
     #appDashboard {
       display: none;
@@ -217,12 +235,8 @@ alert("JAVASCRIPT IS LOADING");
       color: white;
     }
 
-    .area-item {
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-    }
-
     @media (max-width: 700px) {
+
       .layout {
         flex-direction: column;
       }
@@ -249,965 +263,894 @@ alert("JAVASCRIPT IS LOADING");
 
 <body>
 
-  <!-- ================= LOGIN ================= -->
+<!-- ========================================================= -->
+<!-- LOGIN -->
+<!-- ========================================================= -->
 
-  <div id="loginPage" class="login-page">
+<div id="loginPage">
 
-    <div class="login-box">
+  <div class="login-box">
 
-      <h1>Ngessumin Comprehensive School</h1>
+    <h1>Ngessumin Comprehensive School</h1>
 
-      <p>School Management System</p>
+    <p>School Management System</p>
 
-      <form id="loginForm">
-        <script>
-alert("LOGIN FORM FOUND");
-        </script>
+    <form id="loginForm">
 
-        <label for="email">Email</label>
+      <label for="email">
+        Email
+      </label>
 
-        <input
-          type="email"
-          id="email"
-          placeholder="Enter email"
-          required
-        >
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter email"
+        required
+      >
 
-        <label for="password">Password</label>
+      <label for="password">
+        Password
+      </label>
 
-        <input
-          type="password"
-          id="password"
-          placeholder="Enter password"
-          required
-        >
-
-        <button
-  type="button"
-  class="primary-btn"
-  id="loginButton"
-  onclick="login(event)"
->
-  Sign In
-        </button>
-
-      </form>
-
-      <div id="loginMessage" class="message"></div>
-
-    </div>
-
-  </div>
-
-
-  <!-- ================= DASHBOARD ================= -->
-
-  <div id="appDashboard">
-
-    <div class="topbar">
-
-      <h2>Ngessumin Comprehensive School</h2>
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter password"
+        required
+      >
 
       <button
-        id="logoutButton"
-        class="logout"
+        type="submit"
+        class="primary-btn"
+        id="loginButton"
       >
-        Logout
+        Sign In
       </button>
 
-    </div>
+    </form>
 
+    <div
+      id="loginMessage"
+      class="message"
+    ></div>
 
-    <div class="layout">
+  </div>
 
-      <!-- ================= SIDEBAR ================= -->
+</div>
 
-      <aside class="sidebar">
 
-        <button data-section="dashboard">
-          Dashboard
-        </button>
+<!-- ========================================================= -->
+<!-- DASHBOARD -->
+<!-- ========================================================= -->
 
-        <button data-section="learners">
-          Learners
-        </button>
+<div id="appDashboard">
 
-        <button data-section="learningAreas">
-          Learning Areas
-        </button>
+  <div class="topbar">
 
-        <button data-section="assessments">
-          Assessments & Results
-        </button>
+    <h2>
+      Ngessumin Comprehensive School
+    </h2>
 
-        <button data-section="analysis">
-          Results Analysis
-        </button>
-
-        <button data-section="fees">
-          Fees & Payments
-        </button>
-
-        <button data-section="receipts">
-          Receipts & Statements
-        </button>
-
-        <button data-section="reports">
-          Reports / Report Cards
-        </button>
-
-        <button data-section="users">
-          Users & Permissions
-        </button>
-
-        <button data-section="settings">
-          Settings
-        </button>
-
-      </aside>
-
-
-      <!-- ================= CONTENT ================= -->
-
-      <main class="content">
-
-
-        <!-- DASHBOARD -->
-
-        <section
-          id="dashboard"
-          class="section active"
-        >
-
-          <h1>Dashboard</h1>
-
-          <p id="statusMessage">
-            Connecting to school database...
-          </p>
-
-          <div class="cards">
-
-            <div class="card">
-
-              <h3>Academic Year</h3>
-
-              <div
-                id="yearValue"
-                class="number"
-              >
-                2026
-              </div>
-
-            </div>
-
-
-            <div class="card">
-
-              <h3>Grades</h3>
-
-              <div
-                id="gradeCount"
-                class="number"
-              >
-                0
-              </div>
-
-            </div>
-
-
-            <div class="card">
-
-              <h3>Learning Areas</h3>
-
-              <div
-                id="areaCount"
-                class="number"
-              >
-                0
-              </div>
-
-            </div>
-
-
-            <div class="card">
-
-              <h3>Learners</h3>
-
-              <div
-                id="learnerCount"
-                class="number"
-              >
-                0
-              </div>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= LEARNERS ================= -->
-
-        <section
-          id="learners"
-          class="section"
-        >
-
-          <h1>Learners</h1>
-
-          <div class="panel">
-
-            <h2>Register Learner</h2>
-
-            <form
-              id="learnerForm"
-              class="form-grid"
-            >
-
-              <div>
-
-                <label>
-                  Admission Number
-                </label>
-
-                <input
-                  type="text"
-                  id="admissionNumber"
-                  required
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Full Name
-                </label>
-
-                <input
-                  type="text"
-                  id="fullName"
-                  required
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Gender
-                </label>
-
-                <select id="gender">
-
-                  <option value="">
-                    Select gender
-                  </option>
-
-                  <option value="Male">
-                    Male
-                  </option>
-
-                  <option value="Female">
-                    Female
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Grade
-                </label>
-
-                <select
-                  id="grade"
-                  required
-                >
-
-                  <option value="">
-                    Select grade
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Parent / Guardian
-                </label>
-
-                <input
-                  type="text"
-                  id="guardianName"
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Phone Number
-                </label>
-
-                <input
-                  type="tel"
-                  id="guardianPhone"
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Admission Date
-                </label>
-
-                <input
-                  type="date"
-                  id="admissionDate"
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Status
-                </label>
-
-                <select id="learnerStatus">
-
-                  <option value="Active">
-                    Active
-                  </option>
-
-                  <option value="Transferred">
-                    Transferred
-                  </option>
-
-                  <option value="Graduated">
-                    Graduated
-                  </option>
-
-                  <option value="Inactive">
-                    Inactive
-                  </option>
-
-                </select>
-
-              </div>
-
-
-              <div class="full">
-
-                <button type="submit">
-                  Register Learner
-                </button>
-
-              </div>
-
-            </form>
-
-            <div
-              id="learnerMessage"
-              class="message"
-            ></div>
-
-          </div>
-
-
-          <div class="panel">
-
-            <h2>Registered Learners</h2>
-
-            <div class="form-grid">
-
-              <div>
-
-                <label>
-                  Search
-                </label>
-
-                <input
-                  type="text"
-                  id="learnerSearch"
-                  placeholder="Search name or admission number"
-                >
-
-              </div>
-
-
-              <div>
-
-                <label>
-                  Filter by Grade
-                </label>
-
-                <select id="learnerGradeFilter">
-
-                  <option value="">
-                    All Grades
-                  </option>
-
-                </select>
-
-              </div>
-
-            </div>
-
-
-            <div class="table-container">
-
-              <table>
-
-                <thead>
-
-                  <tr>
-
-                    <th>
-                      Admission No.
-                    </th>
-
-                    <th>
-                      Full Name
-                    </th>
-
-                    <th>
-                      Gender
-                    </th>
-
-                    <th>
-                      Grade
-                    </th>
-
-                    <th>
-                      Parent / Guardian
-                    </th>
-
-                    <th>
-                      Status
-                    </th>
-
-                  </tr>
-
-                </thead>
-
-                <tbody
-                  id="learnersTableBody"
-                >
-
-                </tbody>
-
-              </table>
-
-            </div>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= LEARNING AREAS ================= -->
-
-        <section
-          id="learningAreas"
-          class="section"
-        >
-
-          <h1>Learning Areas</h1>
-
-          <div class="panel">
-
-            <p>
-              Learning areas assigned to the CBE grades
-              in Ngessumin Comprehensive School.
-            </p>
-
-            <div
-              id="learningAreasList"
-            ></div>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= ASSESSMENTS ================= -->
-
-        <section
-          id="assessments"
-          class="section"
-        >
-
-          <h1>Assessments & Results</h1>
-
-          <div class="panel">
-
-            <p>
-              This section will be used to enter CBE
-              achievement levels:
-            </p>
-
-            <ul>
-
-              <li>EE - Exceeding Expectation</li>
-
-              <li>ME - Meeting Expectation</li>
-
-              <li>AE - Approaching Expectation</li>
-
-              <li>BE - Below Expectation</li>
-
-            </ul>
-
-            <p>
-              Assessment entry will be added next.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= ANALYSIS ================= -->
-
-        <section
-          id="analysis"
-          class="section"
-        >
-
-          <h1>Results Analysis</h1>
-
-          <div class="panel">
-
-            <p>
-              CBE performance analysis will appear here.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= FEES ================= -->
-
-        <section
-          id="fees"
-          class="section"
-        >
-
-          <h1>Fees & Payments</h1>
-
-          <div class="panel">
-
-            <p>
-              Fee assignments, payments and balances
-              will appear here.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= RECEIPTS ================= -->
-
-        <section
-          id="receipts"
-          class="section"
-        >
-
-          <h1>Receipts & Statements</h1>
-
-          <div class="panel">
-
-            <p>
-              Receipts and learner fee statements will
-              appear here.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= REPORTS ================= -->
-
-        <section
-          id="reports"
-          class="section"
-        >
-
-          <h1>Reports / Report Cards</h1>
-
-          <div class="panel">
-
-            <p>
-              Learner report cards and school reports
-              will appear here.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= USERS ================= -->
-
-        <section
-          id="users"
-          class="section"
-        >
-
-          <h1>Users & Permissions</h1>
-
-          <div class="panel">
-
-            <p>
-              User accounts and permissions will be
-              managed here.
-            </p>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================= SETTINGS ================= -->
-
-        <section
-          id="settings"
-          class="section"
-        >
-
-          <h1>Settings</h1>
-
-          <div class="panel">
-
-            <p>
-              School system settings will appear here.
-            </p>
-
-          </div>
-
-        </section>
-
-
-      </main>
-
-    </div>
+    <button
+      id="logoutButton"
+      class="logout"
+      type="button"
+    >
+      Logout
+    </button>
 
   </div>
 
 
-  <!-- ================= JAVASCRIPT ================= -->
+  <div class="layout">
 
-  <script>
+    <!-- SIDEBAR -->
 
-    const SUPABASE_URL =
-      "https://awazhdqlkjscfrhsoghe.supabase.co";
+    <aside class="sidebar">
 
-    const SUPABASE_KEY =
-      "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
+      <button
+        type="button"
+        data-section="dashboard"
+      >
+        Dashboard
+      </button>
 
-    const db =
-      window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-      );
-db.auth.onAuthStateChange((event, session) => {
-  console.log("AUTH EVENT:", event);
-  console.log("SESSION EXISTS:", !!session);
-});
+      <button
+        type="button"
+        data-section="learners"
+      >
+        Learners
+      </button>
 
-    let grades = [];
-    let learners = [];
-    let areas = [];
+      <button
+        type="button"
+        data-section="learningAreas"
+      >
+        Learning Areas
+      </button>
 
+      <button
+        type="button"
+        data-section="assessments"
+      >
+        Assessments & Results
+      </button>
 
-    /* ================= START ================= */
+      <button
+        type="button"
+        data-section="analysis"
+      >
+        Results Analysis
+      </button>
 
-    document.addEventListener("DOMContentLoaded", function () {
+      <button
+        type="button"
+        data-section="fees"
+      >
+        Fees & Payments
+      </button>
 
-  console.log("STARTUP RUNNING");
+      <button
+        type="button"
+        data-section="receipts"
+      >
+        Receipts & Statements
+      </button>
 
-  const loginForm = document.getElementById("loginForm");
-  const logoutButton = document.getElementById("logoutButton");
-  const learnerForm = document.getElementById("learnerForm");
-  const learnerSearch = document.getElementById("learnerSearch");
-  const learnerGradeFilter = document.getElementById("learnerGradeFilter");
+      <button
+        type="button"
+        data-section="reports"
+      >
+        Reports / Report Cards
+      </button>
 
-  if (loginForm) {
-    loginForm.addEventListener("submit", login);
-    console.log("LOGIN LISTENER ATTACHED");
-  } else {
-    console.error("loginForm NOT FOUND");
-  }
+      <button
+        type="button"
+        data-section="users"
+      >
+        Users & Permissions
+      </button>
 
-  if (logoutButton) {
-    logoutButton.addEventListener("click", logout);
-  }
+      <button
+        type="button"
+        data-section="settings"
+      >
+        Settings
+      </button>
 
-  if (learnerForm) {
-    learnerForm.addEventListener("submit", addLearner);
-  }
-
-  if (learnerSearch) {
-    learnerSearch.addEventListener("input", showLearners);
-  }
-
-  if (learnerGradeFilter) {
-    learnerGradeFilter.addEventListener("change", showLearners);
-  }
-
-  document.querySelectorAll("[data-section]").forEach(function (button) {
-    button.addEventListener("click", function () {
-      showSection(this.dataset.section);
-    });
-  });
-
-  const loginPage = document.getElementById("loginPage");
-  const appDashboard = document.getElementById("appDashboard");
-
-  if (loginPage) {
-    loginPage.style.display = "flex";
-  }
-
-  if (appDashboard) {
-    appDashboard.style.display = "none";
-  }
-
-});
-document
-  .getElementById("loginForm")
-  .addEventListener("submit", login);
-
-alert("LOGIN LISTENER ATTACHED");
-        
-const logoutButton =
-  document.getElementById("logoutButton");
-
-if (logoutButton) {
-  logoutButton.addEventListener("click", logout);
-}
-
-        document
-          .getElementById("learnerForm")
-          .addEventListener(
-            "submit",
-            addLearner
-          );
+    </aside>
 
 
-        document
-          .getElementById("learnerSearch")
-          .addEventListener(
-            "input",
-            showLearners
-          );
+    <!-- CONTENT -->
+
+    <main class="content">
 
 
-        document
-          .getElementById("learnerGradeFilter")
-          .addEventListener(
-            "change",
-            showLearners
-          );
+      <!-- ===================================================== -->
+      <!-- DASHBOARD -->
+      <!-- ===================================================== -->
+
+      <section
+        id="dashboard"
+        class="section active"
+      >
+
+        <h1>Dashboard</h1>
+
+        <p id="statusMessage">
+          Connected to Ngessumin Comprehensive School database.
+        </p>
+
+        <div class="cards">
+
+          <div class="card">
+
+            <h3>Academic Year</h3>
+
+            <div
+              id="yearValue"
+              class="number"
+            >
+              2026
+            </div>
+
+          </div>
 
 
-        document
-          .querySelectorAll(
-            "[data-section]"
-          )
-          .forEach(
-            function (button) {
+          <div class="card">
 
-              button.addEventListener(
-                "click",
-                function () {
+            <h3>Grades</h3>
 
-                  showSection(
-                    this.dataset.section
-                  );
+            <div
+              id="gradeCount"
+              class="number"
+            >
+              0
+            </div>
 
-                }
-              );
-
-            }
-          );
+          </div>
 
 
-        document
-          .getElementById("loginPage")
-          .style.display = "flex";
+          <div class="card">
+
+            <h3>Learning Areas</h3>
+
+            <div
+              id="areaCount"
+              class="number"
+            >
+              0
+            </div>
+
+          </div>
 
 
-        document
-          .getElementById("appDashboard")
-          .style.display = "none";
+          <div class="card">
 
-      }
+            <h3>Learners</h3>
+
+            <div
+              id="learnerCount"
+              class="number"
+            >
+              0
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- LEARNERS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="learners"
+        class="section"
+      >
+
+        <h1>Learners</h1>
+
+
+        <div class="panel">
+
+          <h2>Register Learner</h2>
+
+          <form
+            id="learnerForm"
+            class="form-grid"
+          >
+
+            <div>
+
+              <label for="admissionNumber">
+                Admission Number
+              </label>
+
+              <input
+                type="text"
+                id="admissionNumber"
+                required
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="fullName">
+                Full Name
+              </label>
+
+              <input
+                type="text"
+                id="fullName"
+                required
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="gender">
+                Gender
+              </label>
+
+              <select id="gender">
+
+                <option value="">
+                  Select gender
+                </option>
+
+                <option value="Male">
+                  Male
+                </option>
+
+                <option value="Female">
+                  Female
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div>
+
+              <label for="grade">
+                Grade
+              </label>
+
+              <select
+                id="grade"
+                required
+              >
+
+                <option value="">
+                  Select grade
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div>
+
+              <label for="guardianName">
+                Parent / Guardian
+              </label>
+
+              <input
+                type="text"
+                id="guardianName"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="guardianPhone">
+                Phone Number
+              </label>
+
+              <input
+                type="tel"
+                id="guardianPhone"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="admissionDate">
+                Admission Date
+              </label>
+
+              <input
+                type="date"
+                id="admissionDate"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="learnerStatus">
+                Status
+              </label>
+
+              <select id="learnerStatus">
+
+                <option value="Active">
+                  Active
+                </option>
+
+                <option value="Transferred">
+                  Transferred
+                </option>
+
+                <option value="Graduated">
+                  Graduated
+                </option>
+
+                <option value="Inactive">
+                  Inactive
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <div class="full">
+
+              <button
+                type="submit"
+              >
+                Register Learner
+              </button>
+
+            </div>
+
+          </form>
+
+
+          <div
+            id="learnerMessage"
+            class="message"
+          ></div>
+
+        </div>
+
+
+        <!-- REGISTERED LEARNERS -->
+
+        <div class="panel">
+
+          <h2>
+            Registered Learners
+          </h2>
+
+
+          <div class="form-grid">
+
+            <div>
+
+              <label for="learnerSearch">
+                Search
+              </label>
+
+              <input
+                type="text"
+                id="learnerSearch"
+                placeholder="Search name or admission number"
+              >
+
+            </div>
+
+
+            <div>
+
+              <label for="learnerGradeFilter">
+                Filter by Grade
+              </label>
+
+              <select id="learnerGradeFilter">
+
+                <option value="">
+                  All Grades
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <div class="table-container">
+
+            <table>
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Admission No.
+                  </th>
+
+                  <th>
+                    Full Name
+                  </th>
+
+                  <th>
+                    Gender
+                  </th>
+
+                  <th>
+                    Grade
+                  </th>
+
+                  <th>
+                    Parent / Guardian
+                  </th>
+
+                  <th>
+                    Status
+                  </th>
+
+                </tr>
+
+              </thead>
+
+              <tbody id="learnersTableBody">
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- LEARNING AREAS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="learningAreas"
+        class="section"
+      >
+
+        <h1>Learning Areas</h1>
+
+        <div class="panel">
+
+          <p>
+            CBE learning areas available at Ngessumin
+            Comprehensive School.
+          </p>
+
+          <div id="learningAreasList">
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- ASSESSMENTS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="assessments"
+        class="section"
+      >
+
+        <h1>Assessments & Results</h1>
+
+        <div class="panel">
+
+          <h3>CBE Achievement Levels</h3>
+
+          <ul>
+
+            <li>
+              EE — Exceeding Expectation
+            </li>
+
+            <li>
+              ME — Meeting Expectation
+            </li>
+
+            <li>
+              AE — Approaching Expectation
+            </li>
+
+            <li>
+              BE — Below Expectation
+            </li>
+
+          </ul>
+
+          <p>
+            Assessment entry will be developed in the
+            next stage.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- ANALYSIS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="analysis"
+        class="section"
+      >
+
+        <h1>Results Analysis</h1>
+
+        <div class="panel">
+
+          <p>
+            CBE learner, grade and learning-area
+            performance analysis will appear here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- FEES -->
+      <!-- ===================================================== -->
+
+      <section
+        id="fees"
+        class="section"
+      >
+
+        <h1>Fees & Payments</h1>
+
+        <div class="panel">
+
+          <p>
+            Fee assignments, payments and balances
+            will appear here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- RECEIPTS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="receipts"
+        class="section"
+      >
+
+        <h1>Receipts & Statements</h1>
+
+        <div class="panel">
+
+          <p>
+            Learner receipts and fee statements will
+            appear here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- REPORTS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="reports"
+        class="section"
+      >
+
+        <h1>Reports / Report Cards</h1>
+
+        <div class="panel">
+
+          <p>
+            Learner report cards and school reports
+            will appear here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- USERS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="users"
+        class="section"
+      >
+
+        <h1>Users & Permissions</h1>
+
+        <div class="panel">
+
+          <p>
+            Administrator, Headteacher, Teacher,
+            Bursar and Parent access will be managed
+            here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================== -->
+      <!-- SETTINGS -->
+      <!-- ===================================================== -->
+
+      <section
+        id="settings"
+        class="section"
+      >
+
+        <h1>Settings</h1>
+
+        <div class="panel">
+
+          <p>
+            School system settings will appear here.
+          </p>
+
+        </div>
+
+      </section>
+
+
+    </main>
+
+  </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- JAVASCRIPT -->
+<!-- ========================================================= -->
+
+<script>
+
+  /* =========================================================
+     SUPABASE CONNECTION
+  ========================================================= */
+
+  const SUPABASE_URL =
+    "https://awazhdqlkjscfrhsoghe.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh";
+
+  const db =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
     );
 
 
-    /* ================= LOGIN ================= */
+  /* =========================================================
+     GLOBAL VARIABLES
+  ========================================================= */
 
-    async function login(event) {
-
-      event.preventDefault();
-
-alert("LOGIN FUNCTION RUNNING");
-      const email =
-        document
-          .getElementById("email")
-          .value
-          .trim();
+  let grades = [];
+  let learners = [];
+  let areas = [];
 
 
-      const password =
-        document
-          .getElementById("password")
-          .value;
+  /* =========================================================
+     PAGE START
+  ========================================================= */
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    async function () {
+
+      console.log("SYSTEM STARTED");
+
+      document
+        .getElementById("loginForm")
+        .addEventListener(
+          "submit",
+          login
+        );
+
+      document
+        .getElementById("logoutButton")
+        .addEventListener(
+          "click",
+          logout
+        );
+
+      document
+        .getElementById("learnerForm")
+        .addEventListener(
+          "submit",
+          addLearner
+        );
+
+      document
+        .getElementById("learnerSearch")
+        .addEventListener(
+          "input",
+          showLearners
+        );
+
+      document
+        .getElementById("learnerGradeFilter")
+        .addEventListener(
+          "change",
+          showLearners
+        );
 
 
-      const message =
-        document
-          .getElementById("loginMessage");
+      document
+        .querySelectorAll("[data-section]")
+        .forEach(
+          function (button) {
+
+            button.addEventListener(
+              "click",
+              function () {
+
+                showSection(
+                  this.dataset.section
+                );
+
+              }
+            );
+
+          }
+        );
 
 
-      const button =
-        document
-          .getElementById("loginButton");
+      /* Check existing login */
 
+      const sessionResult =
+        await db.auth.getSession();
 
-      message.textContent =
-        "Signing in...";
+      if (
+        sessionResult.data &&
+        sessionResult.data.session
+      ) {
 
+        showDashboard();
 
-      button.disabled = true;
+      } else {
 
-
-      try {
-
-        const result =
-          await db.auth.signInWithPassword({
-
-            email: email,
-
-            password: password
-
-          });
-
-
-        if (result.error) {
-
-          message.textContent =
-            result.error.message;
-
-          button.disabled = false;
-
-          return;
-
-        }
-
-
-        if (!result.data.session) {
-
-          message.textContent =
-            "Login failed: no session was created.";
-
-          button.disabled = false;
-
-          return;
-
-        }
-
-
-        message.textContent = "";
-
-
-        document
-          .getElementById("loginPage")
-          .style.display = "none";
-
-alert("LOGIN SUCCESSFUL");
-        document
-          .getElementById("appDashboard")
-          .style.display = "block";
-
-
-        showSection("dashboard");
-
-
-        console.log("LOGIN SUCCESS — DASHBOARD OPENED");
-
-
-      } catch (error) {
-
-        console.error(error);
-
-        message.textContent =
-          "Login error: " +
-          error.message;
+        showLogin();
 
       }
 
-
-      button.disabled = false;
-
     }
-/* ================= SCHOOL ================= */
-
-async function loadSchool() {
-
-  const result =
-    await db
-      .from("schools")
-      .select("name")
-      .eq(
-        "name",
-        "Ngessumin Comprehensive School"
-      )
-      .single();
+  );
 
 
-  if (result.error) {
+  /* =========================================================
+     LOGIN
+  ========================================================= */
 
-    console.error("SCHOOL ERROR:", result.error);
+  async function login(event) {
 
-    document
-      .getElementById("statusMessage")
-      .textContent =
-      "School information could not be loaded.";
+    event.preventDefault();
 
-    return;
-  }
+    const email =
+      document
+        .getElementById("email")
+        .value
+        .trim();
+
+    const password =
+      document
+        .getElementById("password")
+        .value;
+
+    const message =
+      document
+        .getElementById("loginMessage");
+
+    const button =
+      document
+        .getElementById("loginButton");
 
 
-  document
-    .getElementById("yearValue")
-    .textContent =
-    "2026";
+    message.textContent =
+      "Signing in...";
 
-
-  document
-    .getElementById("statusMessage")
-    .textContent =
-    "Connected to Ngessumin Comprehensive School database.";
-
-}
-
-    
+    button.dis

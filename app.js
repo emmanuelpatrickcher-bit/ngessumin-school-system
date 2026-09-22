@@ -171,6 +171,7 @@ async function logout(){
     document.getElementById("loginPage").style.display="block";
 }
 async function loadStatementLearners() {
+    alert("REAL FUNCTION CALLED");
 
     const learnerSelect =
         document.getElementById("statementLearner");

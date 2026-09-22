@@ -3831,6 +3831,105 @@ document.addEventListener(
     setupPaymentLearners();
   }
 );
+  /* ================= FEE BALANCE ================= */
+
+async function loadFeeBalance() {
+
+  const learnerId =
+    document.getElementById("balanceLearner").value;
+
+  const container =
+    document.getElementById("balanceResult");
+
+  if (!learnerId) {
+
+    container.innerHTML =
+      "<p>Please select a learner.</p>";
+
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Loading balance...</p>";
+
+  const feeResult =
+    await db
+      .from("fee_assignments")
+      .select("amount_due")
+      .eq("learner_id", learnerId);
+
+  if (feeResult.error) {
+
+    console.error(
+      "BALANCE FEE ERROR:",
+      feeResult.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load fee information.</p>";
+
+    return;
+  }
+
+  const paymentResult =
+    await db
+      .from("payments")
+      .select("amount")
+      .eq("learner_id", learnerId);
+
+  if (paymentResult.error) {
+
+    console.error(
+      "BALANCE PAYMENT ERROR:",
+      paymentResult.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load payment information.</p>";
+
+    return;
+  }
+
+  let totalDue = 0;
+  let totalPaid = 0;
+
+  (feeResult.data || []).forEach(
+    function (fee) {
+      totalDue += Number(fee.amount_due) || 0;
+    }
+  );
+
+  (paymentResult.data || []).forEach(
+    function (payment) {
+      totalPaid += Number(payment.amount) || 0;
+    }
+  );
+
+  const balance =
+    totalDue - totalPaid;
+
+  container.innerHTML = `
+
+    <h3>Fee Summary</h3>
+
+    <p>
+      Total Fees:
+      <strong>KSh ${totalDue.toLocaleString()}</strong>
+    </p>
+
+    <p>
+      Total Paid:
+      <strong>KSh ${totalPaid.toLocaleString()}</strong>
+    </p>
+
+    <p>
+      Balance:
+      <strong>KSh ${balance.toLocaleString()}</strong>
+    </p>
+
+  `;
+
+}
 </script>
 
 </body>

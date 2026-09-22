@@ -170,3 +170,48 @@ async function logout(){
     document.getElementById("appDashboard").style.display="none";
     document.getElementById("loginPage").style.display="block";
 }
+async function setupStatementLearners(){
+
+    const learnerSelect =
+        document.getElementById("statementLearner");
+
+    if(!learnerSelect){
+        return;
+    }
+
+    const result =
+        await db
+            .from("learners")
+            .select("id, admission_number, full_name")
+            .eq("status","Active")
+            .order("full_name");
+
+    if(result.error){
+
+        console.error(
+            "STATEMENT LEARNER ERROR:",
+            result.error
+        );
+
+        return;
+    }
+
+    learnerSelect.innerHTML =
+        '<option value="">Select Learner</option>';
+
+    (result.data || []).forEach(function(learner){
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            learner.id;
+
+        option.textContent =
+            learner.admission_number +
+            " — " +
+            learner.full_name;
+
+        learnerSelect.appendChild(option);
+    });
+}

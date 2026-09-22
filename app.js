@@ -170,44 +170,40 @@ async function logout(){
     document.getElementById("appDashboard").style.display="none";
     document.getElementById("loginPage").style.display="block";
 }
-async function setupStatementLearners(){
-    alert("FUNCTION STARTED");
-    console.log("STATEMENT SETUP RUNNING");
-    alert("STATEMENT SETUP RUNNING");
+async function loadStatementLearners() {
 
     const learnerSelect =
         document.getElementById("statementLearner");
 
-    if(!learnerSelect){
+    if (!learnerSelect) {
+        alert("Statement learner dropdown not found.");
         return;
     }
+
+    learnerSelect.innerHTML =
+        '<option value="">Loading learners...</option>';
 
     const result =
         await db
             .from("learners")
             .select("id, admission_number, full_name")
-            .eq("status","Active")
+            .eq("status", "Active")
             .order("full_name");
 
-    if(result.error){
-
-    alert("ERROR: " + result.error.message);
-
-    return;
-}
-
-alert("Learners found: " + (result.data || []).length);
+    if (result.error) {
+        alert("ERROR: " + result.error.message);
+        return;
+    }
 
     learnerSelect.innerHTML =
         '<option value="">Select Learner</option>';
 
-    (result.data || []).forEach(function(learner){
+    (result.data || []).forEach(function(learner) {
 
         const option =
             document.createElement("option");
 
-        option.value =
-            learner.id;
+        option.value = learner.id;
 
         option.textContent =
             learner.admission_number +
@@ -216,6 +212,11 @@ alert("Learners found: " + (result.data || []).length);
 
         learnerSelect.appendChild(option);
     });
+
+    alert(
+        "Learners loaded: " +
+        (result.data || []).length
+    );
 }
 function testStatementFunction() {
     alert("NEW FUNCTION WORKS");

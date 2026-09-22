@@ -3466,6 +3466,78 @@ document.addEventListener(
     setupFees();
   }
 );
+ /* ================= SAVE FEE ASSIGNMENT ================= */
+
+async function assignFee() {
+
+  const learnerId =
+    document.getElementById("feeLearner").value;
+
+  const yearId =
+    document.getElementById("feeYear").value;
+
+  const termId =
+    document.getElementById("feeTerm").value;
+
+  const amount =
+    document.getElementById("feeAmount").value;
+
+  const description =
+    document.getElementById("feeDescription").value.trim();
+
+  const message =
+    document.getElementById("feeMessage");
+
+
+  if (
+    !learnerId ||
+    !yearId ||
+    !termId ||
+    !amount
+  ) {
+
+    message.textContent =
+      "Please select the learner, academic year, term and enter the amount.";
+
+    return;
+  }
+
+
+  message.textContent =
+    "Saving fee assignment...";
+
+
+  const result =
+    await db
+      .from("fee_assignments")
+      .insert({
+        learner_id: learnerId,
+        academic_year_id: yearId,
+        term_id: termId,
+        amount_due: Number(amount),
+        description: description || null
+      });
+
+
+  if (result.error) {
+
+    console.error(
+      "FEE ERROR:",
+      result.error
+    );
+
+    message.textContent =
+      "Error saving fee assignment: " +
+      result.error.message;
+
+    return;
+  }
+
+
+  message.textContent =
+    "Fee assignment saved successfully.";
+
+} 
 </script>
 
 </body>

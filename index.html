@@ -4115,6 +4115,260 @@ document.addEventListener(
     setupStatementLearners();
   }
 );
+  /* ================= FEE STATEMENT ================= */
+
+async function loadFeeStatement() {
+
+  const learnerId =
+    document.getElementById("statementLearner").value;
+
+  const container =
+    document.getElementById("statementResult");
+
+  if (!learnerId) {
+
+    container.innerHTML =
+      "<p>Please select a learner.</p>";
+
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Loading statement...</p>";
+
+  const learnerResult =
+    await db
+      .from("learners")
+      .select(
+        "admission_number, full_name"
+      )
+      .eq(
+        "id",
+        learnerId
+      )
+      .single();
+
+  if (learnerResult.error) {
+
+    console.error(
+      "STATEMENT LEARNER ERROR:",
+      learnerResult.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load learner information.</p>";
+
+    return;
+  }
+
+  const feeResult =
+    await db
+      .from("fee_assignments")
+      .select(
+        "amount_due, description, created_at"
+      )
+      .eq(
+        "learner_id",
+        learnerId
+      )
+      .order(
+        "created_at"
+      );
+
+  if (feeResult.error) {
+
+    console.error(
+      "STATEMENT FEE ERROR:",
+      feeResult.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load fee information.</p>";
+
+    return;
+  }
+
+  const paymentResult =
+    await db
+      .from("payments")
+      .select(
+        "amount, payment_date, payment_method, reference_number"
+      )
+      .eq(
+        "learner_id",
+        learnerId
+      )
+      .order(
+        "payment_date"
+      );
+
+  if (paymentResult.error) {
+
+    console.error(
+      "STATEMENT PAYMENT ERROR:",
+      paymentResult.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load payment information.</p>";
+
+    return;
+  }
+
+  let totalDue = 0;
+  let totalPaid = 0;
+
+  (feeResult.data || []).forEach(
+    function (fee) {
+      totalDue += Number(fee.amount_due) || 0;
+    }
+  );
+
+  (paymentResult.data || []).forEach(
+    function (payment) {
+      totalPaid += Number(payment.amount) || 0;
+    }
+  );
+
+  const balance =
+    totalDue - totalPaid;
+
+  let html = `
+
+    <h3>
+      Fee Statement
+    </h3>
+
+    <p>
+      <strong>Admission Number:</strong>
+      ${escapeHtml(
+        learnerResult.data.admission_number
+      )}
+    </p>
+
+    <p>
+      <strong>Learner:</strong>
+      ${escapeHtml(
+        learnerResult.data.full_name
+      )}
+    </p>
+
+    <hr>
+
+    <h4>Fees Charged</h4>
+
+    <table>
+
+      <tr>
+        <th>Description</th>
+        <th>Amount</th>
+      </tr>
+  `;
+
+  (feeResult.data || []).forEach(
+    function (fee) {
+
+      html += `
+        <tr>
+          <td>
+            ${escapeHtml(
+              fee.description || "School Fees"
+            )}
+          </td>
+
+          <td>
+            KSh ${Number(
+              fee.amount_due
+            ).toLocaleString()}
+          </td>
+        </tr>
+      `;
+
+    }
+  );
+
+  html += `
+    </table>
+
+    <h4>Payments</h4>
+
+    <table>
+
+      <tr>
+        <th>Date</th>
+        <th>Method</th>
+        <th>Reference</th>
+        <th>Amount</th>
+      </tr>
+  `;
+
+  (paymentResult.data || []).forEach(
+    function (payment) {
+
+      html += `
+        <tr>
+
+          <td>
+            ${escapeHtml(
+              payment.payment_date || ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              payment.payment_method || ""
+            )}
+          </td>
+
+          <td>
+            ${escapeHtml(
+              payment.reference_number || ""
+            )}
+          </td>
+
+          <td>
+            KSh ${Number(
+              payment.amount
+            ).toLocaleString()}
+          </td>
+
+        </tr>
+      `;
+
+    }
+  );
+
+  html += `
+    </table>
+
+    <hr>
+
+    <p>
+      <strong>
+        Total Fees:
+      </strong>
+      KSh ${totalDue.toLocaleString()}
+    </p>
+
+    <p>
+      <strong>
+        Total Paid:
+      </strong>
+      KSh ${totalPaid.toLocaleString()}
+    </p>
+
+    <p>
+      <strong>
+        Balance:
+      </strong>
+      KSh ${balance.toLocaleString()}
+    </p>
+  `;
+
+  container.innerHTML =
+    html;
+
+}
 </script>
 
 </body>

@@ -1331,20 +1331,54 @@
       <!-- ===================================================== -->
 
       <section
-        id="receipts"
-        class="section"
-      >
+  id="receipts"
+  class="section"
+>
 
-        <h1>Receipts & Statements</h1>
+  <h1>Receipts & Statements</h1>
 
-        <div class="panel">
+  <div class="panel">
 
-          <p>
-            Learner receipts and fee statements will
-            appear here.
-          </p>
+    <h2>Learner Fee Statement</h2>
 
-        </div>
+    <div class="form-grid">
+
+      <div>
+        <label for="statementLearner">
+          Learner
+        </label>
+
+        <select id="statementLearner">
+
+          <option value="">
+            Select Learner
+          </option>
+
+        </select>
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="loadFeeStatement()"
+    >
+      View Statement
+    </button>
+
+    <div
+      id="statementResult"
+      class="panel"
+    >
+
+      <p>
+        Select a learner to view the fee statement.
+      </p>
+
+    </div>
+
+  </div>
 
       </section>
 

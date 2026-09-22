@@ -190,13 +190,12 @@ async function setupStatementLearners(){
 
     if(result.error){
 
-        console.error(
-            "STATEMENT LEARNER ERROR:",
-            result.error
-        );
+    alert("ERROR: " + result.error.message);
 
-        return;
-    }
+    return;
+}
+
+alert("Learners found: " + (result.data || []).length);
 
     learnerSelect.innerHTML =
         '<option value="">Select Learner</option>';

@@ -3015,7 +3015,183 @@ document.addEventListener(
   }
 ); 
 
+/* ================= DISPLAY RESULTS ANALYSIS ================= */
 
+async function loadResultsAnalysis() {
+
+  const gradeId =
+    document.getElementById("analysisGrade").value;
+
+  const areaId =
+    document.getElementById("analysisArea").value;
+
+  const container =
+    document.getElementById("analysisResults");
+
+  if (!gradeId || !areaId) {
+
+    container.innerHTML =
+      "<p>Select a grade and learning area to view results analysis.</p>";
+
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Loading results analysis...</p>";
+
+  const result =
+    await db
+      .from("results")
+      .select(`
+        achievement_level,
+        learner_id,
+        assessments!inner (
+          grade_id,
+          learning_area_id
+        )
+      `)
+      .eq(
+        "assessments.grade_id",
+        gradeId
+      )
+      .eq(
+        "assessments.learning_area_id",
+        areaId
+      );
+
+  if (result.error) {
+
+    console.error(
+      "ANALYSIS ERROR:",
+      result.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load results analysis.</p>";
+
+    return;
+  }
+
+  const rows =
+    result.data || [];
+
+  let EE = 0;
+  let ME = 0;
+  let AE = 0;
+  let BE = 0;
+
+  rows.forEach(
+    function (row) {
+
+      if (row.achievement_level === "EE") {
+        EE++;
+      }
+
+      if (row.achievement_level === "ME") {
+        ME++;
+      }
+
+      if (row.achievement_level === "AE") {
+        AE++;
+      }
+
+      if (row.achievement_level === "BE") {
+        BE++;
+      }
+
+    }
+  );
+
+  const total =
+    EE + ME + AE + BE;
+
+  function percentage(number) {
+
+    if (total === 0) {
+      return 0;
+    }
+
+    return Math.round(
+      (number / total) * 100
+    );
+
+  }
+
+  container.innerHTML = `
+
+    <h3>Achievement Level Analysis</h3>
+
+    <p>
+      Total Results:
+      <strong>${total}</strong>
+    </p>
+
+    <div class="cards">
+
+      <div class="card">
+
+        <h3>EE</h3>
+
+        <div class="number">
+          ${EE}
+        </div>
+
+        <p>
+          ${percentage(EE)}%
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>ME</h3>
+
+        <div class="number">
+          ${ME}
+        </div>
+
+        <p>
+          ${percentage(ME)}%
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>AE</h3>
+
+        <div class="number">
+          ${AE}
+        </div>
+
+        <p>
+          ${percentage(AE)}%
+        </p>
+
+      </div>
+
+
+      <div class="card">
+
+        <h3>BE</h3>
+
+        <div class="number">
+          ${BE}
+        </div>
+
+        <p>
+          ${percentage(BE)}%
+        </p>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
 /* CONNECT ANALYSIS DROPDOWNS */
 
 document

@@ -1273,6 +1273,57 @@
 
         </div>
       </section>
+      <section
+  id="statements"
+  class="section"
+>
+
+  <h1>Receipts & Statements</h1>
+
+  <div class="panel">
+
+    <h2>Learner Fee Statement</h2>
+
+    <div class="form-grid">
+
+      <div>
+        <label for="statementLearner">
+          Learner
+        </label>
+
+        <select id="statementLearner">
+
+          <option value="">
+            Select Learner
+          </option>
+
+        </select>
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="loadFeeStatement()"
+    >
+      View Statement
+    </button>
+
+    <div
+      id="statementResult"
+      class="panel"
+    >
+
+      <p>
+        Select a learner to view the fee statement.
+      </p>
+
+    </div>
+
+  </div>
+
+      </section>
 
 
       <!-- ===================================================== -->
@@ -3995,6 +4046,73 @@ document.addEventListener(
   "DOMContentLoaded",
   function () {
     setupBalanceLearners();
+  }
+);
+  /* ================= STATEMENT LEARNER SETUP ================= */
+
+async function setupStatementLearners() {
+
+  const learnerSelect =
+    document.getElementById("statementLearner");
+
+  if (!learnerSelect) {
+    return;
+  }
+
+  const result =
+    await db
+      .from("learners")
+      .select(
+        "id, admission_number, full_name"
+      )
+      .eq(
+        "status",
+        "Active"
+      )
+      .order(
+        "full_name"
+      );
+
+  if (result.error) {
+
+    console.error(
+      "STATEMENT LEARNER ERROR:",
+      result.error
+    );
+
+    return;
+  }
+
+  learnerSelect.innerHTML =
+    '<option value="">Select Learner</option>';
+
+  (result.data || []).forEach(
+    function (learner) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        learner.id;
+
+      option.textContent =
+        learner.admission_number +
+        " — " +
+        learner.full_name;
+
+      learnerSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    setupStatementLearners();
   }
 );
 </script>

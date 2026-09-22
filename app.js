@@ -171,6 +171,7 @@ async function logout(){
     document.getElementById("loginPage").style.display="block";
 }
 async function setupStatementLearners(){
+    alert("FUNCTION STARTED");
     console.log("STATEMENT SETUP RUNNING");
     alert("STATEMENT SETUP RUNNING");
 

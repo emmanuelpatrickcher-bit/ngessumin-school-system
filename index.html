@@ -3289,7 +3289,183 @@ document
     "change",
     loadResultsAnalysis
   );
+/* ================= FEES SETUP ================= */
 
+async function setupFees() {
+
+  const learnerSelect =
+    document.getElementById("feeLearner");
+
+  const yearSelect =
+    document.getElementById("feeYear");
+
+  const termSelect =
+    document.getElementById("feeTerm");
+
+  if (
+    !learnerSelect ||
+    !yearSelect ||
+    !termSelect
+  ) {
+    return;
+  }
+
+
+  /* LOAD LEARNERS */
+
+  const learnerResult =
+    await db
+      .from("learners")
+      .select(
+        "id, admission_number, full_name"
+      )
+      .eq(
+        "status",
+        "Active"
+      )
+      .order(
+        "full_name"
+      );
+
+  if (learnerResult.error) {
+
+    console.error(
+      learnerResult.error
+    );
+
+    return;
+  }
+
+
+  learnerSelect.innerHTML =
+    '<option value="">Select Learner</option>';
+
+  (learnerResult.data || []).forEach(
+    function (learner) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        learner.id;
+
+      option.textContent =
+        learner.admission_number +
+        " — " +
+        learner.full_name;
+
+      learnerSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  /* LOAD CURRENT ACADEMIC YEAR */
+
+  const yearResult =
+    await db
+      .from("academic_years")
+      .select(
+        "id, year"
+      )
+      .order(
+        "year",
+        {
+          ascending: false
+        }
+      );
+
+  if (yearResult.error) {
+
+    console.error(
+      yearResult.error
+    );
+
+    return;
+  }
+
+
+  yearSelect.innerHTML =
+    '<option value="">Select Year</option>';
+
+  (yearResult.data || []).forEach(
+    function (year) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        year.id;
+
+      option.textContent =
+        year.year;
+
+      yearSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  /* LOAD TERMS */
+
+  const termResult =
+    await db
+      .from("terms")
+      .select(
+        "id, term_number"
+      )
+      .order(
+        "term_number"
+      );
+
+  if (termResult.error) {
+
+    console.error(
+      termResult.error
+    );
+
+    return;
+  }
+
+
+  termSelect.innerHTML =
+    '<option value="">Select Term</option>';
+
+  (termResult.data || []).forEach(
+    function (term) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        term.id;
+
+      option.textContent =
+        "Term " +
+        term.term_number;
+
+      termSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+/* START FEES SETUP */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    setupFees();
+  }
+);
 </script>
 
 </body>

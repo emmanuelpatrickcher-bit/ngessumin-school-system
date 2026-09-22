@@ -217,3 +217,6 @@ alert("Learners found: " + (result.data || []).length);
         learnerSelect.appendChild(option);
     });
 }
+function testStatementFunction() {
+    alert("NEW FUNCTION WORKS");
+}

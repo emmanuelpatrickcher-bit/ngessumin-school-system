@@ -4352,8 +4352,46 @@ async function loadFeeStatement() {
 </script>
   <script src="app.js"></script>
   <script>
+    
 async function statementLearnerLoader() {
-    alert("NEW LOADER WORKS");
+
+    const learnerSelect =
+        document.getElementById("statementLearner");
+
+    if (!learnerSelect) {
+        alert("Dropdown not found");
+        return;
+    }
+
+    const result =
+        await db
+            .from("learners")
+            .select("id, admission_number, full_name")
+            .eq("status", "Active")
+            .order("full_name");
+
+    if (result.error) {
+        alert("ERROR: " + result.error.message);
+        return;
+    }
+
+    learnerSelect.innerHTML =
+        '<option value="">Select Learner</option>';
+
+    (result.data || []).forEach(function(learner) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = learner.id;
+
+        option.textContent =
+            learner.admission_number +
+            " — " +
+            learner.full_name;
+
+        learnerSelect.appendChild(option);
+    });
 }
   </script>
 

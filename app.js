@@ -213,10 +213,8 @@ async function loadStatementLearners() {
         learnerSelect.appendChild(option);
     });
 
-    alert(
-        "Learners loaded: " +
-        (result.data || []).length
-    );
+    learnerSelect.innerHTML =
+    '<option value="">TEST LEARNER</option>';
 }
 function testStatementFunction() {
     alert("NEW FUNCTION WORKS");

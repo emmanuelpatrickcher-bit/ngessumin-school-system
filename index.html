@@ -3652,6 +3652,80 @@ async function assignFee() {
     "Fee assignment saved successfully.";
 
 } 
+  /* ================= RECORD PAYMENT ================= */
+
+async function recordPayment(event) {
+
+  if (event) {
+    event.preventDefault();
+  }
+
+  const learnerId =
+    document.getElementById("paymentLearner").value;
+
+  const amount =
+    document.getElementById("paymentAmount").value;
+
+  const method =
+    document.getElementById("paymentMethod").value;
+
+  const reference =
+    document.getElementById("paymentReference").value.trim();
+
+  const paymentDate =
+    document.getElementById("paymentDate").value;
+
+  const notes =
+    document.getElementById("paymentNotes").value.trim();
+
+  const message =
+    document.getElementById("paymentMessage");
+
+  if (
+    !learnerId ||
+    !amount ||
+    !method
+  ) {
+
+    message.textContent =
+      "Please select a learner, enter the amount and select the payment method.";
+
+    return;
+  }
+
+  message.textContent =
+    "Saving payment...";
+
+  const result =
+    await db
+      .from("payments")
+      .insert({
+        learner_id: learnerId,
+        amount: Number(amount),
+        payment_method: method,
+        reference_number: reference || null,
+        payment_date: paymentDate || null,
+        notes: notes || null
+      });
+
+  if (result.error) {
+
+    console.error(
+      "PAYMENT ERROR:",
+      result.error
+    );
+
+    message.textContent =
+      "Error saving payment: " +
+      result.error.message;
+
+    return;
+  }
+
+  message.textContent =
+    "Payment recorded successfully.";
+
+}
 </script>
 
 </body>

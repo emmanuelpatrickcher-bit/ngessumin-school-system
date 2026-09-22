@@ -1031,10 +1031,92 @@
 
         <div class="panel">
 
-          <p>
-            Fee assignments, payments and balances
-            will appear here.
-          </p>
+  <h2>Assign School Fees</h2>
+
+  <div class="form-grid">
+
+    <div>
+      <label for="feeLearner">
+        Learner
+      </label>
+
+      <select id="feeLearner">
+        <option value="">
+          Select Learner
+        </option>
+      </select>
+    </div>
+
+
+    <div>
+      <label for="feeYear">
+        Academic Year
+      </label>
+
+      <select id="feeYear">
+        <option value="">
+          Select Year
+        </option>
+      </select>
+    </div>
+
+
+    <div>
+      <label for="feeTerm">
+        Term
+      </label>
+
+      <select id="feeTerm">
+        <option value="">
+          Select Term
+        </option>
+      </select>
+    </div>
+
+
+    <div>
+      <label for="feeAmount">
+        Amount Due
+      </label>
+
+      <input
+        type="number"
+        id="feeAmount"
+        min="0"
+        step="0.01"
+        placeholder="Enter amount"
+      >
+    </div>
+
+
+    <div>
+      <label for="feeDescription">
+        Description
+      </label>
+
+      <input
+        type="text"
+        id="feeDescription"
+        placeholder="e.g. Term 1 School Fees"
+      >
+    </div>
+
+  </div>
+
+
+  <button
+    type="button"
+    class="primary-btn"
+    id="assignFeeButton"
+  >
+    Assign Fees
+  </button>
+
+
+  <div
+    id="feeMessage"
+    class="message"
+  ></div>
 
         </div>
 

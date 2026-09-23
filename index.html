@@ -5412,13 +5412,29 @@ document.addEventListener(
 
   if (gradesResult.error) {
 
-    console.error(
-      "GRADES LOAD ERROR:",
-gradesResult.error.message
+    if (gradesResult.error) {
+
+  console.error(
+    "GRADES LOAD ERROR:",
+    gradesResult.error
+  );
+
+  gradeSelect.innerHTML =
+    '<option value="">Unable to load grades</option>';
+
+  const message =
+    document.getElementById(
+      "gradeAssignmentMessage"
     );
 
-    gradeSelect.innerHTML =
-      '<option value="">Unable to load grades</option>';
+  if (message) {
+    message.textContent =
+      "Grade error: " +
+      gradesResult.error.message;
+  }
+
+  return;
+    }
 
   } else {
 

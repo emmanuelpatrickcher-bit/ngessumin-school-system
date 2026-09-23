@@ -220,7 +220,6 @@ function testStatementFunction() {
     alert("NEW FUNCTION WORKS");
 }
 async function setupReportCardLearners() {
-    alert("REPORT FUNCTION STARTED");
 
     const learnerSelect =
         document.getElementById("reportLearner");
@@ -236,11 +235,10 @@ async function setupReportCardLearners() {
         await db
             .from("learners")
             .select("id, assessment_number, full_name")
-            .eq("status", "Active")
             .order("full_name");
 
     if (result.error) {
-alert("REPORT ERROR: " + result.error.message);
+
         console.error(
             "REPORT LEARNERS ERROR:",
             result.error
@@ -249,13 +247,21 @@ alert("REPORT ERROR: " + result.error.message);
         learnerSelect.innerHTML =
             '<option value="">Unable to load learners</option>';
 
+        alert(
+            "Report Card Error: " +
+            result.error.message
+        );
+
         return;
     }
+
+    const learners =
+        result.data || [];
 
     learnerSelect.innerHTML =
         '<option value="">Select Learner</option>';
 
-    (result.data || []).forEach(function(learner) {
+    learners.forEach(function(learner) {
 
         const option =
             document.createElement("option");
@@ -270,7 +276,24 @@ alert("REPORT ERROR: " + result.error.message);
 
         learnerSelect.appendChild(option);
     });
-}
 
+    if (learners.length === 0) {
+
+        learnerSelect.innerHTML =
+            '<option value="">No learners found</option>';
+
+        alert(
+            "Supabase returned 0 learners."
+        );
+
+    } else {
+
+        alert(
+            "Report Card loaded " +
+            learners.length +
+            " learner(s)."
+        );
+    }
+}
 
 setupReportCardLearners();

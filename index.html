@@ -1559,7 +1559,52 @@
     ></div>
 
   </div>
+<div class="panel">
 
+  <h2>Assign Learning Area</h2>
+
+  <div class="form-grid">
+
+    <div>
+      <label for="assignmentTeacher">
+        Teacher
+      </label>
+
+      <select id="assignmentTeacher">
+        <option value="">
+          Select Teacher
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label for="assignmentLearningArea">
+        Learning Area
+      </label>
+
+      <select id="assignmentLearningArea">
+        <option value="">
+          Select Learning Area
+        </option>
+      </select>
+    </div>
+
+  </div>
+
+  <button
+    type="button"
+    class="primary-btn"
+    onclick="assignLearningArea()"
+  >
+    Assign Learning Area
+  </button>
+
+  <div
+    id="assignmentMessage"
+    class="message"
+  ></div>
+
+</div>
   <div class="panel">
 
     <h2>Registered Teachers</h2>

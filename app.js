@@ -220,7 +220,8 @@ function testStatementFunction() {
     alert("NEW FUNCTION WORKS");
 }
 async function setupReportCardLearners() {
-
+    
+alert("REPORT CARD FUNCTION RUNNING");
     const learnerSelect =
         document.getElementById("reportLearner");
 

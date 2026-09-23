@@ -1409,7 +1409,8 @@
       <!-- REPORTS -->
       <!-- ===================================================== -->
 
-      <section
+    
+              <section
         id="reports"
         class="section"
       >
@@ -1418,9 +1419,78 @@
 
         <div class="panel">
 
+          <h2>Generate Learner Report Card</h2>
+
+          <div class="form-grid">
+
+            <div>
+
+              <label for="reportLearner">
+                Learner
+              </label>
+
+              <select id="reportLearner">
+
+                <option value="">
+                  Select Learner
+                </option>
+
+              </select>
+
+            </div>
+
+            <div>
+
+              <label for="reportTerm">
+                Term
+              </label>
+
+              <select id="reportTerm">
+
+                <option value="">
+                  Select Term
+                </option>
+
+                <option value="1">
+                  Term 1
+                </option>
+
+                <option value="2">
+                  Term 2
+                </option>
+
+                <option value="3">
+                  Term 3
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+          <button
+            type="button"
+            class="primary-btn"
+            onclick="generateReportCard()"
+          >
+            Generate Report Card
+          </button>
+
+          <div
+            id="reportMessage"
+            class="message"
+          ></div>
+
+        </div>
+
+        <div
+          class="panel"
+          id="reportCardResult"
+        >
+
           <p>
-            Learner report cards and school reports
-            will appear here.
+            Select a learner and term to generate a report card.
           </p>
 
         </div>

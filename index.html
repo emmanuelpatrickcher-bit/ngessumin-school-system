@@ -5474,7 +5474,58 @@ gradeSelect.innerHTML =
   }
 );
     }
+async function assignTeacherGrade() {
 
+  const teacherId =
+    document.getElementById("gradeAssignmentTeacher").value;
+
+  const gradeId =
+    document.getElementById("gradeAssignmentGrade").value;
+
+  const message =
+    document.getElementById("gradeAssignmentMessage");
+
+  if (!teacherId || !gradeId) {
+    message.textContent =
+      "Please select a teacher and grade.";
+    return;
+  }
+
+  message.textContent =
+    "Assigning grade...";
+
+  const result =
+    await db
+      .from("teacher_grades")
+      .insert({
+        teacher_id: teacherId,
+        grade_id: gradeId
+      });
+
+  if (result.error) {
+
+    console.error(
+      "GRADE ASSIGNMENT ERROR:",
+      result.error
+    );
+
+    message.textContent =
+      "Unable to assign grade.";
+
+    return;
+  }
+
+  message.textContent =
+    "Grade assigned successfully.";
+
+  document.getElementById(
+    "gradeAssignmentTeacher"
+  ).value = "";
+
+  document.getElementById(
+    "gradeAssignmentGrade"
+  ).value = "";
+}
 document.addEventListener(
   "DOMContentLoaded",
   function() {

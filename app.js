@@ -214,6 +214,7 @@ async function loadStatementLearners() {
 
     learnerSelect.innerHTML =
     '<option value="">TEST LEARNER</option>';
+    alert("LEARNERS FOUND: " + (result.data || []).length);
 }
 function testStatementFunction() {
     alert("NEW FUNCTION WORKS");

@@ -273,15 +273,4 @@ alert("REPORT ERROR: " + result.error.message);
 }
 
 
-if (document.readyState === "loading") {
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        setupReportCardLearners
-    );
-
-} else {
-
-    setupReportCardLearners();
-
-}
+setupReportCardLearners();

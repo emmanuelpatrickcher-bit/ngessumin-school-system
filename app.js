@@ -126,7 +126,7 @@ async function addLearner(e){
         .from("learners")
         .insert({
             school_id:school.id,
-            admission_number:admissionNumber,
+            assessment_number:assessmentNumber,
             full_name:fullName,
             gender:gender||null,
             grade_id:gradeId,

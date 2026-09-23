@@ -219,3 +219,61 @@ async function loadStatementLearners() {
 function testStatementFunction() {
     alert("NEW FUNCTION WORKS");
 }
+async function setupReportCardLearners() {
+
+    const learnerSelect =
+        document.getElementById("reportLearner");
+
+    if (!learnerSelect) {
+        return;
+    }
+
+    learnerSelect.innerHTML =
+        '<option value="">Loading learners...</option>';
+
+    const result =
+        await db
+            .from("learners")
+            .select("id, assessment_number, full_name")
+            .eq("status", "Active")
+            .order("full_name");
+
+    if (result.error) {
+
+        console.error(
+            "REPORT LEARNERS ERROR:",
+            result.error
+        );
+
+        learnerSelect.innerHTML =
+            '<option value="">Unable to load learners</option>';
+
+        return;
+    }
+
+    learnerSelect.innerHTML =
+        '<option value="">Select Learner</option>';
+
+    (result.data || []).forEach(function(learner) {
+
+        const option =
+            document.createElement("option");
+
+        option.value =
+            learner.id;
+
+        option.textContent =
+            learner.assessment_number +
+            " — " +
+            learner.full_name;
+
+        learnerSelect.appendChild(option);
+    });
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+        setupReportCardLearners();
+    }
+);

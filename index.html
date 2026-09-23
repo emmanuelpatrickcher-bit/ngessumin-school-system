@@ -1426,6 +1426,155 @@
         </div>
 
       </section>
+      <!-- ===================================================== -->
+<!-- TEACHERS & STAFF -->
+<!-- ===================================================== -->
+
+<section
+  id="teachers"
+  class="section"
+>
+
+  <h1>Teachers & Staff</h1>
+
+  <div class="panel">
+
+    <h2>Add Teacher</h2>
+
+    <div class="form-grid">
+
+      <div>
+        <label for="teacherName">
+          Full Name
+        </label>
+
+        <input
+          type="text"
+          id="teacherName"
+          placeholder="Enter teacher's full name"
+        >
+      </div>
+
+      <div>
+        <label for="teacherTsc">
+          TSC Number
+        </label>
+
+        <input
+          type="text"
+          id="teacherTsc"
+          placeholder="Enter TSC number"
+        >
+      </div>
+
+      <div>
+        <label for="teacherGender">
+          Gender
+        </label>
+
+        <select id="teacherGender">
+
+          <option value="">
+            Select Gender
+          </option>
+
+          <option value="Male">
+            Male
+          </option>
+
+          <option value="Female">
+            Female
+          </option>
+
+        </select>
+      </div>
+
+      <div>
+        <label for="teacherPhone">
+          Phone Number
+        </label>
+
+        <input
+          type="tel"
+          id="teacherPhone"
+          placeholder="Enter phone number"
+        >
+      </div>
+
+      <div>
+        <label for="teacherEmail">
+          Email
+        </label>
+
+        <input
+          type="email"
+          id="teacherEmail"
+          placeholder="Enter email address"
+        >
+      </div>
+
+      <div>
+        <label for="teacherRole">
+          Role
+        </label>
+
+        <select id="teacherRole">
+
+          <option value="Teacher">
+            Teacher
+          </option>
+
+          <option value="Senior Teacher">
+            Senior Teacher
+          </option>
+
+          <option value="Headteacher">
+            Headteacher
+          </option>
+
+          <option value="Deputy Headteacher">
+            Deputy Headteacher
+          </option>
+
+          <option value="Other">
+            Other
+          </option>
+
+        </select>
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="addTeacher()"
+    >
+      Add Teacher
+    </button>
+
+    <div
+      id="teacherMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+  <div class="panel">
+
+    <h2>Registered Teachers</h2>
+
+    <div
+      id="teacherList"
+    >
+      <p>
+        No teachers loaded yet.
+      </p>
+    </div>
+
+  </div>
+
+</section>
 
 
       <!-- ===================================================== -->

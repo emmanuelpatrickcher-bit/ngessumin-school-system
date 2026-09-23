@@ -5247,6 +5247,58 @@ document.addEventListener(
 
   }
 );
+    async function assignLearningArea() {
+
+  const teacherId =
+    document.getElementById("assignmentTeacher").value;
+
+  const learningAreaId =
+    document.getElementById("assignmentLearningArea").value;
+
+  const message =
+    document.getElementById("assignmentMessage");
+
+  if (!teacherId || !learningAreaId) {
+    message.textContent =
+      "Please select a teacher and learning area.";
+    return;
+  }
+
+  message.textContent =
+    "Assigning learning area...";
+
+  const result =
+    await db
+      .from("teacher_learning_areas")
+      .insert({
+        teacher_id: teacherId,
+        learning_area_id: learningAreaId
+      });
+
+  if (result.error) {
+
+    console.error(
+      "ASSIGNMENT ERROR:",
+      result.error
+    );
+
+    message.textContent =
+      "Unable to assign learning area.";
+
+    return;
+  }
+
+  message.textContent =
+    "Learning area assigned successfully.";
+
+  document.getElementById(
+    "assignmentTeacher"
+  ).value = "";
+
+  document.getElementById(
+    "assignmentLearningArea"
+  ).value = "";
+    }
   </script>
 
 </body>

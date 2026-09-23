@@ -184,11 +184,10 @@ async function loadStatementLearners() {
         '<option value="">Loading learners...</option>';
 
     const result =
-        await db
-            .from("learners")
-            .select("id, admission_number, full_name")
-            .eq("status", "Active")
-            .order("full_name");
+    await db
+        .from("learners")
+        .select("id, assessment_number, full_name")
+        .order("full_name");
 
     if (result.error) {
         alert("ERROR: " + result.error.message);

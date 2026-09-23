@@ -4879,6 +4879,216 @@ function printReceipt() {
 
   printWindow.print();
 }
+    async function addTeacher() {
+
+  const name =
+    document.getElementById("teacherName").value.trim();
+
+  const tsc =
+    document.getElementById("teacherTsc").value.trim();
+
+  const gender =
+    document.getElementById("teacherGender").value;
+
+  const phone =
+    document.getElementById("teacherPhone").value.trim();
+
+  const email =
+    document.getElementById("teacherEmail").value.trim();
+
+  const role =
+    document.getElementById("teacherRole").value;
+
+  const message =
+    document.getElementById("teacherMessage");
+
+  if (!name) {
+    message.textContent =
+      "Please enter the teacher's full name.";
+    return;
+  }
+
+  message.textContent =
+    "Saving teacher...";
+
+  const schoolResult =
+    await db
+      .from("schools")
+      .select("id")
+      .eq(
+        "name",
+        "Ngessumin Comprehensive School"
+      )
+      .single();
+
+  if (schoolResult.error) {
+
+    console.error(
+      "SCHOOL ERROR:",
+      schoolResult.error
+    );
+
+    message.textContent =
+      "Unable to find the school.";
+
+    return;
+  }
+
+  const result =
+    await db
+      .from("teachers")
+      .insert({
+        school_id: schoolResult.data.id,
+        full_name: name,
+        tsc_number: tsc || null,
+        gender: gender || null,
+        phone: phone || null,
+        email: email || null,
+        role: role,
+        status: "Active"
+      });
+
+  if (result.error) {
+
+    console.error(
+      "TEACHER ERROR:",
+      result.error
+    );
+
+    message.textContent =
+      "Unable to add teacher.";
+
+    return;
+  }
+
+  message.textContent =
+    "Teacher added successfully.";
+
+  document.getElementById("teacherName").value = "";
+  document.getElementById("teacherTsc").value = "";
+  document.getElementById("teacherGender").value = "";
+  document.getElementById("teacherPhone").value = "";
+  document.getElementById("teacherEmail").value = "";
+  document.getElementById("teacherRole").value = "Teacher";
+
+  loadTeachers();
+}
+
+
+async function loadTeachers() {
+
+  const container =
+    document.getElementById("teacherList");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Loading teachers...</p>";
+
+  const result =
+    await db
+      .from("teachers")
+      .select("*")
+      .order(
+        "full_name",
+        {
+          ascending: true
+        }
+      );
+
+  if (result.error) {
+
+    console.error(
+      "LOAD TEACHERS ERROR:",
+      result.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load teachers.</p>";
+
+    return;
+  }
+
+  if (!result.data ||
+      result.data.length === 0) {
+
+    container.innerHTML =
+      "<p>No teachers registered yet.</p>";
+
+    return;
+  }
+
+  let html = "";
+
+  result.data.forEach(
+    function(teacher) {
+
+      html += `
+        <div class="panel">
+
+          <h3>
+            ${escapeHtml(teacher.full_name)}
+          </h3>
+
+          <p>
+            <strong>TSC Number:</strong>
+            ${escapeHtml(
+              teacher.tsc_number || "-"
+            )}
+          </p>
+
+          <p>
+            <strong>Gender:</strong>
+            ${escapeHtml(
+              teacher.gender || "-"
+            )}
+          </p>
+
+          <p>
+            <strong>Phone:</strong>
+            ${escapeHtml(
+              teacher.phone || "-"
+            )}
+          </p>
+
+          <p>
+            <strong>Email:</strong>
+            ${escapeHtml(
+              teacher.email || "-"
+            )}
+          </p>
+
+          <p>
+            <strong>Role:</strong>
+            ${escapeHtml(
+              teacher.role || "Teacher"
+            )}
+          </p>
+
+          <p>
+            <strong>Status:</strong>
+            ${escapeHtml(
+              teacher.status || "Active"
+            )}
+          </p>
+
+        </div>
+      `;
+    }
+  );
+
+  container.innerHTML = html;
+}
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+    loadTeachers();
+  }
+);
   </script>
 
 </body>

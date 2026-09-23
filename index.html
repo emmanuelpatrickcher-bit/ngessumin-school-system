@@ -1331,6 +1331,61 @@
   </div>
 
       </section>
+      <!-- ===================================================== -->
+<!-- PAYMENT RECEIPT -->
+<!-- ===================================================== -->
+
+<section
+  id="payment-receipt"
+  class="section"
+>
+
+  <h1>Payment Receipt</h1>
+
+  <div class="panel">
+
+    <h2>Generate Payment Receipt</h2>
+
+    <div class="form-grid">
+
+      <div>
+        <label for="receiptPayment">
+          Payment
+        </label>
+
+        <select id="receiptPayment">
+
+          <option value="">
+            Select Payment
+          </option>
+
+        </select>
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="generateReceipt()"
+    >
+      Generate Receipt
+    </button>
+
+    <div
+      id="receiptResult"
+      class="panel"
+    >
+
+      <p>
+        Select a payment to generate a receipt.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
 
 
       <!-- ===================================================== -->

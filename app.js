@@ -297,3 +297,4 @@ async function setupReportCardLearners() {
 }
 
 setupReportCardLearners();
+alert("APP JS LOADED");

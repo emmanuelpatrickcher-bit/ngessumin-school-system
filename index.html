@@ -5134,6 +5134,119 @@ document.addEventListener(
     loadTeachers();
   }
 );
+    async function setupTeacherLearningAreaAssignment() {
+
+  const teacherSelect =
+    document.getElementById("assignmentTeacher");
+
+  const learningAreaSelect =
+    document.getElementById("assignmentLearningArea");
+
+  if (!teacherSelect || !learningAreaSelect) {
+    return;
+  }
+
+  teacherSelect.innerHTML =
+    '<option value="">Loading teachers...</option>';
+
+  learningAreaSelect.innerHTML =
+    '<option value="">Loading learning areas...</option>';
+
+  const teachersResult =
+    await db
+      .from("teachers")
+      .select("id, full_name, tsc_number")
+      .order("full_name", {
+        ascending: true
+      });
+
+  if (teachersResult.error) {
+
+    console.error(
+      "TEACHERS LOAD ERROR:",
+      teachersResult.error
+    );
+
+    teacherSelect.innerHTML =
+      '<option value="">Unable to load teachers</option>';
+
+  } else {
+
+    teacherSelect.innerHTML =
+      '<option value="">Select Teacher</option>';
+
+    (teachersResult.data || []).forEach(
+      function(teacher) {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          teacher.id;
+
+        option.textContent =
+          teacher.full_name +
+          (
+            teacher.tsc_number
+              ? " — " + teacher.tsc_number
+              : ""
+          );
+
+        teacherSelect.appendChild(option);
+      }
+    );
+  }
+
+  const learningAreasResult =
+    await db
+      .from("learning_areas")
+      .select("id, name")
+      .order("name", {
+        ascending: true
+      });
+
+  if (learningAreasResult.error) {
+
+    console.error(
+      "LEARNING AREAS LOAD ERROR:",
+      learningAreasResult.error
+    );
+
+    learningAreaSelect.innerHTML =
+      '<option value="">Unable to load learning areas</option>';
+
+  } else {
+
+    learningAreaSelect.innerHTML =
+      '<option value="">Select Learning Area</option>';
+
+    (learningAreasResult.data || []).forEach(
+      function(area) {
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          area.id;
+
+        option.textContent =
+          area.name;
+
+        learningAreaSelect.appendChild(option);
+      }
+    );
+  }
+}
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+
+    setupTeacherLearningAreaAssignment();
+
+  }
+);
   </script>
 
 </body>

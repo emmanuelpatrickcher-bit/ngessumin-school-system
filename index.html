@@ -5402,10 +5402,61 @@ document.addEventListener(
     );
   }
 
+const schoolResult =
+  await db
+    .from("schools")
+    .select("id")
+    .eq(
+      "name",
+      "Ngessumin Comprehensive School"
+    )
+    .single();
+
+if (schoolResult.error) {
+
+  console.error(
+    "SCHOOL ERROR:",
+    schoolResult.error
+  );
+
+  gradeSelect.innerHTML =
+    '<option value="">Unable to find school</option>';
+
+  return;
+}
+
+const gradesResult =
+  await db
+    .from("grades")
+    .select("id, grade_number")
+    .eq(
+      "school_id",
+      schoolResult.data.id
+    )
+    .order(
+      "grade_number",
+      {
+        ascending: true
+      }
+    );
+
+if (gradesResult.error) {
+
+  console.error(
+    "GRADES ERROR:",
+    gradesResult.error
+  );
+
+  gradeSelect.innerHTML =
+    '<option value="">Unable to load grades</option>';
+
+  return;
+}
+
 gradeSelect.innerHTML =
   '<option value="">Select Grade</option>';
 
-(grades || []).forEach(
+(gradesResult.data || []).forEach(
   function(grade) {
 
     const option =
@@ -5419,9 +5470,10 @@ gradeSelect.innerHTML =
       grade.grade_number;
 
     gradeSelect.appendChild(option);
-  }
-);  
 
+  }
+);
+    }
 
 document.addEventListener(
   "DOMContentLoaded",

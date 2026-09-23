@@ -4417,7 +4417,85 @@ async function loadFeeStatement() {
 </script>
   <script src="app.js"></script>
   <script>
-    
+    async function setupReceiptPayments() {
+
+  const paymentSelect =
+    document.getElementById("receiptPayment");
+
+  if (!paymentSelect) {
+    return;
+  }
+
+  paymentSelect.innerHTML =
+    '<option value="">Loading payments...</option>';
+
+  const result =
+    await db
+      .from("payments")
+      .select(`
+        id,
+        amount,
+        payment_date,
+        payment_method,
+        reference_number,
+        learners (
+          admission_number,
+          full_name
+        )
+      `)
+      .order(
+        "payment_date",
+        {
+          ascending: false
+        }
+      );
+
+  if (result.error) {
+
+    console.error(
+      "RECEIPT PAYMENT ERROR:",
+      result.error
+    );
+
+    paymentSelect.innerHTML =
+      '<option value="">Unable to load payments</option>';
+
+    return;
+  }
+
+  paymentSelect.innerHTML =
+    '<option value="">Select Payment</option>';
+
+  (result.data || []).forEach(
+    function(payment) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        payment.id;
+
+      option.textContent =
+        payment.learners.admission_number +
+        " — " +
+        payment.learners.full_name +
+        " — KSh " +
+        Number(payment.amount).toLocaleString() +
+        " — " +
+        payment.payment_method;
+
+      paymentSelect.appendChild(option);
+
+    }
+  );
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function() {
+    setupReceiptPayments();
+  }
+);
 async function statementLearnerLoader() {
 
     const learnerSelect =

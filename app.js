@@ -220,8 +220,7 @@ function testStatementFunction() {
     alert("NEW FUNCTION WORKS");
 }
 async function setupReportCardLearners() {
-    
-alert("REPORT CARD FUNCTION RUNNING");
+
     const learnerSelect =
         document.getElementById("reportLearner");
 
@@ -264,7 +263,7 @@ alert("REPORT CARD FUNCTION RUNNING");
             learner.id;
 
         option.textContent =
-            learner.assessment_number +
+            (learner.assessment_number || "-") +
             " — " +
             learner.full_name;
 
@@ -272,10 +271,16 @@ alert("REPORT CARD FUNCTION RUNNING");
     });
 }
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-        setupReportCardLearners();
-    }
-);
-console.log("REPORT CARD CODE LOADED");
+
+if (document.readyState === "loading") {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        setupReportCardLearners
+    );
+
+} else {
+
+    setupReportCardLearners();
+
+}

@@ -1606,7 +1606,52 @@
 
 </div>
   <div class="panel">
+<div class="panel">
 
+  <h2>Assign Grade</h2>
+
+  <div class="form-grid">
+
+    <div>
+      <label for="gradeAssignmentTeacher">
+        Teacher
+      </label>
+
+      <select id="gradeAssignmentTeacher">
+        <option value="">
+          Select Teacher
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label for="gradeAssignmentGrade">
+        Grade
+      </label>
+
+      <select id="gradeAssignmentGrade">
+        <option value="">
+          Select Grade
+        </option>
+      </select>
+    </div>
+
+  </div>
+
+  <button
+    type="button"
+    class="primary-btn"
+    onclick="assignTeacherGrade()"
+  >
+    Assign Grade
+  </button>
+
+  <div
+    id="gradeAssignmentMessage"
+    class="message"
+  ></div>
+
+</div>
     <h2>Registered Teachers</h2>
 
     <div

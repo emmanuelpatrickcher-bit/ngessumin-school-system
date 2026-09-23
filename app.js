@@ -1,4 +1,5 @@
-    if(error){
+alert("APP JS STARTED");
+if(error){
         console.error(error);
         return;
     }

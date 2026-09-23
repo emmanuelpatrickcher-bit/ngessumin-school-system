@@ -71,7 +71,7 @@ async function addLearner(e){
 
     const msg=document.getElementById("learnerMessage");
 
-    const admissionNumber=document.getElementById("admissionNumber").value.trim();
+    const assessmentNumber=document.getElementById("assessmentNumber").value.trim();
     const fullName=document.getElementById("fullName").value.trim();
     const gender=document.getElementById("gender").value;
     let gradeId=document.getElementById("grade").value;
@@ -80,10 +80,9 @@ async function addLearner(e){
     const admissionDate=document.getElementById("admissionDate").value;
     const status=document.getElementById("learnerStatus").value;
 
-    if(!admissionNumber||!fullName||!gradeId){
+    if(!assessmentNumber||!fullName||!gradeId){
 
-        msg.textContent="Please enter admission number, full name and grade.";
-
+    msg.textContent="Please enter assessment number, full name and grade.";
         return;
     }
 

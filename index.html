@@ -4536,6 +4536,193 @@ async function statementLearnerLoader() {
         learnerSelect.appendChild(option);
     });
 }
+    async function generateReceipt() {
+
+  const paymentId =
+    document.getElementById("receiptPayment").value;
+
+  const container =
+    document.getElementById("receiptResult");
+
+  if (!paymentId) {
+    container.innerHTML =
+      "<p>Please select a payment to generate a receipt.</p>";
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Loading receipt...</p>";
+
+  const result =
+    await db
+      .from("payments")
+      .select(`
+        id,
+        amount,
+        payment_date,
+        payment_method,
+        reference_number,
+        notes,
+        learners (
+          admission_number,
+          full_name
+        )
+      `)
+      .eq("id", paymentId)
+      .single();
+
+  if (result.error) {
+
+    console.error(
+      "RECEIPT ERROR:",
+      result.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load receipt.</p>";
+
+    return;
+  }
+
+  const payment =
+    result.data;
+
+  container.innerHTML = `
+
+    <div id="printReceipt">
+
+      <h2>NGESSUMIN COMPREHENSIVE SCHOOL</h2>
+
+      <h3>OFFICIAL PAYMENT RECEIPT</h3>
+
+      <hr>
+
+      <p>
+        <strong>Receipt No:</strong>
+        ${payment.id.substring(0, 8).toUpperCase()}
+      </p>
+
+      <p>
+        <strong>Date:</strong>
+        ${payment.payment_date || ""}
+      </p>
+
+      <p>
+        <strong>Admission Number:</strong>
+        ${escapeHtml(
+          payment.learners.admission_number
+        )}
+      </p>
+
+      <p>
+        <strong>Learner:</strong>
+        ${escapeHtml(
+          payment.learners.full_name
+        )}
+      </p>
+
+      <hr>
+
+      <p>
+        <strong>Amount Paid:</strong>
+        KSh ${Number(
+          payment.amount
+        ).toLocaleString()}
+      </p>
+
+      <p>
+        <strong>Payment Method:</strong>
+        ${escapeHtml(
+          payment.payment_method
+        )}
+      </p>
+
+      <p>
+        <strong>Reference Number:</strong>
+        ${escapeHtml(
+          payment.reference_number || ""
+        )}
+      </p>
+
+      <p>
+        <strong>Notes:</strong>
+        ${escapeHtml(
+          payment.notes || ""
+        )}
+      </p>
+
+      <hr>
+
+      <p>
+        Thank you for your payment.
+      </p>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="printReceipt()"
+    >
+      Print Receipt
+    </button>
+
+  `;
+}
+
+function printReceipt() {
+
+  const receipt =
+    document.getElementById("printReceipt");
+
+  if (!receipt) {
+    return;
+  }
+
+  const printWindow =
+    window.open(
+      "",
+      "_blank"
+    );
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Payment Receipt</title>
+
+        <style>
+
+          body {
+            font-family: Arial, sans-serif;
+            padding: 30px;
+          }
+
+          h2,
+          h3 {
+            text-align: center;
+          }
+
+          hr {
+            margin: 20px 0;
+          }
+
+        </style>
+
+      </head>
+
+      <body>
+
+        ${receipt.innerHTML}
+
+      </body>
+
+    </html>
+  `);
+
+  printWindow.document.close();
+
+  printWindow.print();
+}
   </script>
 
 </body>

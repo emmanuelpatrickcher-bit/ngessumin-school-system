@@ -5402,62 +5402,25 @@ document.addEventListener(
     );
   }
 
-  const gradesResult =
-    await db
-      .from("grades")
-      .select("id, name")
-      .order("name", {
-        ascending: true
-      });
+gradeSelect.innerHTML =
+  '<option value="">Select Grade</option>';
 
-  if (gradesResult.error) {
+(grades || []).forEach(
+  function(grade) {
 
-    if (gradesResult.error) {
+    const option =
+      document.createElement("option");
 
-  console.error(
-    "GRADES LOAD ERROR:",
-    gradesResult.error
-  );
+    option.value =
+      grade.id;
 
-  gradeSelect.innerHTML =
-    '<option value="">Unable to load grades</option>';
+    option.textContent =
+      "Grade " +
+      grade.grade_number;
 
-  const message =
-    document.getElementById(
-      "gradeAssignmentMessage"
-    );
-
-  if (message) {
-    message.textContent =
-      "Grade error: " +
-      gradesResult.error.message;
+    gradeSelect.appendChild(option);
   }
-
-  return;
-    }
-
-  } else {
-
-    gradeSelect.innerHTML =
-      '<option value="">Select Grade</option>';
-
-    (gradesResult.data || []).forEach(
-      function(grade) {
-
-        const option =
-          document.createElement("option");
-
-        option.value =
-          grade.id;
-
-        option.textContent =
-  "Grade " + grade.grade_number;
-
-        gradeSelect.appendChild(option);
-      }
-    );
-  }
-}
+);  
 
 
 document.addEventListener(

@@ -238,7 +238,7 @@ async function setupReportCardLearners() {
             .order("full_name");
 
     if (result.error) {
-
+alert("REPORT ERROR: " + result.error.message);
         console.error(
             "REPORT LEARNERS ERROR:",
             result.error

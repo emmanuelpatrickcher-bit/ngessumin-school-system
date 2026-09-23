@@ -277,3 +277,4 @@ document.addEventListener(
         setupReportCardLearners();
     }
 );
+console.log("REPORT CARD CODE LOADED");

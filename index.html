@@ -3365,7 +3365,53 @@ async function loadAssessmentLearners() {
   `;
 
   container.innerHTML =
-    html;
+  html;
+
+// Automatically calculate achievement level from score
+const scoreInputs =
+  container.querySelectorAll(".learner-score");
+
+scoreInputs.forEach(function (input) {
+
+  input.addEventListener("input", function () {
+
+    const score =
+      Number(input.value);
+
+    const learnerId =
+      input.dataset.learnerId;
+
+    const levelSelect =
+      container.querySelector(
+        '.learner-result[data-learner-id="' +
+        learnerId +
+        '"]'
+      );
+
+    if (!levelSelect || input.value === "") {
+      return;
+    }
+
+    let level = "";
+
+    if (score >= 76) {
+      level = "EE";
+    } else if (score >= 41) {
+      level = "ME";
+    } else if (score >= 21) {
+      level = "AE";
+    } else if (score >= 0) {
+      level = "BE";
+    }
+
+    levelSelect.value =
+      level;
+
+  });
+
+});
+
+}
 
 } 
   /* ================= SAVE ASSESSMENT RESULTS ================= */

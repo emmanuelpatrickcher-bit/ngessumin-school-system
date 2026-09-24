@@ -3789,17 +3789,18 @@ scoreInputs.forEach(function (input) {
     let level = "";
 
 const selectedGrade =
-  document.getElementById("assessmentGrade").value;
+  document.getElementById("assessmentGrade");
 
-const selectedGradeData =
-  grades.find(function (grade) {
-    return grade.id === selectedGrade;
-  });
+const selectedGradeText =
+  selectedGrade.options[
+    selectedGrade.selectedIndex
+  ].textContent.trim();
 
 const gradeNumber =
-  selectedGradeData
-    ? Number(selectedGradeData.grade_number)
-    : 0;
+  parseInt(
+    selectedGradeText.replace(/\D/g, ""),
+    10
+  );
 
 if (gradeNumber === 9) {
 

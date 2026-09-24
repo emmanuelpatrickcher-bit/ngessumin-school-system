@@ -3874,6 +3874,14 @@ alert(
     'option[value="' + level + '"]'
   ) ? "YES" : "NO")
 );
+    alert(
+  "OPTIONS: " +
+  Array.from(levelSelect.options)
+    .map(function(option) {
+      return option.value;
+    })
+    .join(", ")
+);
     levelSelect.value =
       level;
 

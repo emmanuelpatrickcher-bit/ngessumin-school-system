@@ -5332,7 +5332,7 @@ async function statementLearnerLoader() {
         document.getElementById("statementLearner");
 
     if (!learnerSelect) {
-        alert("Dropdown not found");
+        
         return;
     }
 
@@ -5344,7 +5344,7 @@ async function statementLearnerLoader() {
             .order("full_name");
 
     if (result.error) {
-        alert("ERROR: " + result.error.message);
+        
         return;
     }
 

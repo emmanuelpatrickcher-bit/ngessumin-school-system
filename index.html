@@ -3240,8 +3240,8 @@ async function loadAssessmentLearners() {
     await db
       .from("learners")
       .select(
-        "id, admission_number, full_name"
-      )
+  "id, assessment_number, full_name"
+)
       .eq(
         "grade_id",
         gradeId

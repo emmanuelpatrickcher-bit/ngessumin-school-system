@@ -2939,33 +2939,33 @@ if (totalMarks >= 802) {
       ${
         Object.values(bestResultsByArea).map(function(result) {
 
-          const areaName =
-            results.find(function(item) {
-              return (
-                item.assessments?.learning_area_id ===
-                Object.keys(bestResultsByArea).find(function(id) {
-                  return bestResultsByArea[id] === result;
-                })
-              );
-            })?.assessments?.learning_areas?.name || "-";
+  const areaName =
+    results.find(function(item) {
+      return (
+        item.assessments?.learning_area_id ===
+        Object.keys(bestResultsByArea).find(function(id) {
+          return bestResultsByArea[id] === result;
+        })
+      );
+    })?.assessments?.learning_areas?.name || "-";
 
-          return `
-            <tr>
-              <td style="border:1px solid #ccc; padding:8px;">
-                ${escapeHtml(areaName)}
-              </td>
+  return `
+    <tr>
+      <td style="border:1px solid #ccc; padding:8px;">
+        ${escapeHtml(areaName)}
+      </td>
 
-              <td style="border:1px solid #ccc; padding:8px; text-align:center;">
-                ${result.score === null ? "-" : result.score}
-              </td>
+      <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+        ${result.score === null ? "—" : result.score}
+      </td>
 
-              <td style="border:1px solid #ccc; padding:8px; text-align:center;">
-                ${result.achievement_level || "-"}
-              </td>
-            </tr>
-          `;
+      <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+        ${result.achievement_level || "—"}
+      </td>
+    </tr>
+  `;
 
-        }).join("")
+}).join("")
       }
 
     </tbody>

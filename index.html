@@ -2858,15 +2858,25 @@ totalPossible = 900;
 
   let level = "";
 
-  if (percentage <= 25) {
-    level = "BE";
-  } else if (percentage <= 50) {
-    level = "AE";
-  } else if (percentage <= 75) {
-    level = "ME";
-  } else {
-    level = "EE";
-  }
+  let level = "";
+
+if (totalMarks >= 802) {
+  level = "EE1";
+} else if (totalMarks >= 667) {
+  level = "EE2";
+} else if (totalMarks >= 514) {
+  level = "ME1";
+} else if (totalMarks >= 361) {
+  level = "ME2";
+} else if (totalMarks >= 271) {
+  level = "AE1";
+} else if (totalMarks >= 181) {
+  level = "AE2";
+} else if (totalMarks >= 91) {
+  level = "BE1";
+} else {
+  level = "BE2";
+}
 
   resultContainer.innerHTML = `
 

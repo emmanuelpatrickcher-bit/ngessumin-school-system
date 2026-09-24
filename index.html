@@ -2728,16 +2728,19 @@ alert("LOADING LEARNER FROM DATABASE");
 
   if (resultsResult.error) {
 
-    console.error(
-      "REPORT RESULTS ERROR:",
-      resultsResult.error
-    );
+  alert("RESULT ERROR: " + resultsResult.error.message);
 
-    message.textContent =
-      "Unable to load learner results.";
+  console.error(
+    "REPORT RESULTS ERROR:",
+    resultsResult.error
+  );
 
-    return;
+  message.textContent =
+    "Unable to load learner results.";
+
+  return;
   }
+
 
   const results =
     resultsResult.data || [];

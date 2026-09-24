@@ -2770,6 +2770,8 @@ const selectedTermId =
 let totalMarks = 0;
 let totalPossible = 0;
 
+const countedLearningAreas = {};
+
 results.forEach(
   function(result) {
 
@@ -2778,10 +2780,22 @@ results.forEach(
       String(selectedTermId)
     ) {
 
-      totalMarks +=
-        Number(result.score || 0);
+      const learningAreaId =
+        result.assessments?.learning_area_id;
 
-      totalPossible += 100;
+      if (
+        learningAreaId &&
+        !countedLearningAreas[learningAreaId]
+      ) {
+
+        countedLearningAreas[learningAreaId] = true;
+
+        totalMarks +=
+          Number(result.score || 0);
+
+        totalPossible += 100;
+
+      }
 
     }
 

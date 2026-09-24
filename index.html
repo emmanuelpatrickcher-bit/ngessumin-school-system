@@ -3791,23 +3791,15 @@ scoreInputs.forEach(function (input) {
 const selectedGrade =
   document.getElementById("assessmentGrade").value;
 
-const gradeOption =
-  document.querySelector(
-    '#assessmentGrade option[value="' +
-    selectedGrade +
-    '"]'
-  );
-
-const gradeText =
-  gradeOption
-    ? gradeOption.textContent.trim()
-    : "";
+const selectedGradeData =
+  grades.find(function (grade) {
+    return grade.id === selectedGrade;
+  });
 
 const gradeNumber =
-  parseInt(
-    gradeText.replace(/\D/g, ""),
-    10
-  );
+  selectedGradeData
+    ? Number(selectedGradeData.grade_number)
+    : 0;
 
 if (gradeNumber === 9) {
 

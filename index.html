@@ -3487,49 +3487,50 @@ async function saveAssessmentResults() {
     document.getElementById("assessmentMessage");
 
   if (!gradeId || !areaId || !assessmentName) {
+
     message.textContent =
       "Please select Grade, Learning Area and enter the Assessment name.";
+
     return;
   }
 
   const selectedResults =
     document.querySelectorAll(".learner-result");
 
-  if (selectedResults.length === 0) {
-    message.textContent =
-      "No learners found.";
-    return;
-  }
-
   const resultsToSave = [];
 
-selectedResults.forEach(function (select) {
+  selectedResults.forEach(function (select) {
 
-  const learnerId = select.dataset.learnerId;
+    if (select.value) {
 
-  const scoreInput =
-    document.querySelector(
-      '.learner-score[data-learner-id="' + learnerId + '"]'
-    );
+      const learnerId =
+        select.dataset.learnerId;
 
-  const score =
-    scoreInput ? scoreInput.value : "";
+      const scoreInput =
+        document.querySelector(
+          '.learner-score[data-learner-id="' +
+          learnerId +
+          '"]'
+        );
 
-  if (select.value && score !== "") {
+      const score =
+        scoreInput ? scoreInput.value : "";
 
-    resultsToSave.push({
-      learner_id: learnerId,
-      score: Number(score),
-      achievement_level: select.value
-    });
+      resultsToSave.push({
+        learner_id: learnerId,
+        score: score === "" ? null : Number(score),
+        achievement_level: select.value
+      });
 
-  }
+    }
 
-});
+  });
 
   if (resultsToSave.length === 0) {
+
     message.textContent =
       "Please select an achievement level for at least one learner.";
+
     return;
   }
 
@@ -3607,18 +3608,22 @@ selectedResults.forEach(function (select) {
       throw assessmentResult.error;
     }
 
-    const assessmentId =
-      assessmentResult.data.id;
-
     const rows =
       resultsToSave.map(function (item) {
 
         return {
-  assessment_id: assessmentId,
-  learner_id: item.learner_id,
-  score: item.score,
-  achievement_level: item.achievement_level
-};
+          assessment_id:
+            assessmentResult.data.id,
+
+          learner_id:
+            item.learner_id,
+
+          score:
+            item.score,
+
+          achievement_level:
+            item.achievement_level
+        };
 
       });
 
@@ -3646,7 +3651,6 @@ selectedResults.forEach(function (select) {
       error.message;
 
   }
-
 }
 /* ================= LOAD ASSESSMENT LEARNERS ================= */
 

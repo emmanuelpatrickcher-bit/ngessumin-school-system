@@ -3404,18 +3404,29 @@ async function saveAssessmentResults() {
 
   const resultsToSave = [];
 
-  selectedResults.forEach(function (select) {
+selectedResults.forEach(function (select) {
 
-    if (select.value) {
+  const learnerId = select.dataset.learnerId;
 
-      resultsToSave.push({
-        learner_id: select.dataset.learnerId,
-        achievement_level: select.value
-      });
+  const scoreInput =
+    document.querySelector(
+      '.learner-score[data-learner-id="' + learnerId + '"]'
+    );
 
-    }
+  const score =
+    scoreInput ? scoreInput.value : "";
 
-  });
+  if (select.value && score !== "") {
+
+    resultsToSave.push({
+      learner_id: learnerId,
+      score: Number(score),
+      achievement_level: select.value
+    });
+
+  }
+
+});
 
   if (resultsToSave.length === 0) {
     message.textContent =

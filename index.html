@@ -3882,8 +3882,42 @@ alert(
     })
     .join(", ")
 );
-    levelSelect.value =
-      level;
+    if (gradeNumber === 9) {
+
+  const grade9Levels = [
+    ["EE1", "EE1 — Exceeding Expectations 1"],
+    ["EE2", "EE2 — Exceeding Expectations 2"],
+    ["ME1", "ME1 — Meeting Expectations 1"],
+    ["ME2", "ME2 — Meeting Expectations 2"],
+    ["AE1", "AE1 — Approaching Expectations 1"],
+    ["AE2", "AE2 — Approaching Expectations 2"],
+    ["BE1", "BE1 — Below Expectations 1"],
+    ["BE2", "BE2 — Below Expectations 2"]
+  ];
+
+  grade9Levels.forEach(function(item) {
+
+    if (
+      !levelSelect.querySelector(
+        'option[value="' + item[0] + '"]'
+      )
+    ) {
+
+      const option =
+        document.createElement("option");
+
+      option.value = item[0];
+      option.textContent = item[1];
+
+      levelSelect.appendChild(option);
+    }
+
+  });
+
+}
+
+levelSelect.value =
+  level;
 
   });
 

@@ -2744,7 +2744,30 @@ async function generateReportCard() {
 
   const results =
   resultsResult.data || [];
+const gradeLearningAreasResult =
+  await db
+    .from("grade_learning_areas")
+    .select(`
+      learning_area_id,
+      learning_areas (
+        id,
+        name
+      )
+    `)
+    .eq("grade_id", learner.grade_id);
 
+if (gradeLearningAreasResult.error) {
+  console.error(
+    "GRADE LEARNING AREAS ERROR:",
+    gradeLearningAreasResult.error
+  );
+  message.textContent =
+    "Unable to load learning areas.";
+  return;
+}
+
+const gradeLearningAreas =
+  gradeLearningAreasResult.data || [];
 // Get the actual term ID from the selected term number
 const termResult =
   await db

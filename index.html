@@ -2880,60 +2880,118 @@ if (totalMarks >= 802) {
 
   resultContainer.innerHTML = `
 
-    <h2>
-      NGESSUMIN COMPREHENSIVE SCHOOL
-    </h2>
+  <h2>
+    NGESSUMIN COMPREHENSIVE SCHOOL
+  </h2>
 
-    <h3>
-      LEARNER REPORT CARD
-    </h3>
+  <h3>
+    LEARNER REPORT CARD
+  </h3>
 
-    <p>
-      <strong>Assessment Number:</strong>
-      ${escapeHtml(
-        learner.assessment_number || "-"
-      )}
-    </p>
+  <p>
+    <strong>Assessment Number:</strong>
+    ${escapeHtml(
+      learner.assessment_number || "-"
+    )}
+  </p>
 
-    <p>
-      <strong>Learner:</strong>
-      ${escapeHtml(
-        learner.full_name
-      )}
-    </p>
+  <p>
+    <strong>Learner:</strong>
+    ${escapeHtml(
+      learner.full_name
+    )}
+  </p>
 
-    <p>
-      <strong>Grade:</strong>
-      Grade ${learner.grades?.grade_number || "-"}
-    </p>
+  <p>
+    <strong>Grade:</strong>
+    Grade ${learner.grades?.grade_number || "-"}
+  </p>
 
-    <p>
-      <strong>Term:</strong>
-      ${termNumber}
-    </p>
+  <p>
+    <strong>Term:</strong>
+    ${termNumber}
+  </p>
 
-    <hr>
+  <hr>
 
-    <h3>
-      Performance Summary
-    </h3>
+  <h3>
+    Learning Area Results
+  </h3>
 
-    <p>
-      <strong>Total Marks:</strong>
-      ${totalMarks}/${totalPossible}
-    </p>
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #ccc; padding:8px; text-align:left;">
+          Learning Area
+        </th>
+        <th style="border:1px solid #ccc; padding:8px;">
+          Score
+        </th>
+        <th style="border:1px solid #ccc; padding:8px;">
+          Level
+        </th>
+      </tr>
+    </thead>
 
-    <p>
-      <strong>Percentage:</strong>
-      ${percentage}%
-    </p>
+    <tbody>
 
-    <p>
-      <strong>Achievement Level:</strong>
-      ${level}
-    </p>
+      ${
+        Object.values(bestResultsByArea).map(function(result) {
 
-  `;
+          const areaName =
+            results.find(function(item) {
+              return (
+                item.assessments?.learning_area_id ===
+                Object.keys(bestResultsByArea).find(function(id) {
+                  return bestResultsByArea[id] === result;
+                })
+              );
+            })?.assessments?.learning_areas?.name || "-";
+
+          return `
+            <tr>
+              <td style="border:1px solid #ccc; padding:8px;">
+                ${escapeHtml(areaName)}
+              </td>
+
+              <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+                ${result.score === null ? "-" : result.score}
+              </td>
+
+              <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+                ${result.achievement_level || "-"}
+              </td>
+            </tr>
+          `;
+
+        }).join("")
+      }
+
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h3>
+    Performance Summary
+  </h3>
+
+  <p>
+    <strong>Total Marks:</strong>
+    ${totalMarks}/${totalPossible}
+  </p>
+
+  <p>
+    <strong>Percentage:</strong>
+    ${percentage}%
+  </p>
+
+  <p>
+    <strong>Achievement Level:</strong>
+    ${level}
+  </p>
+
+`;
 
   message.textContent =
     "Report card generated successfully.";

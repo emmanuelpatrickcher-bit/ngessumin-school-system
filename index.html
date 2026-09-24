@@ -3972,8 +3972,22 @@ async function saveAssessmentResults() {
 
     if (select.value) {
 
+      const learnerId =
+        select.dataset.learnerId;
+
+      const scoreInput =
+        document.querySelector(
+          '.learner-score[data-learner-id="' +
+          learnerId +
+          '"]'
+        );
+
+      const score =
+        scoreInput ? scoreInput.value : "";
+
       resultsToSave.push({
-        learner_id: select.dataset.learnerId,
+        learner_id: learnerId,
+        score: score === "" ? null : Number(score),
         achievement_level: select.value
       });
 
@@ -4067,9 +4081,17 @@ async function saveAssessmentResults() {
       resultsToSave.map(function (item) {
 
         return {
-          assessment_id: assessmentResult.data.id,
-          learner_id: item.learner_id,
-          achievement_level: item.achievement_level
+          assessment_id:
+            assessmentResult.data.id,
+
+          learner_id:
+            item.learner_id,
+
+          score:
+            item.score,
+
+          achievement_level:
+            item.achievement_level
         };
 
       });

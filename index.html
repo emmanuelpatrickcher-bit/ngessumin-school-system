@@ -3742,7 +3742,27 @@ async function saveAssessmentResults() {
     if (termResult.error) {
       throw termResult.error;
     }
+const duplicateAssessment =
+  await db
+    .from("assessments")
+    .select("id")
+    .eq("school_id", schoolResult.data.id)
+    .eq("academic_year_id", yearResult.data.id)
+    .eq("term_id", termResult.data.id)
+    .eq("grade_id", gradeId)
+    .eq("learning_area_id", areaId)
+    .eq("assessment_name", assessmentName)
+    .maybeSingle();
 
+if (duplicateAssessment.error) {
+  throw duplicateAssessment.error;
+}
+
+if (duplicateAssessment.data) {
+  message.textContent =
+    "This assessment already exists for this grade and learning area. Please use a different assessment name.";
+  return;
+}
     const assessmentResult =
       await db
         .from("assessments")

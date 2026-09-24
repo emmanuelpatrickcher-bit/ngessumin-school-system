@@ -2842,34 +2842,7 @@ Object.keys(bestResultsByArea).forEach(
  * each carrying 100 marks.
  */
 totalPossible = 900;
-  function(result) {
-
-    if (
-      String(result.assessments?.term_id) ===
-      String(selectedTermId)
-    ) {
-
-      const learningAreaId =
-        result.assessments?.learning_area_id;
-
-      if (
-        learningAreaId &&
-        !countedLearningAreas[learningAreaId]
-      ) {
-
-        countedLearningAreas[learningAreaId] = true;
-
-        totalMarks +=
-          Number(result.score || 0);
-
-        totalPossible += 100;
-
-      }
-
-    }
-
-  }
-);
+  
 
   let percentage = 0;
 

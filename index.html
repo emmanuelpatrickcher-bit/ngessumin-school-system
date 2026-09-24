@@ -2657,7 +2657,197 @@
     setupReportCardLearners();
   }
 );
+async function generateReportCard() {
 
+  const learnerId =
+    document.getElementById("reportLearner").value;
+
+  const termNumber =
+    document.getElementById("reportTerm").value;
+
+  const message =
+    document.getElementById("reportMessage");
+
+  const resultContainer =
+    document.getElementById("reportCardResult");
+
+  if (!learnerId || !termNumber) {
+    message.textContent =
+      "Please select a learner and term.";
+    return;
+  }
+
+  message.textContent =
+    "Generating report card...";
+
+  resultContainer.innerHTML =
+    "<p>Loading results...</p>";
+
+  const learnerResult =
+    await db
+      .from("learners")
+      .select(`
+        id,
+        assessment_number,
+        full_name,
+        grade_id,
+        grades (
+          grade_number
+        )
+      `)
+      .eq("id", learnerId)
+      .single();
+
+  if (learnerResult.error) {
+    message.textContent =
+      "Unable to load learner.";
+    return;
+  }
+
+  const learner =
+    learnerResult.data;
+
+  const resultsResult =
+    await db
+      .from("results")
+      .select(`
+        score,
+        assessments (
+          term_id,
+          learning_area_id,
+          learning_areas (
+            name
+          )
+        )
+      `)
+      .eq(
+        "learner_id",
+        learnerId
+      );
+
+  if (resultsResult.error) {
+
+    console.error(
+      "REPORT RESULTS ERROR:",
+      resultsResult.error
+    );
+
+    message.textContent =
+      "Unable to load learner results.";
+
+    return;
+  }
+
+  const results =
+    resultsResult.data || [];
+
+  let totalMarks = 0;
+  let totalPossible = 0;
+
+  results.forEach(
+    function(result) {
+
+      if (
+        String(
+          result.assessments?.term_id
+        ) === String(termNumber)
+      ) {
+
+        totalMarks +=
+          Number(result.score || 0);
+
+        totalPossible += 100;
+
+      }
+
+    }
+  );
+
+  let percentage = 0;
+
+  if (totalPossible > 0) {
+
+    percentage =
+      (totalMarks / totalPossible) * 100;
+
+  }
+
+  percentage =
+    Math.round(percentage);
+
+  let level = "";
+
+  if (percentage <= 25) {
+    level = "BE";
+  } else if (percentage <= 50) {
+    level = "AE";
+  } else if (percentage <= 75) {
+    level = "ME";
+  } else {
+    level = "EE";
+  }
+
+  resultContainer.innerHTML = `
+
+    <h2>
+      NGESSUMIN COMPREHENSIVE SCHOOL
+    </h2>
+
+    <h3>
+      LEARNER REPORT CARD
+    </h3>
+
+    <p>
+      <strong>Assessment Number:</strong>
+      ${escapeHtml(
+        learner.assessment_number || "-"
+      )}
+    </p>
+
+    <p>
+      <strong>Learner:</strong>
+      ${escapeHtml(
+        learner.full_name
+      )}
+    </p>
+
+    <p>
+      <strong>Grade:</strong>
+      Grade ${learner.grades?.grade_number || "-"}
+    </p>
+
+    <p>
+      <strong>Term:</strong>
+      ${termNumber}
+    </p>
+
+    <hr>
+
+    <h3>
+      Performance Summary
+    </h3>
+
+    <p>
+      <strong>Total Marks:</strong>
+      ${totalMarks}/${totalPossible}
+    </p>
+
+    <p>
+      <strong>Percentage:</strong>
+      ${percentage}%
+    </p>
+
+    <p>
+      <strong>Achievement Level:</strong>
+      ${level}
+    </p>
+
+  `;
+
+  message.textContent =
+    "Report card generated successfully.";
+
+}
 
   /* =========================================================
      SHOW LEARNERS

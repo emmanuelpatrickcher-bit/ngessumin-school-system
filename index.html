@@ -2742,29 +2742,51 @@ async function generateReportCard() {
 
 
   const results =
-    resultsResult.data || [];
+  resultsResult.data || [];
 
-  let totalMarks = 0;
-  let totalPossible = 0;
+// Get the actual term ID from the selected term number
+const termResult =
+  await db
+    .from("terms")
+    .select("id, term_number")
+    .eq("term_number", Number(termNumber))
+    .single();
 
-  results.forEach(
-    function(result) {
+if (termResult.error) {
+  console.error(
+    "TERM LOOKUP ERROR:",
+    termResult.error
+  );
 
-      if (
-        String(
-          result.assessments?.term_id
-        ) === String(termNumber)
-      ) {
+  message.textContent =
+    "Unable to find selected term.";
 
-        totalMarks +=
-          Number(result.score || 0);
+  return;
+}
 
-        totalPossible += 100;
+const selectedTermId =
+  termResult.data.id;
 
-      }
+let totalMarks = 0;
+let totalPossible = 0;
+
+results.forEach(
+  function(result) {
+
+    if (
+      String(result.assessments?.term_id) ===
+      String(selectedTermId)
+    ) {
+
+      totalMarks +=
+        Number(result.score || 0);
+
+      totalPossible += 100;
 
     }
-  );
+
+  }
+);
 
   let percentage = 0;
 

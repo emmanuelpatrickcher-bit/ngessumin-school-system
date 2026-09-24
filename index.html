@@ -2986,9 +2986,9 @@ if (totalMarks >= 802) {
 
       <td style="border:1px solid #ccc; padding:8px; text-align:center;">
         ${
-          result && result.achievement_level
-            ? result.achievement_level
-            : "—"
+  result && result.score !== null && result.achievement_level
+    ? result.achievement_level
+    : "—"
         }
       </td>
     </tr>

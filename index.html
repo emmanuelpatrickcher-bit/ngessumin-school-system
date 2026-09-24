@@ -2960,35 +2960,41 @@ if (totalMarks >= 802) {
     <tbody>
 
       ${
-        Object.values(bestResultsByArea).map(function(result) {
+       gradeLearningAreas.map(function(item) {
 
-  const areaName =
-    results.find(function(item) {
-      return (
-        item.assessments?.learning_area_id ===
-        Object.keys(bestResultsByArea).find(function(id) {
-          return bestResultsByArea[id] === result;
-        })
-      );
-    })?.assessments?.learning_areas?.name || "-";
+  const learningAreaId =
+    item.learning_area_id;
+
+  const result =
+    bestResultsByArea[learningAreaId];
 
   return `
     <tr>
       <td style="border:1px solid #ccc; padding:8px;">
-        ${escapeHtml(areaName)}
+        ${escapeHtml(
+          item.learning_areas?.name || "-"
+        )}
       </td>
 
       <td style="border:1px solid #ccc; padding:8px; text-align:center;">
-        ${result.score === null ? "—" : result.score}
+        ${
+          result && result.score !== null
+            ? result.score
+            : "—"
+        }
       </td>
 
       <td style="border:1px solid #ccc; padding:8px; text-align:center;">
-        ${result.achievement_level || "—"}
+        ${
+          result && result.achievement_level
+            ? result.achievement_level
+            : "—"
+        }
       </td>
     </tr>
   `;
 
-}).join("")
+}).join("") 
       }
 
     </tbody>

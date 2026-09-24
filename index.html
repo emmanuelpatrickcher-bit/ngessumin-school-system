@@ -3868,10 +3868,11 @@ if (gradeNumber === 9) {
 
 }
 alert(
-  "LEVEL SELECT FOUND: " +
-  (levelSelect ? "YES" : "NO") +
-  " | LEVEL: " +
-  level
+  "LEVEL: " + level +
+  " | OPTION EXISTS: " +
+  (levelSelect.querySelector(
+    'option[value="' + level + '"]'
+  ) ? "YES" : "NO")
 );
     levelSelect.value =
       level;

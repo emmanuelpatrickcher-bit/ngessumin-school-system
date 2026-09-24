@@ -3640,32 +3640,48 @@ async function loadAssessmentLearners() {
             )}
           </small>
 
-          <select
-            class="learner-result"
-            data-learner-id="${learner.id}"
-          >
+          <div class="score-entry">
 
-            <option value="">
-              Select level
-            </option>
+  <label>
+    Score
+  </label>
 
-            <option value="EE">
-              EE — Exceeding Expectations
-            </option>
+  <input
+    type="number"
+    class="learner-score"
+    data-learner-id="${learner.id}"
+    min="0"
+    max="100"
+    step="1"
+    placeholder="0–100"
+  >
 
-            <option value="ME">
-              ME — Meeting Expectations
-            </option>
+  <select
+    class="learner-result"
+    data-learner-id="${learner.id}"
+  >
+    <option value="">
+      Select level
+    </option>
 
-            <option value="AE">
-              AE — Approaching Expectations
-            </option>
+    <option value="EE">
+      EE — Exceeding Expectations
+    </option>
 
-            <option value="BE">
-              BE — Below Expectations
-            </option>
+    <option value="ME">
+      ME — Meeting Expectations
+    </option>
 
-          </select>
+    <option value="AE">
+      AE — Approaching Expectations
+    </option>
+
+    <option value="BE">
+      BE — Below Expectations
+    </option>
+  </select>
+
+</div>
 
         </div>
       `;

@@ -2711,15 +2711,16 @@ async function generateReportCard() {
     await db
       .from("results")
       .select(`
-        score,
-        assessments (
-          term_id,
-          learning_area_id,
-          learning_areas (
-            name
-          )
-        )
-      `)
+  score,
+  achievement_level,
+  assessments (
+    term_id,
+    learning_area_id,
+    learning_areas (
+      name
+    )
+  )
+`)
       .eq(
         "learner_id",
         learnerId

@@ -3515,10 +3515,11 @@ selectedResults.forEach(function (select) {
       resultsToSave.map(function (item) {
 
         return {
-          assessment_id: assessmentId,
-          learner_id: item.learner_id,
-          achievement_level: item.achievement_level
-        };
+  assessment_id: assessmentId,
+  learner_id: item.learner_id,
+  score: item.score,
+  achievement_level: item.achievement_level
+};
 
       });
 

@@ -4275,6 +4275,8 @@ document.addEventListener(
 
 async function loadResultsAnalysis() {
 
+  async function loadResultsAnalysis() {
+
   const gradeId =
     document.getElementById("analysisGrade").value;
 
@@ -4294,6 +4296,33 @@ async function loadResultsAnalysis() {
 
   container.innerHTML =
     "<p>Loading results analysis...</p>";
+
+  /* GET GRADE NUMBER */
+
+  const gradeResult =
+    await db
+      .from("grades")
+      .select("grade_number")
+      .eq("id", gradeId)
+      .single();
+
+  if (gradeResult.error) {
+
+    console.error(
+      "GRADE ANALYSIS ERROR:",
+      gradeResult.error
+    );
+
+    container.innerHTML =
+      "<p>Unable to identify the selected grade.</p>";
+
+    return;
+  }
+
+  const gradeNumber =
+    Number(gradeResult.data.grade_number);
+
+  /* LOAD RESULTS */
 
   const result =
     await db
@@ -4330,6 +4359,150 @@ async function loadResultsAnalysis() {
 
   const rows =
     result.data || [];
+
+  /*
+   * GRADE 9
+   * Uses EE1, EE2, ME1, ME2,
+   * AE1, AE2, BE1, BE2.
+   */
+
+  if (gradeNumber === 9) {
+
+    let EE1 = 0;
+    let EE2 = 0;
+    let ME1 = 0;
+    let ME2 = 0;
+    let AE1 = 0;
+    let AE2 = 0;
+    let BE1 = 0;
+    let BE2 = 0;
+
+    rows.forEach(
+      function (row) {
+
+        if (row.achievement_level === "EE1") {
+          EE1++;
+        }
+
+        if (row.achievement_level === "EE2") {
+          EE2++;
+        }
+
+        if (row.achievement_level === "ME1") {
+          ME1++;
+        }
+
+        if (row.achievement_level === "ME2") {
+          ME2++;
+        }
+
+        if (row.achievement_level === "AE1") {
+          AE1++;
+        }
+
+        if (row.achievement_level === "AE2") {
+          AE2++;
+        }
+
+        if (row.achievement_level === "BE1") {
+          BE1++;
+        }
+
+        if (row.achievement_level === "BE2") {
+          BE2++;
+        }
+
+      }
+    );
+
+    const total =
+      EE1 + EE2 +
+      ME1 + ME2 +
+      AE1 + AE2 +
+      BE1 + BE2;
+
+    function percentage(number) {
+
+      if (total === 0) {
+        return 0;
+      }
+
+      return Math.round(
+        (number / total) * 100
+      );
+
+    }
+
+    container.innerHTML = `
+
+      <h3>Achievement Level Analysis</h3>
+
+      <p>
+        Total Results:
+        <strong>${total}</strong>
+      </p>
+
+      <div class="cards">
+
+        <div class="card">
+          <h3>EE1</h3>
+          <div class="number">${EE1}</div>
+          <p>${percentage(EE1)}%</p>
+        </div>
+
+        <div class="card">
+          <h3>EE2</h3>
+          <div class="number">${EE2}</div>
+          <p>${percentage(EE2)}%</p>
+        </div>
+
+        <div class="card">
+          <h3>ME1</h3>
+          <div class="number">${ME1}</div>
+          <p>${percentage(ME1)}%</p>
+        </div>
+
+        <div class="card">
+          <h3>ME2</h3>
+          <div class="number">${ME2}</div>
+          <p>${percentage(ME2)}%</p>
+        </div>
+
+        <div class="card">
+          <h3>AE1</h3>
+          <div class="number">${AE1}</div>
+          <p>${percentage(AE1)}%</p>
+        </div>
+
+        <div class="card">
+          <h3>AE2</h3>
+          <div class="number">${AE2}</div>
+          <p>${percentage(AE2)}%</p>
+        </div>
+
+        <div class="card">
+          <h3>BE1</h3>
+          <div class="number">${BE1}</div>
+          <p>${percentage(BE1)}%</p>
+        </div>
+
+        <div class="card">
+          <h3>BE2</h3>
+          <div class="number">${BE2}</div>
+          <p>${percentage(BE2)}%</p>
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+  /*
+   * GRADES 1–8
+   * Uses EE, ME, AE, BE.
+   */
 
   let EE = 0;
   let ME = 0;
@@ -4385,69 +4558,34 @@ async function loadResultsAnalysis() {
     <div class="cards">
 
       <div class="card">
-
         <h3>EE</h3>
-
-        <div class="number">
-          ${EE}
-        </div>
-
-        <p>
-          ${percentage(EE)}%
-        </p>
-
+        <div class="number">${EE}</div>
+        <p>${percentage(EE)}%</p>
       </div>
 
-
       <div class="card">
-
         <h3>ME</h3>
-
-        <div class="number">
-          ${ME}
-        </div>
-
-        <p>
-          ${percentage(ME)}%
-        </p>
-
+        <div class="number">${ME}</div>
+        <p>${percentage(ME)}%</p>
       </div>
 
-
       <div class="card">
-
         <h3>AE</h3>
-
-        <div class="number">
-          ${AE}
-        </div>
-
-        <p>
-          ${percentage(AE)}%
-        </p>
-
+        <div class="number">${AE}</div>
+        <p>${percentage(AE)}%</p>
       </div>
 
-
       <div class="card">
-
         <h3>BE</h3>
-
-        <div class="number">
-          ${BE}
-        </div>
-
-        <p>
-          ${percentage(BE)}%
-        </p>
-
+        <div class="number">${BE}</div>
+        <p>${percentage(BE)}%</p>
       </div>
 
     </div>
 
   `;
 
-}
+  }
 /* CONNECT ANALYSIS DROPDOWNS */
 
 document

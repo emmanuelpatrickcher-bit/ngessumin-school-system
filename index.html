@@ -2881,25 +2881,78 @@ totalPossible = 900;
     Math.round(percentage);
 
   
+let level = "";
 
-  let level = "";
+const selectedGradeNumber =
+  Number(learner.grades?.grade_number);
 
-if (totalMarks >= 802) {
-  level = "EE1";
-} else if (totalMarks >= 667) {
-  level = "EE2";
-} else if (totalMarks >= 514) {
-  level = "ME1";
-} else if (totalMarks >= 361) {
-  level = "ME2";
-} else if (totalMarks >= 271) {
-  level = "AE1";
-} else if (totalMarks >= 181) {
-  level = "AE2";
-} else if (totalMarks >= 91) {
-  level = "BE1";
-} else {
-  level = "BE2";
+if (selectedGradeNumber === 9) {
+
+  if (totalMarks >= 802) {
+    level = "EE1";
+  } else if (totalMarks >= 667) {
+    level = "EE2";
+  } else if (totalMarks >= 514) {
+    level = "ME1";
+  } else if (totalMarks >= 361) {
+    level = "ME2";
+  } else if (totalMarks >= 271) {
+    level = "AE1";
+  } else if (totalMarks >= 181) {
+    level = "AE2";
+  } else if (totalMarks >= 91) {
+    level = "BE1";
+  } else {
+    level = "BE2";
+  }
+
+} else if (
+  selectedGradeNumber >= 7 &&
+  selectedGradeNumber <= 8
+) {
+
+  if (totalMarks >= 676) {
+    level = "EE";
+  } else if (totalMarks >= 361) {
+    level = "ME";
+  } else if (totalMarks >= 181) {
+    level = "AE";
+  } else {
+    level = "BE";
+  }
+
+} else if (
+  selectedGradeNumber >= 4 &&
+  selectedGradeNumber <= 6
+) {
+
+  if (totalMarks >= 526) {
+    level = "EE";
+  } else if (totalMarks >= 281) {
+    level = "ME";
+  } else if (totalMarks >= 141) {
+    level = "AE";
+  } else {
+    level = "BE";
+  }
+
+} else if (
+  selectedGradeNumber >= 1 &&
+  selectedGradeNumber <= 3
+) {
+
+  if (totalMarks >= 451) {
+    level = "EE";
+  } else if (totalMarks >= 241) {
+    level = "ME";
+  } else if (totalMarks >= 121) {
+    level = "AE";
+  } else {
+    level = "BE";
+  }
+
+}
+  
 }
 
   resultContainer.innerHTML = `

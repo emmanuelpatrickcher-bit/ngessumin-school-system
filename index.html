@@ -8671,11 +8671,138 @@ message.textContent =
 
   }
 
+}
+
+
+async function applyRolePermissions() {
+
+  try {
+
+    const authResult =
+      await db.auth.getUser();
+
+    if (
+      authResult.error ||
+      !authResult.data.user
+    ) {
+      return;
+    }
+
+    const userId =
+      authResult.data.user.id;
+
+    const result =
+      await db
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .single();
+
+    if (result.error) {
+      console.error(
+        "ROLE PERMISSION ERROR:",
+        result.error
+      );
+      return;
+    }
+
+    const role =
+      result.data.role;
+
+    const restrictedMenus = [
+      "feesMenuButton",
+      "receiptsMenuButton",
+      "teachersMenuButton",
+      "usersMenuButton",
+      "settingsMenuButton"
+    ];
+
+
+    /* Show all restricted menus first */
+
+    restrictedMenus.forEach(function(menuId) {
+
+      const menu =
+        document.getElementById(menuId);
+
+      if (menu) {
+        menu.style.display = "";
+      }
+
+    });
+
+
+    /* Teacher */
+
+    if (role === "Teacher") {
+
+      restrictedMenus.forEach(function(menuId) {
+
+        const menu =
+          document.getElementById(menuId);
+
+        if (menu) {
+          menu.style.display = "none";
+        }
+
+      });
+
     }
 
 
+    /* Headteacher */
+
+    if (role === "Headteacher") {
+
+      [
+        "usersMenuButton",
+        "settingsMenuButton"
+      ].forEach(function(menuId) {
+
+        const menu =
+          document.getElementById(menuId);
+
+        if (menu) {
+          menu.style.display = "none";
+        }
+
+      });
+
+    }
+
+
+    /* Administrator */
+
+    if (role === "Administrator") {
+
+      restrictedMenus.forEach(function(menuId) {
+
+        const menu =
+          document.getElementById(menuId);
+
+        if (menu) {
+          menu.style.display = "";
+        }
+
+      });
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "ROLE PERMISSION ERROR:",
+      error
+    );
+
+  }
+
+}
+
 
 applyRolePermissions();
+
+loadUserPermissions();
 
 </script>
 

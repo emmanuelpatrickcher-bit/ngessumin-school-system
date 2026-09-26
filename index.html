@@ -2856,6 +2856,89 @@ const termClosingDate =
 
 
 let nextTermOpeningDate = null;
+  async function getNextTermOpeningDate(
+  academicYearId,
+  currentTermNumber,
+  academicYear,
+  schoolId
+) {
+  try {
+
+    // Term 1 → Term 2
+    // Term 2 → Term 3
+    if (Number(currentTermNumber) < 3) {
+
+      const result = await db
+        .from("terms")
+        .select("opening_date")
+        .eq("academic_year_id", academicYearId)
+        .eq(
+          "term_number",
+          Number(currentTermNumber) + 1
+        )
+        .maybeSingle();
+
+      if (result.error) {
+        console.error(
+          "NEXT TERM OPENING DATE ERROR:",
+          result.error
+        );
+        return null;
+      }
+
+      return result.data?.opening_date || null;
+    }
+
+    // Term 3 → Term 1 of the next academic year
+    const nextYearResult = await db
+      .from("academic_years")
+      .select("id")
+      .eq("school_id", schoolId)
+      .eq("year", Number(academicYear) + 1)
+      .maybeSingle();
+
+    if (nextYearResult.error) {
+      console.error(
+        "NEXT ACADEMIC YEAR ERROR:",
+        nextYearResult.error
+      );
+      return null;
+    }
+
+    if (!nextYearResult.data) {
+      return null;
+    }
+
+    const nextTermResult = await db
+      .from("terms")
+      .select("opening_date")
+      .eq(
+        "academic_year_id",
+        nextYearResult.data.id
+      )
+      .eq("term_number", 1)
+      .maybeSingle();
+
+    if (nextTermResult.error) {
+      console.error(
+        "NEXT YEAR TERM 1 ERROR:",
+        nextTermResult.error
+      );
+      return null;
+    }
+
+    return nextTermResult.data?.opening_date || null;
+
+  } catch (error) {
+
+    console.error(
+      "GET NEXT TERM DATE ERROR:",
+      error
+    );
+
+    return null;
+  }
+  }
 
 try {
 

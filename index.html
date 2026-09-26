@@ -7877,37 +7877,123 @@ document.addEventListener(
 
     if (gradeNumber === 9) {
 
-      html += `
+  html += `
 
-        <h3>
-          ACHIEVEMENT LEVEL SUMMARY
-        </h3>
+    <h3>
+      ACHIEVEMENT LEVEL SUMMARY
+    </h3>
 
-        <p>EE1: ${levelCounts.EE1}</p>
-        <p>EE2: ${levelCounts.EE2}</p>
-        <p>ME1: ${levelCounts.ME1}</p>
-        <p>ME2: ${levelCounts.ME2}</p>
-        <p>AE1: ${levelCounts.AE1}</p>
-        <p>AE2: ${levelCounts.AE2}</p>
-        <p>BE1: ${levelCounts.BE1}</p>
-        <p>BE2: ${levelCounts.BE2}</p>
+    <table>
 
-      `;
+      <thead>
 
-    } else {
+        <tr>
 
-      html += `
+          <th>ACHIEVEMENT LEVEL</th>
 
-        <h3>
-          ACHIEVEMENT LEVEL SUMMARY
-        </h3>
+          <th>NUMBER OF LEARNERS</th>
 
-        <p>EE: ${levelCounts.EE}</p>
-        <p>ME: ${levelCounts.ME}</p>
-        <p>AE: ${levelCounts.AE}</p>
-        <p>BE: ${levelCounts.BE}</p>
+        </tr>
 
-      `;
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td>EE1</td>
+          <td>${levelCounts.EE1}</td>
+        </tr>
+
+        <tr>
+          <td>EE2</td>
+          <td>${levelCounts.EE2}</td>
+        </tr>
+
+        <tr>
+          <td>ME1</td>
+          <td>${levelCounts.ME1}</td>
+        </tr>
+
+        <tr>
+          <td>ME2</td>
+          <td>${levelCounts.ME2}</td>
+        </tr>
+
+        <tr>
+          <td>AE1</td>
+          <td>${levelCounts.AE1}</td>
+        </tr>
+
+        <tr>
+          <td>AE2</td>
+          <td>${levelCounts.AE2}</td>
+        </tr>
+
+        <tr>
+          <td>BE1</td>
+          <td>${levelCounts.BE1}</td>
+        </tr>
+
+        <tr>
+          <td>BE2</td>
+          <td>${levelCounts.BE2}</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  `;
+
+} else {
+
+  html += `
+
+    <h3>
+      ACHIEVEMENT LEVEL SUMMARY
+    </h3>
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>ACHIEVEMENT LEVEL</th>
+
+          <th>NUMBER OF LEARNERS</th>
+
+        </tr>
+
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td>EE</td>
+          <td>${levelCounts.EE}</td>
+        </tr>
+
+        <tr>
+          <td>ME</td>
+          <td>${levelCounts.ME}</td>
+        </tr>
+
+        <tr>
+          <td>AE</td>
+          <td>${levelCounts.AE}</td>
+        </tr>
+
+        <tr>
+          <td>BE</td>
+          <td>${levelCounts.BE}</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  `;
 
     }
 

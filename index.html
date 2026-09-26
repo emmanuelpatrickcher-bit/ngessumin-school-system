@@ -2952,7 +2952,169 @@ if (selectedGradeNumber === 9) {
   }
 
 }
-  
+/* ================= CLASS POSITION ================= */
+
+let classPosition = "—";
+let classSize = 0;
+
+try {
+
+  /* Get all learners in the same grade */
+  const classLearnersResult =
+    await db
+      .from("learners")
+      .select("id")
+      .eq("grade_id", learner.grade_id)
+      .eq("status", "Active");
+
+  if (!classLearnersResult.error) {
+
+    const classLearners =
+      classLearnersResult.data || [];
+
+    /* Get all results for this grade and selected term */
+    const classResultsResult =
+      await db
+        .from("results")
+        .select(`
+          learner_id,
+          score,
+          assessments!inner (
+            grade_id,
+            term_id,
+            learning_area_id
+          )
+        `)
+        .eq(
+          "assessments.grade_id",
+          learner.grade_id
+        )
+        .eq(
+          "assessments.term_id",
+          selectedTermId
+        );
+
+    if (!classResultsResult.error) {
+
+      const classResults =
+        classResultsResult.data || [];
+
+      const learnerTotals = {};
+
+      /*
+       * Keep the highest scored result for each
+       * learner and learning area.
+       */
+      classResults.forEach(
+        function(row) {
+
+          if (
+            row.score === null ||
+            row.score === undefined
+          ) {
+            return;
+          }
+
+          const learnerId =
+            row.learner_id;
+
+          const areaId =
+            row.assessments?.learning_area_id;
+
+          if (!areaId) {
+            return;
+          }
+
+          if (!learnerTotals[learnerId]) {
+            learnerTotals[learnerId] = {};
+          }
+
+          const currentScore =
+            learnerTotals[learnerId][areaId];
+
+          if (
+            currentScore === undefined ||
+            Number(row.score) > Number(currentScore)
+          ) {
+
+            learnerTotals[learnerId][areaId] =
+              Number(row.score);
+
+          }
+
+        }
+      );
+
+      const rankedLearners = [];
+
+      classLearners.forEach(
+        function(classLearner) {
+
+          const learnerAreas =
+            learnerTotals[classLearner.id];
+
+          if (!learnerAreas) {
+            return;
+          }
+
+          const scores =
+            Object.values(learnerAreas);
+
+          if (scores.length === 0) {
+            return;
+          }
+
+          const total =
+            scores.reduce(
+              function(sum, score) {
+                return sum + Number(score);
+              },
+              0
+            );
+
+          rankedLearners.push({
+            learnerId: classLearner.id,
+            total: total
+          });
+
+        }
+      );
+
+      rankedLearners.sort(
+        function(a, b) {
+          return b.total - a.total;
+        }
+      );
+
+      classSize =
+        rankedLearners.length;
+
+      const learnerRankIndex =
+        rankedLearners.findIndex(
+          function(item) {
+            return item.learnerId === learnerId;
+          }
+        );
+
+      if (learnerRankIndex !== -1) {
+
+        classPosition =
+          learnerRankIndex + 1;
+
+      }
+
+    }
+
+  }
+
+} catch (rankingError) {
+
+  console.error(
+    "CLASS RANKING ERROR:",
+    rankingError
+  );
+
+  }  
 
 
   resultContainer.innerHTML = `

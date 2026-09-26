@@ -3344,7 +3344,41 @@ if (!classResultsResult.error) {
     <strong>Class Position:</strong>
     ${classPosition} of ${classSize}
   </p>
+<p>
+  <strong>School Closing Date:</strong>
+  ${
+    termClosingDate
+      ? new Date(termClosingDate).toLocaleDateString("en-KE")
+      : "—"
+  }
+</p>
 
+<p>
+  <strong>School Opening Date:</strong>
+  ${
+    termOpeningDate
+      ? new Date(termOpeningDate).toLocaleDateString("en-KE")
+      : "—"
+  }
+</p>
+
+<p>
+  <strong>Class Teacher's Signature:</strong>
+  ______________________________
+</p>
+
+<p>
+  <strong>School Official Stamp:</strong>
+</p>
+
+<div
+  style="
+    width:120px;
+    height:80px;
+    border:2px solid #999;
+    margin-top:8px;
+  "
+></div>
 `;
 
   message.textContent =

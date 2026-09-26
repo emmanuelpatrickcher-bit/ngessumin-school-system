@@ -6986,6 +6986,85 @@ document.addEventListener(
       error.message;
   }
   }
+    function printReportCard() {
+  const reportCard =
+    document.getElementById("reportCardResult");
+
+  if (!reportCard) {
+    return;
+  }
+
+  const printWindow =
+    window.open("", "_blank");
+
+  if (!printWindow) {
+    alert("Please allow pop-ups to print the report card.");
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Ngessumin Comprehensive School - Report Card</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 30px;
+          color: #000;
+        }
+
+        h2,
+        h3 {
+          text-align: center;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+
+        th,
+        td {
+          border: 1px solid #000;
+          padding: 8px;
+          text-align: left;
+        }
+
+        th {
+          font-weight: bold;
+        }
+
+        button {
+          display: none;
+        }
+
+        @media print {
+          body {
+            margin: 15mm;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+
+      ${reportCard.innerHTML}
+
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+
+  printWindow.focus();
+
+  setTimeout(function () {
+    printWindow.print();
+  }, 500);
+    }
   </script>
 
 </body>

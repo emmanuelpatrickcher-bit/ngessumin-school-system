@@ -8677,11 +8677,28 @@ async function applyRolePermissions() {
 
   try {
 
+    const authResult =
+      await db.auth.getUser();
+
+    if (
+      authResult.error ||
+      !authResult.data.user
+    ) {
+      console.error(
+        "AUTH USER ERROR:",
+        authResult.error
+      );
+      return;
+    }
+
+    const userId =
+      authResult.data.user.id;
+
     const result =
       await db
         .from("profiles")
         .select("role")
-        .eq("id", currentUser.id)
+        .eq("id", userId)
         .single();
 
     if (result.error) {
@@ -8694,6 +8711,11 @@ async function applyRolePermissions() {
 
     const role =
       result.data.role;
+
+    console.log(
+      "CURRENT USER ROLE:",
+      role
+    );
 
     const usersMenu =
       document.getElementById(
@@ -8708,25 +8730,11 @@ async function applyRolePermissions() {
     if (role === "Headteacher") {
 
       if (usersMenu) {
-        usersMenu.style.display =
-          "none";
+        usersMenu.style.display = "none";
       }
 
       if (settingsMenu) {
-        settingsMenu.style.display =
-          "none";
-      }
-
-    } else {
-
-      if (usersMenu) {
-        usersMenu.style.display =
-          "";
-      }
-
-      if (settingsMenu) {
-        settingsMenu.style.display =
-          "";
+        settingsMenu.style.display = "none";
       }
 
     }

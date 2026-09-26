@@ -7348,6 +7348,590 @@ document.addEventListener(
 
   }
 );
+    async function generateClassPerformanceReport() {
+
+  const gradeId =
+    document.getElementById("classReportGrade").value;
+
+  const termNumber =
+    document.getElementById("classReportTerm").value;
+
+  const areaId =
+    document.getElementById("classReportArea").value;
+
+  const resultContainer =
+    document.getElementById("classPerformanceResult");
+
+  const message =
+    document.getElementById("classReportMessage");
+
+  if (!gradeId || !termNumber || !areaId) {
+
+    message.textContent =
+      "Please select Grade, Term and Learning Area.";
+
+    return;
+  }
+
+  message.textContent =
+    "Generating class performance report...";
+
+  resultContainer.innerHTML = "";
+
+  try {
+
+    /* Get selected grade */
+
+    const gradeResult =
+      await db
+        .from("grades")
+        .select("id, grade_number")
+        .eq("id", gradeId)
+        .single();
+
+    if (gradeResult.error) {
+      throw gradeResult.error;
+    }
+
+    const gradeNumber =
+      Number(gradeResult.data.grade_number);
+
+
+    /* Get selected term */
+
+    const schoolResult =
+      await db
+        .from("schools")
+        .select("id")
+        .eq(
+          "name",
+          "Ngessumin Comprehensive School"
+        )
+        .single();
+
+    if (schoolResult.error) {
+      throw schoolResult.error;
+    }
+
+
+    const yearResult =
+      await db
+        .from("academic_years")
+        .select("id, year")
+        .eq(
+          "school_id",
+          schoolResult.data.id
+        )
+        .eq(
+          "is_current",
+          true
+        )
+        .single();
+
+    if (yearResult.error) {
+      throw yearResult.error;
+    }
+
+
+    const termResult =
+      await db
+        .from("terms")
+        .select("id, term_number")
+        .eq(
+          "academic_year_id",
+          yearResult.data.id
+        )
+        .eq(
+          "term_number",
+          Number(termNumber)
+        )
+        .single();
+
+    if (termResult.error) {
+      throw termResult.error;
+    }
+
+
+    /* Get learning area */
+
+    const areaResult =
+      await db
+        .from("learning_areas")
+        .select("id, name")
+        .eq("id", areaId)
+        .single();
+
+    if (areaResult.error) {
+      throw areaResult.error;
+    }
+
+
+    /* Get learners in the selected grade */
+
+    const learnersResult =
+      await db
+        .from("learners")
+        .select(`
+          id,
+          assessment_number,
+          full_name
+        `)
+        .eq(
+          "school_id",
+          schoolResult.data.id
+        )
+        .eq(
+          "grade_id",
+          gradeId
+        )
+        .eq(
+          "status",
+          "Active"
+        )
+        .order("full_name");
+
+    if (learnersResult.error) {
+      throw learnersResult.error;
+    }
+
+
+    const learners =
+      learnersResult.data || [];
+
+
+    /* Get results for this grade,
+       term and learning area */
+
+    const resultsResult =
+      await db
+        .from("results")
+        .select(`
+          learner_id,
+          score,
+          achievement_level,
+          assessments!inner (
+            grade_id,
+            term_id,
+            learning_area_id,
+            created_at
+          )
+        `)
+        .eq(
+          "assessments.grade_id",
+          gradeId
+        )
+        .eq(
+          "assessments.term_id",
+          termResult.data.id
+        )
+        .eq(
+          "assessments.learning_area_id",
+          areaId
+        );
+
+    if (resultsResult.error) {
+      throw resultsResult.error;
+    }
+
+
+    const results =
+      resultsResult.data || [];
+
+
+    /* Keep only the latest scored
+       assessment for each learner */
+
+    const latestResults = {};
+
+
+    results.forEach(
+      function (row) {
+
+        if (
+          row.score === null ||
+          row.score === undefined
+        ) {
+          return;
+        }
+
+        const learnerId =
+          row.learner_id;
+
+        const createdAt =
+          row.assessments?.created_at || "";
+
+        const current =
+          latestResults[learnerId];
+
+        if (
+          !current ||
+          createdAt > current.createdAt
+        ) {
+
+          latestResults[learnerId] = {
+
+            score:
+              Number(row.score),
+
+            achievement_level:
+              row.achievement_level,
+
+            createdAt:
+              createdAt
+
+          };
+
+        }
+
+      }
+    );
+
+
+    /* Build learner report */
+
+    const reportRows = [];
+
+    learners.forEach(
+      function (learner) {
+
+        const result =
+          latestResults[learner.id];
+
+        if (!result) {
+          return;
+        }
+
+        reportRows.push({
+
+          assessment_number:
+            learner.assessment_number || "-",
+
+          full_name:
+            learner.full_name,
+
+          score:
+            result.score,
+
+          achievement_level:
+            result.achievement_level
+
+        });
+
+      }
+    );
+
+
+    /* Sort highest score first */
+
+    reportRows.sort(
+      function (a, b) {
+
+        return b.score - a.score;
+
+      }
+    );
+
+
+    /* Calculate statistics */
+
+    const totalLearners =
+      reportRows.length;
+
+    let totalScore = 0;
+
+    let highestScore = null;
+
+    let lowestScore = null;
+
+
+    reportRows.forEach(
+      function (row) {
+
+        totalScore +=
+          Number(row.score);
+
+        if (
+          highestScore === null ||
+          row.score > highestScore
+        ) {
+
+          highestScore =
+            row.score;
+
+        }
+
+        if (
+          lowestScore === null ||
+          row.score < lowestScore
+        ) {
+
+          lowestScore =
+            row.score;
+
+        }
+
+      }
+    );
+
+
+    const average =
+      totalLearners > 0
+        ? (
+            totalScore /
+            totalLearners
+          ).toFixed(1)
+        : "—";
+
+
+    /* Achievement-level counts */
+
+    const levelCounts = {
+
+      EE: 0,
+      ME: 0,
+      AE: 0,
+      BE: 0,
+
+      EE1: 0,
+      EE2: 0,
+      ME1: 0,
+      ME2: 0,
+      AE1: 0,
+      AE2: 0,
+      BE1: 0,
+      BE2: 0
+
+    };
+
+
+    reportRows.forEach(
+      function (row) {
+
+        const level =
+          row.achievement_level;
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            levelCounts,
+            level
+          )
+        ) {
+
+          levelCounts[level]++;
+
+        }
+
+      }
+    );
+
+
+    /* Create report */
+
+    let html = `
+
+      <h2>
+        NGESSUMIN COMPREHENSIVE SCHOOL
+      </h2>
+
+      <p>
+        <strong>
+          CLASS PERFORMANCE REPORT
+        </strong>
+      </p>
+
+      <p>
+        <strong>GRADE:</strong>
+        ${gradeNumber}
+      </p>
+
+      <p>
+        <strong>TERM:</strong>
+        ${termNumber}
+      </p>
+
+      <p>
+        <strong>LEARNING AREA:</strong>
+        ${areaResult.data.name}
+      </p>
+
+      <p>
+        <strong>ACADEMIC YEAR:</strong>
+        ${yearResult.data.year}
+      </p>
+
+      <hr>
+
+      <h3>
+        LEARNER PERFORMANCE
+      </h3>
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>POSITION</th>
+
+            <th>ASSESSMENT NUMBER</th>
+
+            <th>LEARNER</th>
+
+            <th>SCORE</th>
+
+            <th>LEVEL</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+    `;
+
+
+    reportRows.forEach(
+      function (row, index) {
+
+        html += `
+
+          <tr>
+
+            <td>
+              ${index + 1}
+            </td>
+
+            <td>
+              ${row.assessment_number}
+            </td>
+
+            <td>
+              ${row.full_name}
+            </td>
+
+            <td>
+              ${row.score}
+            </td>
+
+            <td>
+              ${row.achievement_level}
+            </td>
+
+          </tr>
+
+        `;
+
+      }
+    );
+
+
+    html += `
+
+        </tbody>
+
+      </table>
+
+      <h3>
+        PERFORMANCE SUMMARY
+      </h3>
+
+      <p>
+        <strong>
+          TOTAL LEARNERS ASSESSED:
+        </strong>
+        ${totalLearners}
+      </p>
+
+      <p>
+        <strong>
+          CLASS AVERAGE:
+        </strong>
+        ${average}
+      </p>
+
+      <p>
+        <strong>
+          HIGHEST SCORE:
+        </strong>
+        ${
+          highestScore === null
+            ? "—"
+            : highestScore
+        }
+      </p>
+
+      <p>
+        <strong>
+          LOWEST SCORE:
+        </strong>
+        ${
+          lowestScore === null
+            ? "—"
+            : lowestScore
+        }
+      </p>
+
+    `;
+
+
+    /* Grade 9 levels */
+
+    if (gradeNumber === 9) {
+
+      html += `
+
+        <h3>
+          ACHIEVEMENT LEVEL SUMMARY
+        </h3>
+
+        <p>EE1: ${levelCounts.EE1}</p>
+        <p>EE2: ${levelCounts.EE2}</p>
+        <p>ME1: ${levelCounts.ME1}</p>
+        <p>ME2: ${levelCounts.ME2}</p>
+        <p>AE1: ${levelCounts.AE1}</p>
+        <p>AE2: ${levelCounts.AE2}</p>
+        <p>BE1: ${levelCounts.BE1}</p>
+        <p>BE2: ${levelCounts.BE2}</p>
+
+      `;
+
+    } else {
+
+      html += `
+
+        <h3>
+          ACHIEVEMENT LEVEL SUMMARY
+        </h3>
+
+        <p>EE: ${levelCounts.EE}</p>
+        <p>ME: ${levelCounts.ME}</p>
+        <p>AE: ${levelCounts.AE}</p>
+        <p>BE: ${levelCounts.BE}</p>
+
+      `;
+
+    }
+
+
+    resultContainer.innerHTML =
+      html;
+
+    message.textContent =
+      "Class performance report generated successfully.";
+
+  } catch (error) {
+
+    console.error(
+      "CLASS PERFORMANCE REPORT ERROR:",
+      error
+    );
+
+    message.textContent =
+      "Error generating class performance report: " +
+      error.message;
+
+  }
+
+    }
   </script>
 
 </body>

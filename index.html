@@ -2827,8 +2827,9 @@ const termResult =
       opening_date,
       closing_date,
       academic_years (
-        year
-      )
+  id,
+  year
+)
     `)
     .eq("term_number", Number(termNumber))
     .single();

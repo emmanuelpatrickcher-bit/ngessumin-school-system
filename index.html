@@ -7002,11 +7002,84 @@ document.addEventListener(
     return;
   }
 
-  printWindow.document.write(`
+printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
       <title>Ngessumin Comprehensive School - Report Card</title>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 20mm;
+          color: #000;
+          font-size: 12px;
+        }
+
+        h2 {
+          text-align: center;
+          margin-bottom: 4px;
+          font-size: 20px;
+        }
+
+        h3 {
+          text-align: center;
+          margin-top: 4px;
+          margin-bottom: 18px;
+          font-size: 16px;
+        }
+
+        p {
+          margin: 7px 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 18px;
+          margin-bottom: 18px;
+        }
+
+        th,
+        td {
+          border: 1px solid #000;
+          padding: 8px;
+          text-align: left;
+        }
+
+        th {
+          font-weight: bold;
+          text-align: center;
+        }
+
+        td:nth-child(2),
+        td:nth-child(3) {
+          text-align: center;
+        }
+
+        button {
+          display: none !important;
+        }
+
+        @media print {
+          body {
+            margin: 15mm;
+          }
+
+          table {
+            page-break-inside: avoid;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+
+      ${reportCard.innerHTML}
+
+    </body>
+    </html>
+  `);
 
       <style>
   body {

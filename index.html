@@ -7220,6 +7220,59 @@ document.addEventListener(
   }, 500);
 
     }
+    async function setupClassPerformanceReport() {
+
+  const gradeSelect =
+    document.getElementById("classReportGrade");
+
+  if (!gradeSelect) {
+    return;
+  }
+
+  const result =
+    await db
+      .from("grades")
+      .select("id, grade_number")
+      .order("grade_number");
+
+  if (result.error) {
+
+    console.error(
+      "CLASS REPORT GRADES ERROR:",
+      result.error
+    );
+
+    return;
+  }
+
+  gradeSelect.innerHTML =
+    '<option value="">Select Grade</option>';
+
+  (result.data || []).forEach(
+    function (grade) {
+
+      const option =
+        document.createElement("option");
+
+      option.value = grade.id;
+
+      option.textContent =
+        "Grade " + grade.grade_number;
+
+      gradeSelect.appendChild(option);
+
+    }
+  );
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    setupClassPerformanceReport();
+
+  }
+);
   </script>
 
 </body>

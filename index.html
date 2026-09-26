@@ -6649,7 +6649,7 @@ document.addEventListener(
     setupTeacherGradeAssignment();
   }
 );
- async function saveTermDates() {
+  async function saveTermDates() {
 
   const academicYear =
     document.getElementById("academicYear").value.trim();
@@ -6741,7 +6741,7 @@ document.addEventListener(
       throw termResult.error;
     }
 
-    /* Save the dates */
+    /* Update and return the actual row */
     const updateResult =
       await db
         .from("terms")
@@ -6752,14 +6752,27 @@ document.addEventListener(
         .eq(
           "id",
           termResult.data.id
-        );
+        )
+        .select("id, opening_date, closing_date")
+        .single();
 
     if (updateResult.error) {
       throw updateResult.error;
     }
 
+    if (!updateResult.data) {
+      throw new Error(
+        "No term record was updated."
+      );
+    }
+
     message.textContent =
       "Term dates saved successfully.";
+
+    console.log(
+      "TERM DATES SAVED:",
+      updateResult.data
+    );
 
   } catch (error) {
 
@@ -6772,7 +6785,7 @@ document.addEventListener(
       "Error saving term dates: " +
       error.message;
   }
- }   
+  } 
   </script>
 
 </body>

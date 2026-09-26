@@ -8448,6 +8448,139 @@ message.textContent =
   }
 
 }
+    async function loadUserPermissions() {
+
+  const container =
+    document.getElementById(
+      "userPermissionsList"
+    );
+
+  const message =
+    document.getElementById(
+      "userPermissionsMessage"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Loading users...</p>";
+
+  try {
+
+    const result =
+      await db
+        .from("profiles")
+        .select(
+          "id, full_name, role, active"
+        );
+
+    console.log(
+      "PROFILES RESULT:",
+      result
+    );
+
+    if (result.error) {
+
+      throw result.error;
+
+    }
+
+    const users =
+      result.data || [];
+
+    if (users.length === 0) {
+
+      container.innerHTML =
+        "<p>No user accounts found.</p>";
+
+      return;
+
+    }
+
+    let html = `
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>NAME</th>
+
+            <th>ROLE</th>
+
+            <th>STATUS</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+    `;
+
+    users.forEach(
+      function (user) {
+
+        html += `
+
+          <tr>
+
+            <td>
+              ${user.full_name || "—"}
+            </td>
+
+            <td>
+              ${user.role || "—"}
+            </td>
+
+            <td>
+              ${
+                user.active
+                  ? "ACTIVE"
+                  : "INACTIVE"
+              }
+            </td>
+
+          </tr>
+
+        `;
+
+      }
+    );
+
+    html += `
+
+        </tbody>
+
+      </table>
+
+    `;
+
+    container.innerHTML =
+      html;
+
+    message.textContent =
+      "User accounts loaded successfully.";
+
+  } catch (error) {
+
+    console.error(
+      "USER PERMISSIONS ERROR:",
+      error
+    );
+
+    container.innerHTML =
+      "<p>Unable to load user accounts.</p>";
+
+    message.textContent =
+      error.message;
+
+  }
+
+    }
 
 loadUserPermissions();
   </script>

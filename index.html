@@ -7225,7 +7225,10 @@ document.addEventListener(
   const gradeSelect =
     document.getElementById("classReportGrade");
 
-  if (!gradeSelect) {
+  const areaSelect =
+    document.getElementById("classReportArea");
+
+  if (!gradeSelect || !areaSelect) {
     return;
   }
 
@@ -7263,7 +7266,79 @@ document.addEventListener(
 
     }
   );
+
+
+  gradeSelect.addEventListener(
+    "change",
+    async function () {
+
+      areaSelect.innerHTML =
+        '<option value="">Select Learning Area</option>';
+
+      if (!this.value) {
+        return;
+      }
+
+      const areaResult =
+        await db
+          .from("grade_learning_areas")
+          .select(`
+            learning_area_id,
+            learning_areas (
+              id,
+              name
+            )
+          `)
+          .eq(
+            "grade_id",
+            this.value
+          );
+
+      if (areaResult.error) {
+
+        console.error(
+          "CLASS REPORT AREAS ERROR:",
+          areaResult.error
+        );
+
+        return;
+      }
+
+      (areaResult.data || []).forEach(
+        function (item) {
+
+          if (!item.learning_areas) {
+            return;
+          }
+
+          const option =
+            document.createElement("option");
+
+          option.value =
+            item.learning_areas.id;
+
+          option.textContent =
+            item.learning_areas.name;
+
+          areaSelect.appendChild(option);
+
+        }
+      );
+
+    }
+  );
+
 }
+
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    setupClassPerformanceReport();
+
+  }
+);
 
 document.addEventListener(
   "DOMContentLoaded",

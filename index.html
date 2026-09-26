@@ -8570,12 +8570,16 @@ message.textContent =
 </td>
 
             <td>
-              ${
-                user.active
-                  ? "ACTIVE"
-                  : "INACTIVE"
-              }
-            </td>
+
+  <button
+    type="button"
+    class="primary-btn"
+    onclick="updateUserRole('${user.id}')"
+  >
+    Save Role
+  </button>
+
+</td>
 
           </tr>
 

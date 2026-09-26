@@ -8673,8 +8673,78 @@ message.textContent =
 
     }
 
-loadUserPermissions();
-  </script>
+async function applyRolePermissions() {
+
+  try {
+
+    const result =
+      await db
+        .from("profiles")
+        .select("role")
+        .eq("id", currentUser.id)
+        .single();
+
+    if (result.error) {
+      console.error(
+        "ROLE PERMISSION ERROR:",
+        result.error
+      );
+      return;
+    }
+
+    const role =
+      result.data.role;
+
+    const usersMenu =
+      document.getElementById(
+        "usersMenuButton"
+      );
+
+    const settingsMenu =
+      document.getElementById(
+        "settingsMenuButton"
+      );
+
+    if (role === "Headteacher") {
+
+      if (usersMenu) {
+        usersMenu.style.display =
+          "none";
+      }
+
+      if (settingsMenu) {
+        settingsMenu.style.display =
+          "none";
+      }
+
+    } else {
+
+      if (usersMenu) {
+        usersMenu.style.display =
+          "";
+      }
+
+      if (settingsMenu) {
+        settingsMenu.style.display =
+          "";
+      }
+
+    }
+
+  } catch (error) {
+
+    console.error(
+      "ROLE PERMISSION ERROR:",
+      error
+    );
+
+  }
+
+}
+
+applyRolePermissions();
+
+</script>
 
 </body>
 </html>

@@ -7944,6 +7944,220 @@ message.textContent =
   }
 
     }
+    function printClassPerformanceReport() {
+
+  const report =
+    document.getElementById("classPerformanceResult");
+
+  if (!report) {
+    return;
+  }
+
+  const printWindow =
+    window.open("", "_blank");
+
+  if (!printWindow) {
+
+    alert(
+      "Please allow pop-ups to print the class performance report."
+    );
+
+    return;
+  }
+
+  printWindow.document.write(`
+
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+      <title>
+        Ngessumin Comprehensive School - Class Performance Report
+      </title>
+
+      <style>
+
+        body {
+
+          font-family: Arial, sans-serif;
+
+          margin: 20mm;
+
+          color: #000;
+
+          font-size: 12px;
+
+          text-transform: uppercase;
+
+        }
+
+        h2 {
+
+          text-align: center;
+
+          margin-bottom: 4px;
+
+          font-size: 20px;
+
+        }
+
+        h3 {
+
+          text-align: center;
+
+          margin-top: 8px;
+
+          margin-bottom: 14px;
+
+          font-size: 16px;
+
+        }
+
+        p {
+
+          margin: 6px 0;
+
+        }
+
+        hr {
+
+          border: none;
+
+          border-top: 1px solid #000;
+
+          margin: 12px 0;
+
+        }
+
+        table {
+
+          width: 100%;
+
+          border-collapse: collapse;
+
+          margin-top: 15px;
+
+          margin-bottom: 15px;
+
+        }
+
+        th,
+        td {
+
+          border: 1px solid #000;
+
+          padding: 7px;
+
+          text-align: left;
+
+        }
+
+        th {
+
+          text-align: center;
+
+          font-weight: bold;
+
+        }
+
+        td:first-child,
+        td:nth-child(2),
+        td:nth-child(4),
+        td:nth-child(5) {
+
+          text-align: center;
+
+        }
+
+        button {
+
+          display: none !important;
+
+        }
+
+        @media print {
+
+          body {
+
+            margin: 10mm;
+
+            font-size: 10px;
+
+          }
+
+          h2 {
+
+            font-size: 17px;
+
+            margin-bottom: 2px;
+
+          }
+
+          h3 {
+
+            font-size: 14px;
+
+            margin-top: 4px;
+
+            margin-bottom: 8px;
+
+          }
+
+          p {
+
+            margin: 4px 0;
+
+          }
+
+          table {
+
+            margin-top: 8px;
+
+            margin-bottom: 8px;
+
+            page-break-inside: avoid;
+
+          }
+
+          th,
+          td {
+
+            padding: 5px;
+
+          }
+
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      ${report.innerHTML}
+
+    </body>
+
+    </html>
+
+  `);
+
+  printWindow.document.close();
+
+  printWindow.focus();
+
+  setTimeout(
+    function () {
+
+      printWindow.print();
+
+    },
+    500
+  );
+
+    }
   </script>
 
 </body>

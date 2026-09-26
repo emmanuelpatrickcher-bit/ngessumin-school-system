@@ -2847,7 +2847,14 @@ if (termResult.error) {
 
 const selectedTermId =
   termResult.data.id;
+const academicYear =
+  termResult.data.academic_years?.year || "—";
 
+const termOpeningDate =
+  termResult.data.opening_date || null;
+
+const termClosingDate =
+  termResult.data.closing_date || null;
 let totalMarks = 0;
 let totalPossible = 0;
 

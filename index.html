@@ -8509,9 +8509,11 @@ message.textContent =
 
             <th>NAME</th>
 
-            <th>ROLE</th>
+<th>ROLE</th>
 
-            <th>STATUS</th>
+<th>STATUS</th>
+
+<th>ACTION</th>
 
           </tr>
 
@@ -8533,8 +8535,39 @@ message.textContent =
             </td>
 
             <td>
-              ${user.role || "—"}
-            </td>
+
+  <select
+    id="role_${user.id}"
+  >
+
+    <option value="Administrator"
+      ${user.role === "Administrator" ? "selected" : ""}>
+      Administrator
+    </option>
+
+    <option value="Headteacher"
+      ${user.role === "Headteacher" ? "selected" : ""}>
+      Headteacher
+    </option>
+
+    <option value="Teacher"
+      ${user.role === "Teacher" ? "selected" : ""}>
+      Teacher
+    </option>
+
+    <option value="Bursar"
+      ${user.role === "Bursar" ? "selected" : ""}>
+      Bursar
+    </option>
+
+    <option value="Parent"
+      ${user.role === "Parent" ? "selected" : ""}>
+      Parent
+    </option>
+
+  </select>
+
+</td>
 
             <td>
               ${

@@ -3436,14 +3436,15 @@ if (!classResultsResult.error) {
   </p>
 
   <p>
-    <strong>Achievement Level:</strong>
-    ${level}
-  </p>
+  <strong>Achievement Level:</strong>
+  ${level}
+</p>
 
-  <p>
-    <strong>Class Position:</strong>
-    ${classPosition} of ${classSize}
-  </p>
+<p>
+  <strong>Class Position:</strong>
+  ${classPosition} of ${classSize}
+</p>
+
 <p>
   <strong>School Closing Date:</strong>
   ${
@@ -3454,10 +3455,10 @@ if (!classResultsResult.error) {
 </p>
 
 <p>
-  nextTermOpeningDate
+  <strong>School Opening Date:</strong>
   ${
-    termOpeningDate
-      ? new Date(termOpeningDate).toLocaleDateString("en-KE")
+    nextTermOpeningDate
+      ? nextTermOpeningDate
       : "—"
   }
 </p>
@@ -3469,6 +3470,7 @@ if (!classResultsResult.error) {
 
 <p>
   <strong>School Official Stamp:</strong>
+</p>
 </p>
 
 <div

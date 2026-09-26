@@ -6987,6 +6987,7 @@ document.addEventListener(
   }
   }
     function printReportCard() {
+
   const reportCard =
     document.getElementById("reportCardResult");
 
@@ -7002,13 +7003,15 @@ document.addEventListener(
     return;
   }
 
-printWindow.document.write(`
+  printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
+
       <title>Ngessumin Comprehensive School - Report Card</title>
 
       <style>
+
         body {
           font-family: Arial, sans-serif;
           margin: 20mm;
@@ -7062,6 +7065,7 @@ printWindow.document.write(`
         }
 
         @media print {
+
           body {
             margin: 15mm;
           }
@@ -7069,8 +7073,11 @@ printWindow.document.write(`
           table {
             page-break-inside: avoid;
           }
+
         }
+
       </style>
+
     </head>
 
     <body>
@@ -7078,35 +7085,7 @@ printWindow.document.write(`
       ${reportCard.innerHTML}
 
     </body>
-    </html>
-  `);
 
-      printWindow.document.write(`
-  <!DOCTYPE html>
-  <html>
-  <head>
-
-    <title>
-      Ngessumin Comprehensive School - Report Card
-    </title>
-
-    <style>
-      /* the single style section goes here */
-    </style>
-
-  </head>
-
-  <body>
-
-    ${reportCard.innerHTML}
-
-  </body>
-  </html>
-`);
-
-      ${reportCard.innerHTML}
-
-    </body>
     </html>
   `);
 
@@ -7117,6 +7096,7 @@ printWindow.document.write(`
   setTimeout(function () {
     printWindow.print();
   }, 500);
+
     }
   </script>
 

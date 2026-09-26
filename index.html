@@ -7913,10 +7913,22 @@ document.addEventListener(
 
 
     resultContainer.innerHTML =
-      html;
+  html + `
 
-    message.textContent =
-      "Class performance report generated successfully.";
+    <div style="margin-top:20px;">
+      <button
+        type="button"
+        class="primary-btn"
+        onclick="printClassPerformanceReport()"
+      >
+        Print Class Performance Report
+      </button>
+    </div>
+
+  `;
+
+message.textContent =
+  "Class performance report generated successfully.";
 
   } catch (error) {
 

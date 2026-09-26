@@ -8618,6 +8618,58 @@ message.textContent =
   }
 
     }
+    async function updateUserRole(userId) {
+
+  const roleSelect =
+    document.getElementById(
+      "role_" + userId
+    );
+
+  if (!roleSelect) {
+    return;
+  }
+
+  const newRole =
+    roleSelect.value;
+
+  try {
+
+    const result =
+      await db
+        .from("profiles")
+        .update({
+          role: newRole
+        })
+        .eq(
+          "id",
+          userId
+        );
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    alert(
+      "User role updated successfully."
+    );
+
+    loadUserPermissions();
+
+  } catch (error) {
+
+    console.error(
+      "UPDATE USER ROLE ERROR:",
+      error
+    );
+
+    alert(
+      "Unable to update user role: " +
+      error.message
+    );
+
+  }
+
+    }
 
 loadUserPermissions();
   </script>

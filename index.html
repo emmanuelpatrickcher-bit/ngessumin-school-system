@@ -7061,15 +7061,42 @@ document.addEventListener(
 
         @media print {
 
-          body {
-            margin: 15mm;
-          }
+  body {
+    margin: 10mm;
+    font-size: 10px;
+  }
 
-          table {
-            page-break-inside: avoid;
-          }
+  h2 {
+    font-size: 17px;
+    margin-bottom: 2px;
+  }
 
-        }
+  h3 {
+    font-size: 14px;
+    margin-top: 2px;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin: 4px 0;
+  }
+
+  table {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    page-break-inside: avoid;
+  }
+
+  th,
+  td {
+    padding: 5px;
+  }
+
+  div {
+    page-break-inside: avoid;
+  }
+
+}
 
       </style>
 

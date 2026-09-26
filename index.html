@@ -2708,25 +2708,27 @@ async function generateReportCard() {
     learnerResult.data;
 
   const resultsResult =
-    await db
-      .from("results")
-      .select(`
-  score,
-  achievement_level,
-  assessments (
-    term_id,
-    learning_area_id,
-    learning_areas (
-      name
-    )
-  )
-`)
-      .eq(
-        "learner_id",
-        learnerId
-      );
+  await db
+    .from("results")
+    .select(`
+      score,
+      achievement_level,
+      assessments (
+        term_id,
+        learning_area_id,
+        created_at,
+        assessment_date,
+        learning_areas (
+          name
+        )
+      )
+    `)
+    .eq(
+      "learner_id",
+      learnerId
+    );
 
-  if (resultsResult.error) {
+if (resultsResult.error) {
 
 
 
@@ -2800,43 +2802,51 @@ results.forEach(
   function(result) {
 
     if (
-      String(result.assessments?.term_id) ===
+      String(result.assessments?.term_id) !==
       String(selectedTermId)
     ) {
+      return;
+    }
 
-      const learningAreaId =
-        result.assessments?.learning_area_id;
+    const learningAreaId =
+      result.assessments?.learning_area_id;
 
-      if (!learningAreaId) {
-        return;
-      }
+    if (!learningAreaId) {
+      return;
+    }
 
-      const score =
-        result.score === null
-          ? null
-          : Number(result.score);
+    const score =
+      result.score === null
+        ? null
+        : Number(result.score);
 
-      /*
-       * Keep the result that has an actual score.
-       * This prevents an older NULL result from
-       * hiding a newer scored result.
-       */
-      if (
-        !bestResultsByArea[learningAreaId] ||
-        (
-          score !== null &&
-          bestResultsByArea[learningAreaId].score === null
-        )
-      ) {
+    /*
+     * Only scored assessments are considered.
+     * The latest scored assessment becomes
+     * the official result for the learning area.
+     */
 
-        bestResultsByArea[learningAreaId] =
-          {
-            score: score,
-            achievement_level:
-              result.achievement_level
-          };
+    if (score === null) {
+      return;
+    }
 
-      }
+    const createdAt =
+      result.assessments?.created_at || "";
+
+    const current =
+      bestResultsByArea[learningAreaId];
+
+    if (
+      !current ||
+      createdAt > current.createdAt
+    ) {
+
+      bestResultsByArea[learningAreaId] = {
+        score: score,
+        achievement_level:
+          result.achievement_level,
+        createdAt: createdAt
+      };
 
     }
 

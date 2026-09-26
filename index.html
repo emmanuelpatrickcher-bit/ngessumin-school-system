@@ -2984,76 +2984,27 @@ try {
 
     /* Get all results for this grade and selected term */
     const classResultsResult =
-      await db
-        .from("results")
-        .select(`
-          learner_id,
-          score,
-          assessments!inner (
-            grade_id,
-            term_id,
-            learning_area_id
-          )
-        `)
-        .eq(
-          "assessments.grade_id",
-          learner.grade_id
-        )
-        .eq(
-          "assessments.term_id",
-          selectedTermId
-        );
-
-    if (!classResultsResult.error) {
-
-      const classResults =
-        classResultsResult.data || [];
-
-      const learnerTotals = {};
-
-      /*
-       * Keep the highest scored result for each
-       * learner and learning area.
-       */
-      classResults.forEach(
-        function(row) {
-
-          if (
-            row.score === null ||
-            row.score === undefined
-          ) {
-            return;
-          }
-
-          const learnerId =
-            row.learner_id;
-
-          const areaId =
-            row.assessments?.learning_area_id;
-
-          if (!areaId) {
-            return;
-          }
-
-          if (!learnerTotals[learnerId]) {
-            learnerTotals[learnerId] = {};
-          }
-
-          const currentScore =
-            learnerTotals[learnerId][areaId];
-
-          if (
-            currentScore === undefined ||
-            Number(row.score) > Number(currentScore)
-          ) {
-
-            learnerTotals[learnerId][areaId] =
-              Number(row.score);
-
-          }
-
-        }
-      );
+  await db
+    .from("results")
+    .select(`
+      learner_id,
+      score,
+      assessments!inner (
+        grade_id,
+        term_id,
+        learning_area_id,
+        created_at,
+        assessment_date
+      )
+    `)
+    .eq(
+      "assessments.grade_id",
+      learner.grade_id
+    )
+    .eq(
+      "assessments.term_id",
+      selectedTermId
+    );
 
       const rankedLearners = [];
 

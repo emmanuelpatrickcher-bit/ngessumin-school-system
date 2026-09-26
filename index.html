@@ -3006,40 +3006,92 @@ try {
       selectedTermId
     );
 
-      const rankedLearners = [];
+if (!classResultsResult.error) {
 
-      classLearners.forEach(
-        function(classLearner) {
+  const classResults =
+    classResultsResult.data || [];
 
-          const learnerAreas =
-            learnerTotals[classLearner.id];
+  const learnerTotals = {};
 
-          if (!learnerAreas) {
-            return;
-          }
+  classResults.forEach(
+    function(row) {
 
-          const scores =
-            Object.values(learnerAreas);
+      if (
+        row.score === null ||
+        row.score === undefined
+      ) {
+        return;
+      }
 
-          if (scores.length === 0) {
-            return;
-          }
+      const learnerId =
+        row.learner_id;
 
-          const total =
-            scores.reduce(
-              function(sum, score) {
-                return sum + Number(score);
-              },
-              0
-            );
+      const areaId =
+        row.assessments?.learning_area_id;
 
-          rankedLearners.push({
-            learnerId: classLearner.id,
-            total: total
-          });
+      if (!areaId) {
+        return;
+      }
 
-        }
-      );
+      if (!learnerTotals[learnerId]) {
+        learnerTotals[learnerId] = {};
+      }
+
+      const createdAt =
+        row.assessments?.created_at || "";
+
+      const current =
+        learnerTotals[learnerId][areaId];
+
+      if (
+        !current ||
+        createdAt > current.createdAt
+      ) {
+
+        learnerTotals[learnerId][areaId] = {
+          score: Number(row.score),
+          createdAt: createdAt
+        };
+
+      }
+
+    }
+  );
+
+  const rankedLearners = [];
+
+  classLearners.forEach(
+    function(classLearner) {
+
+      const learnerAreas =
+        learnerTotals[classLearner.id];
+
+      if (!learnerAreas) {
+        return;
+      }
+
+      const scores =
+        Object.values(learnerAreas);
+
+      if (scores.length === 0) {
+        return;
+      }
+
+      const total =
+        scores.reduce(
+          function(sum, item) {
+            return sum + Number(item.score);
+          },
+          0
+        );
+
+      rankedLearners.push({
+        learnerId: classLearner.id,
+        total: total
+      });
+
+    }
+  );
 
       rankedLearners.sort(
         function(a, b) {

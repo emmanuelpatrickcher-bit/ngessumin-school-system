@@ -6790,7 +6790,6 @@ document.addEventListener(
 
   try {
 
-    /* Find the school */
     const schoolResult =
       await db
         .from("schools")
@@ -6805,7 +6804,6 @@ document.addEventListener(
       throw schoolResult.error;
     }
 
-    /* Find the academic year */
     const yearResult =
       await db
         .from("academic_years")
@@ -6824,7 +6822,6 @@ document.addEventListener(
       throw yearResult.error;
     }
 
-    /* Find the selected term */
     const termResult =
       await db
         .from("terms")
@@ -6843,7 +6840,6 @@ document.addEventListener(
       throw termResult.error;
     }
 
-    /* Update and return the actual row */
     const updateResult =
       await db
         .from("terms")
@@ -6854,27 +6850,14 @@ document.addEventListener(
         .eq(
           "id",
           termResult.data.id
-        )
-        .select("id, opening_date, closing_date")
-        .single();
+        );
 
     if (updateResult.error) {
       throw updateResult.error;
     }
 
-    if (!updateResult.data) {
-      throw new Error(
-        "No term record was updated."
-      );
-    }
-
     message.textContent =
       "Term dates saved successfully.";
-
-    console.log(
-      "TERM DATES SAVED:",
-      updateResult.data
-    );
 
   } catch (error) {
 
@@ -6887,7 +6870,7 @@ document.addEventListener(
       "Error saving term dates: " +
       error.message;
   }
-  } 
+  }
   </script>
 
 </body>

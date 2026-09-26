@@ -1410,92 +1410,191 @@
       <!-- ===================================================== -->
 
     
-              <section
-        id="reports"
-        class="section"
-      >
+             <section
+  id="reports"
+  class="section"
+>
 
-        <h1>Reports / Report Cards</h1>
+  <h1>Reports / Report Cards</h1>
 
-        <div class="panel">
+  <!-- LEARNER REPORT CARD -->
 
-          <h2>Generate Learner Report Card</h2>
+  <div class="panel">
 
-          <div class="form-grid">
+    <h2>Generate Learner Report Card</h2>
 
-            <div>
+    <div class="form-grid">
 
-              <label for="reportLearner">
-                Learner
-              </label>
+      <div>
 
-              <select id="reportLearner">
+        <label for="reportLearner">
+          Learner
+        </label>
 
-                <option value="">
-                  Select Learner
-                </option>
+        <select id="reportLearner">
 
-              </select>
+          <option value="">
+            Select Learner
+          </option>
 
-            </div>
+        </select>
 
-            <div>
+      </div>
 
-              <label for="reportTerm">
-                Term
-              </label>
+      <div>
 
-              <select id="reportTerm">
+        <label for="reportTerm">
+          Term
+        </label>
 
-                <option value="">
-                  Select Term
-                </option>
+        <select id="reportTerm">
 
-                <option value="1">
-                  Term 1
-                </option>
+          <option value="">
+            Select Term
+          </option>
 
-                <option value="2">
-                  Term 2
-                </option>
+          <option value="1">
+            Term 1
+          </option>
 
-                <option value="3">
-                  Term 3
-                </option>
+          <option value="2">
+            Term 2
+          </option>
 
-              </select>
+          <option value="3">
+            Term 3
+          </option>
 
-            </div>
+        </select>
 
-          </div>
+      </div>
 
-          <button
-            type="button"
-            class="primary-btn"
-            onclick="generateReportCard()"
-          >
-            Generate Report Card
-          </button>
+    </div>
 
-          <div
-            id="reportMessage"
-            class="message"
-          ></div>
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="generateReportCard()"
+    >
+      Generate Report Card
+    </button>
 
-        </div>
+    <div
+      id="reportMessage"
+      class="message"
+    ></div>
 
-        <div
-          class="panel"
-          id="reportCardResult"
-        >
+  </div>
 
-          <p>
-            Select a learner and term to generate a report card.
-          </p>
+  <div
+    class="panel"
+    id="reportCardResult"
+  >
 
-        </div>
+    <p>
+      Select a learner and term to generate a report card.
+    </p>
 
-      </section>
+  </div>
+
+
+  <!-- CLASS PERFORMANCE REPORT -->
+
+  <div class="panel">
+
+    <h2>Class Performance Report</h2>
+
+    <div class="form-grid">
+
+      <div>
+
+        <label for="classReportGrade">
+          Grade
+        </label>
+
+        <select id="classReportGrade">
+
+          <option value="">
+            Select Grade
+          </option>
+
+        </select>
+
+      </div>
+
+      <div>
+
+        <label for="classReportTerm">
+          Term
+        </label>
+
+        <select id="classReportTerm">
+
+          <option value="">
+            Select Term
+          </option>
+
+          <option value="1">
+            Term 1
+          </option>
+
+          <option value="2">
+            Term 2
+          </option>
+
+          <option value="3">
+            Term 3
+          </option>
+
+        </select>
+
+      </div>
+
+      <div>
+
+        <label for="classReportArea">
+          Learning Area
+        </label>
+
+        <select id="classReportArea">
+
+          <option value="">
+            Select Learning Area
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="generateClassPerformanceReport()"
+    >
+      Generate Class Performance Report
+    </button>
+
+    <div
+      id="classReportMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+  <div
+    class="panel"
+    id="classPerformanceResult"
+  >
+
+    <p>
+      Select a grade, term and learning area to generate a class performance report.
+    </p>
+
+  </div>
+
+             </section> 
       <!-- ===================================================== -->
 <!-- TEACHERS & STAFF -->
 <!-- ===================================================== -->

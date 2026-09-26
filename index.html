@@ -6595,6 +6595,130 @@ document.addEventListener(
     setupTeacherGradeAssignment();
   }
 );
+ async function saveTermDates() {
+
+  const academicYear =
+    document.getElementById("academicYear").value.trim();
+
+  const termNumber =
+    document.getElementById("termNumber").value;
+
+  const openingDate =
+    document.getElementById("termOpeningDate").value;
+
+  const closingDate =
+    document.getElementById("termClosingDate").value;
+
+  const message =
+    document.getElementById("termDatesMessage");
+
+  if (
+    !academicYear ||
+    !termNumber ||
+    !openingDate ||
+    !closingDate
+  ) {
+    message.textContent =
+      "Please enter the academic year, term, opening date and closing date.";
+    return;
+  }
+
+  if (closingDate < openingDate) {
+    message.textContent =
+      "Closing date cannot be earlier than the opening date.";
+    return;
+  }
+
+  message.textContent =
+    "Saving term dates...";
+
+  try {
+
+    /* Find the school */
+    const schoolResult =
+      await db
+        .from("schools")
+        .select("id")
+        .eq(
+          "name",
+          "Ngessumin Comprehensive School"
+        )
+        .single();
+
+    if (schoolResult.error) {
+      throw schoolResult.error;
+    }
+
+    /* Find the academic year */
+    const yearResult =
+      await db
+        .from("academic_years")
+        .select("id")
+        .eq(
+          "school_id",
+          schoolResult.data.id
+        )
+        .eq(
+          "year",
+          Number(academicYear)
+        )
+        .single();
+
+    if (yearResult.error) {
+      throw yearResult.error;
+    }
+
+    /* Find the selected term */
+    const termResult =
+      await db
+        .from("terms")
+        .select("id")
+        .eq(
+          "academic_year_id",
+          yearResult.data.id
+        )
+        .eq(
+          "term_number",
+          Number(termNumber)
+        )
+        .single();
+
+    if (termResult.error) {
+      throw termResult.error;
+    }
+
+    /* Save the dates */
+    const updateResult =
+      await db
+        .from("terms")
+        .update({
+          opening_date: openingDate,
+          closing_date: closingDate
+        })
+        .eq(
+          "id",
+          termResult.data.id
+        );
+
+    if (updateResult.error) {
+      throw updateResult.error;
+    }
+
+    message.textContent =
+      "Term dates saved successfully.";
+
+  } catch (error) {
+
+    console.error(
+      "SAVE TERM DATES ERROR:",
+      error
+    );
+
+    message.textContent =
+      "Error saving term dates: " +
+      error.message;
+  }
+ }   
   </script>
 
 </body>

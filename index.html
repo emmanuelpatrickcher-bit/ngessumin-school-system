@@ -2821,7 +2821,15 @@ const gradeLearningAreas =
 const termResult =
   await db
     .from("terms")
-    .select("id, term_number")
+    .select(`
+      id,
+      term_number,
+      opening_date,
+      closing_date,
+      academic_years (
+        year
+      )
+    `)
     .eq("term_number", Number(termNumber))
     .single();
 

@@ -6893,7 +6893,7 @@ document.addEventListener(
     const yearResult =
       await db
         .from("academic_years")
-        .select("id")
+        .select("id, year")
         .eq(
           "school_id",
           schoolResult.data.id
@@ -6911,7 +6911,9 @@ document.addEventListener(
     const termResult =
       await db
         .from("terms")
-        .select("id")
+        .select(
+          "id, term_number, opening_date, closing_date"
+        )
         .eq(
           "academic_year_id",
           yearResult.data.id
@@ -6925,6 +6927,11 @@ document.addEventListener(
     if (termResult.error) {
       throw termResult.error;
     }
+
+    console.log(
+      "TERM BEING UPDATED:",
+      termResult.data
+    );
 
     const updateResult =
       await db
@@ -6943,7 +6950,9 @@ document.addEventListener(
     }
 
     message.textContent =
-      "Term dates saved successfully.";
+      "Term " +
+      termNumber +
+      " dates saved successfully.";
 
   } catch (error) {
 

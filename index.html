@@ -8256,6 +8256,192 @@ message.textContent =
   );
 
     }
+    async function loadTeacherAssignmentReport() {
+
+  const container =
+    document.getElementById("teacherAssignmentReport");
+
+  if (!container) {
+    return;
+  }
+
+  container.innerHTML =
+    "<p>Loading teacher assignments...</p>";
+
+  try {
+
+    const teachersResult =
+      await db
+        .from("teachers")
+        .select(`
+          id,
+          full_name
+        `)
+        .order("full_name");
+
+    if (teachersResult.error) {
+      throw teachersResult.error;
+    }
+
+    const teachers =
+      teachersResult.data || [];
+
+    if (teachers.length === 0) {
+
+      container.innerHTML =
+        "<p>No registered teachers found.</p>";
+
+      return;
+    }
+
+    let html = `
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>TEACHER</th>
+
+            <th>LEARNING AREAS</th>
+
+            <th>GRADES</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+    `;
+
+    for (
+      const teacher of teachers
+    ) {
+
+      const areasResult =
+        await db
+          .from("teacher_learning_areas")
+          .select(`
+            learning_area_id,
+            learning_areas (
+              name
+            )
+          `)
+          .eq(
+            "teacher_id",
+            teacher.id
+          );
+
+      if (areasResult.error) {
+        throw areasResult.error;
+      }
+
+      const gradesResult =
+        await db
+          .from("teacher_grades")
+          .select(`
+            grade_id,
+            grades (
+              grade_number
+            )
+          `)
+          .eq(
+            "teacher_id",
+            teacher.id
+          );
+
+      if (gradesResult.error) {
+        throw gradesResult.error;
+      }
+
+      const areas =
+        (areasResult.data || [])
+          .filter(
+            item =>
+              item.learning_areas
+          )
+          .map(
+            item =>
+              item.learning_areas.name
+          );
+
+      const grades =
+        (gradesResult.data || [])
+          .filter(
+            item =>
+              item.grades
+          )
+          .map(
+            item =>
+              "Grade " +
+              item.grades.grade_number
+          );
+
+      html += `
+
+        <tr>
+
+          <td>
+            ${teacher.full_name}
+          </td>
+
+          <td>
+            ${
+              areas.length > 0
+                ? areas.join(", ")
+                : "—"
+            }
+          </td>
+
+          <td>
+            ${
+              grades.length > 0
+                ? grades.join(", ")
+                : "—"
+            }
+          </td>
+
+        </tr>
+
+      `;
+
+    }
+
+    html += `
+
+        </tbody>
+
+      </table>
+
+    `;
+
+    container.innerHTML =
+      html;
+
+  } catch (error) {
+
+    console.error(
+      "TEACHER ASSIGNMENT REPORT ERROR:",
+      error
+    );
+
+    container.innerHTML =
+      "<p>Error loading teacher assignments.</p>";
+
+  }
+
+}
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+
+    loadTeacherAssignmentReport();
+
+  }
+);
   </script>
 
 </body>

@@ -1766,21 +1766,68 @@
       <!-- ===================================================== -->
 
       <section
-        id="settings"
-        class="section"
-      >
+  id="settings"
+  class="section"
+>  <h1>Settings</h1>  <div class="panel"><h2>Academic Calendar / Term Dates</h2>
 
-        <h1>Settings</h1>
+<p>
+  Enter the opening and closing dates for each term.
+  These dates can be changed for every academic year.
+</p>
 
-        <div class="panel">
+<div class="form-grid">
 
-          <p>
-            School system settings will appear here.
-          </p>
+  <div>
+    <label for="academicYear">Academic Year</label>
+    <input
+      type="number"
+      id="academicYear"
+      placeholder="e.g. 2026"
+    >
+  </div>
 
-        </div>
+  <div>
+    <label for="termNumber">Term</label>
+    <select id="termNumber">
+      <option value="">Select Term</option>
+      <option value="1">Term 1</option>
+      <option value="2">Term 2</option>
+      <option value="3">Term 3</option>
+    </select>
+  </div>
 
-      </section>
+  <div>
+    <label for="termOpeningDate">Opening Date</label>
+    <input
+      type="date"
+      id="termOpeningDate"
+    >
+  </div>
+
+  <div>
+    <label for="termClosingDate">Closing Date</label>
+    <input
+      type="date"
+      id="termClosingDate"
+    >
+  </div>
+
+</div>
+
+<button
+  type="button"
+  class="primary-btn"
+  onclick="saveTermDates()"
+>
+  Save Term Dates
+</button>
+
+<div
+  id="termDatesMessage"
+  class="message"
+></div>
+
+  </div></section>
 
 
     </main>

@@ -2856,6 +2856,13 @@ const termClosingDate =
 
 
 let nextTermOpeningDate = null;
+  nextTermOpeningDate =
+  await getNextTermOpeningDate(
+    termResult.data.academic_years?.id,
+    termNumber,
+    academicYear,
+    learner.school_id
+  );
   async function getNextTermOpeningDate(
   academicYearId,
   currentTermNumber,

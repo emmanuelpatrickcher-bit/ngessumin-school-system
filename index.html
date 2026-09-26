@@ -2872,10 +2872,34 @@ Object.keys(bestResultsByArea).forEach(
 );
 
 /*
- * Grade 9 has 9 learning areas,
- * each carrying 100 marks.
+ * Set total possible marks according
+ * to the learner's grade.
  */
-totalPossible = 900;
+const reportGradeNumber =
+  Number(learner.grades?.grade_number);
+
+if (
+  reportGradeNumber >= 1 &&
+  reportGradeNumber <= 3
+) {
+
+  totalPossible = 600;
+
+} else if (
+  reportGradeNumber >= 4 &&
+  reportGradeNumber <= 6
+) {
+
+  totalPossible = 700;
+
+} else if (
+  reportGradeNumber >= 7 &&
+  reportGradeNumber <= 9
+) {
+
+  totalPossible = 900;
+
+}
   
 
   let percentage = 0;

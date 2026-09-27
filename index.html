@@ -3889,13 +3889,13 @@ if (!classResultsResult.error) {
         function (learner) {
 
           const matchesSearch =
-            learner.full_name
-              .toLowerCase()
-              .includes(search) ||
+  (learner.full_name || "")
+    .toLowerCase()
+    .includes(search) ||
 
-            learner.assessment_number
-              .toLowerCase()
-              .includes(search);
+  (learner.assessment_number || "")
+    .toLowerCase()
+    .includes(search);
 
 
           const matchesGrade =

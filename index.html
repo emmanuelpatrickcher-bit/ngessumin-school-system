@@ -1610,7 +1610,140 @@
   <h1>Teachers & Staff</h1>
 
   <div class="panel">
+<div class="panel">
 
+  <h2>Create Teacher Account</h2>
+
+  <div class="form-grid">
+
+    <div>
+      <label for="accountTeacherName">
+        Full Name
+      </label>
+
+      <input
+        type="text"
+        id="accountTeacherName"
+        placeholder="Enter teacher's full name"
+      >
+    </div>
+
+    <div>
+      <label for="accountTeacherEmail">
+        Email
+      </label>
+
+      <input
+        type="email"
+        id="accountTeacherEmail"
+        placeholder="Enter teacher's email"
+      >
+    </div>
+
+    <div>
+      <label for="accountTeacherPassword">
+        Temporary Password
+      </label>
+
+      <input
+        type="password"
+        id="accountTeacherPassword"
+        placeholder="Enter temporary password"
+      >
+    </div>
+
+    <div>
+      <label for="accountTeacherTsc">
+        TSC Number
+      </label>
+
+      <input
+        type="text"
+        id="accountTeacherTsc"
+        placeholder="Enter TSC number"
+      >
+    </div>
+
+    <div>
+      <label for="accountTeacherGender">
+        Gender
+      </label>
+
+      <select id="accountTeacherGender">
+
+        <option value="">
+          Select Gender
+        </option>
+
+        <option value="Male">
+          Male
+        </option>
+
+        <option value="Female">
+          Female
+        </option>
+
+      </select>
+    </div>
+
+    <div>
+      <label for="accountTeacherPhone">
+        Phone Number
+      </label>
+
+      <input
+        type="tel"
+        id="accountTeacherPhone"
+        placeholder="Enter phone number"
+      >
+    </div>
+
+    <div>
+      <label for="accountTeacherRole">
+        Role
+      </label>
+
+      <select id="accountTeacherRole">
+
+        <option value="Teacher">
+          Teacher
+        </option>
+
+        <option value="Senior Teacher">
+          Senior Teacher
+        </option>
+
+        <option value="Headteacher">
+          Headteacher
+        </option>
+
+        <option value="Deputy Headteacher">
+          Deputy Headteacher
+        </option>
+
+        <option value="Other">
+          Other
+        </option>
+
+      </select>
+    </div>
+
+  </div>
+
+  <button
+    type="button"
+    class="primary-btn"
+    onclick="createTeacherAccount()"
+  >
+    Create Teacher Account
+  </button>
+
+  <div
+    id="teacherAccountMessage"
+    class="message"
+  ></div>
+
+</div>
     <h2>Add Teacher</h2>
 
     <div class="form-grid">

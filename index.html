@@ -7061,7 +7061,153 @@ document.addEventListener(
     );
   }
 }
+async function createTeacherAccount() {
 
+  const name =
+    document.getElementById("accountTeacherName").value.trim();
+
+  const email =
+    document.getElementById("accountTeacherEmail").value.trim();
+
+  const password =
+    document.getElementById("accountTeacherPassword").value;
+
+  const tsc =
+    document.getElementById("accountTeacherTsc").value.trim();
+
+  const gender =
+    document.getElementById("accountTeacherGender").value;
+
+  const phone =
+    document.getElementById("accountTeacherPhone").value.trim();
+
+  const role =
+    document.getElementById("accountTeacherRole").value;
+
+  const message =
+    document.getElementById("teacherAccountMessage");
+
+  if (!name || !email || !password) {
+    message.textContent =
+      "Please enter the teacher's name, email and temporary password.";
+    return;
+  }
+
+  if (password.length < 6) {
+    message.textContent =
+      "The temporary password must be at least 6 characters.";
+    return;
+  }
+
+  message.textContent =
+    "Creating teacher account...";
+
+  try {
+
+    const sessionResult =
+      await db.auth.getSession();
+
+    if (
+      sessionResult.error ||
+      !sessionResult.data.session
+    ) {
+      message.textContent =
+        "You must be logged in as Administrator.";
+      return;
+    }
+
+    const accessToken =
+      sessionResult.data.session.access_token;
+
+    const response =
+      await fetch(
+        "https://awazhdqlkjscfrhsoghe.supabase.co/functions/v1/quick-endpoint",
+        {
+          method: "POST",
+
+          headers: {
+            "Authorization":
+              "Bearer " + accessToken,
+
+            "apikey":
+              "sb_publishable_87J_ACo3RI__1dzCFH1I8A_vml3ngIh",
+
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            full_name: name,
+            email: email,
+            password: password,
+            tsc_number: tsc || null,
+            gender: gender || null,
+            phone: phone || null,
+            role: role || "Teacher"
+          })
+        }
+      );
+
+    const result =
+      await response.json();
+
+    if (!response.ok) {
+      console.error(
+        "CREATE TEACHER ACCOUNT ERROR:",
+        result
+      );
+
+      message.textContent =
+        result.error ||
+        "Unable to create teacher account.";
+
+      return;
+    }
+
+    message.textContent =
+      "Teacher account created successfully.";
+
+    document.getElementById(
+      "accountTeacherName"
+    ).value = "";
+
+    document.getElementById(
+      "accountTeacherEmail"
+    ).value = "";
+
+    document.getElementById(
+      "accountTeacherPassword"
+    ).value = "";
+
+    document.getElementById(
+      "accountTeacherTsc"
+    ).value = "";
+
+    document.getElementById(
+      "accountTeacherGender"
+    ).value = "";
+
+    document.getElementById(
+      "accountTeacherPhone"
+    ).value = "";
+
+    document.getElementById(
+      "accountTeacherRole"
+    ).value = "Teacher";
+
+    loadTeachers();
+
+  } catch (error) {
+
+    console.error(
+      "CREATE TEACHER ACCOUNT ERROR:",
+      error
+    );
+
+    message.textContent =
+      "Unable to connect to the teacher account service.";
+  }
+      }
 
 document.addEventListener(
   "DOMContentLoaded",

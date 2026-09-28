@@ -5321,7 +5321,192 @@ async function setupResultsAnalysis() {
     };
 
 }
+/* ================= MERIT LIST SETUP ================= */
 
+async function setupMeritList() {
+
+  const yearSelect =
+    document.getElementById("meritYear");
+
+  const termSelect =
+    document.getElementById("meritTerm");
+
+  const gradeSelect =
+    document.getElementById("meritGrade");
+
+  if (
+    !yearSelect ||
+    !termSelect ||
+    !gradeSelect
+  ) {
+    return;
+  }
+
+
+  /* LOAD ACADEMIC YEARS */
+
+  const yearResult =
+    await db
+      .from("academic_years")
+      .select("id, year")
+      .order(
+        "year",
+        {
+          ascending: false
+        }
+      );
+
+  if (yearResult.error) {
+
+    console.error(
+      "MERIT YEAR ERROR:",
+      yearResult.error
+    );
+
+    return;
+  }
+
+
+  yearSelect.innerHTML =
+    '<option value="">Select Year</option>';
+
+  (yearResult.data || []).forEach(
+    function (year) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        year.id;
+
+      option.textContent =
+        year.year;
+
+      yearSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+
+  /* LOAD TERMS WHEN YEAR IS SELECTED */
+
+  yearSelect.onchange =
+    async function () {
+
+      termSelect.innerHTML =
+        '<option value="">Select Term</option>';
+
+      if (!this.value) {
+        return;
+      }
+
+      const termResult =
+        await db
+          .from("terms")
+          .select(
+            "id, term_number"
+          )
+          .eq(
+            "academic_year_id",
+            this.value
+          )
+          .order(
+            "term_number"
+          );
+
+      if (termResult.error) {
+
+        console.error(
+          "MERIT TERM ERROR:",
+          termResult.error
+        );
+
+        return;
+      }
+
+
+      (termResult.data || []).forEach(
+        function (term) {
+
+          const option =
+            document.createElement("option");
+
+          option.value =
+            term.id;
+
+          option.textContent =
+            "Term " +
+            term.term_number;
+
+          termSelect.appendChild(
+            option
+          );
+
+        }
+      );
+
+    };
+
+
+  /* LOAD GRADES */
+
+  const gradeResult =
+    await db
+      .from("grades")
+      .select(
+        "id, grade_number"
+      )
+      .order(
+        "grade_number"
+      );
+
+  if (gradeResult.error) {
+
+    console.error(
+      "MERIT GRADE ERROR:",
+      gradeResult.error
+    );
+
+    return;
+  }
+
+
+  gradeSelect.innerHTML =
+    '<option value="">Select Grade</option>';
+
+  (gradeResult.data || []).forEach(
+    function (grade) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        grade.id;
+
+      option.textContent =
+        "Grade " +
+        grade.grade_number;
+
+      gradeSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+}
+
+
+/* START MERIT LIST SETUP */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  function () {
+    setupMeritList();
+  }
+);
 document.addEventListener(
   "DOMContentLoaded",
   function () {

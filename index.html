@@ -8835,11 +8835,6 @@ message.textContent =
       if (areasResult.error) {
         throw areasResult.error;
       }
-console.log(
-  "TEACHER GRADES:",
-  teacher.full_name,
-  gradesResult.data
-);
       const gradesResult =
         await db
           .from("teacher_grades")

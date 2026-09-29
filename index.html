@@ -1250,5 +1250,87 @@
     id="balanceResult"
     class="panel"
   >
+                Select Grade
+          </option>
+
+        </select>
+
+      </div>
+
+      <div>
+
+        <label for="classReportTerm">
+          Term
+        </label>
+
+        <select id="classReportTerm">
+
+          <option value="">
+            Select Term
+          </option>
+
+          <option value="1">
+            Term 1
+          </option>
+
+          <option value="2">
+            Term 2
+          </option>
+
+          <option value="3">
+            Term 3
+          </option>
+
+        </select>
+
+      </div>
+
+      <div>
+
+        <label for="classReportArea">
+          Learning Area
+        </label>
+
+        <select id="classReportArea">
+
+          <option value="">
+            Select Learning Area
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="primary-btn"
+      onclick="generateClassPerformanceReport()"
+    >
+      Generate Class Performance Report
+    </button>
+
+    <div
+      id="classReportMessage"
+      class="message"
+    ></div>
+
+  </div>
+
+  <div
+    class="panel"
+    id="classPerformanceResult"
+  >
+
     <p>
-      Select 
+      Select a grade, term and learning area to generate a class performance report.
+    </p>
+
+  </div>
+
+             </section> 
+      <!-- ===================================================== -->
+<!-- TEACHERS & STAFF -->
+<!-- ===================================================== -->
+      

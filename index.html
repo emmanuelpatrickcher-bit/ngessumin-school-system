@@ -8788,15 +8788,11 @@ message.textContent =
       const teacher of teachers
     ) {
 
-      const assignmentsResult =
+     const areasResult =
   await db
-    .from("teacher_grade_learning_areas")
+    .from("teacher_learning_areas")
     .select(`
-      grade_id,
       learning_area_id,
-      grades (
-        grade_number
-      ),
       learning_areas (
         name
       )
@@ -8806,28 +8802,57 @@ message.textContent =
       teacher.id
     );
 
-if (assignmentsResult.error) {
-  throw assignmentsResult.error;
+if (areasResult.error) {
+  throw areasResult.error;
 }
 
-const assignments =
-  (assignmentsResult.data || [])
-    .filter(function(item) {
-      return (
-        item.grades &&
-        item.learning_areas
-      );
-    });
+const gradesResult =
+  await db
+    .from("teacher_grades")
+    .select(`
+      grade_id,
+      grades (
+        grade_number
+      )
+    `)
+    .eq(
+      "teacher_id",
+      teacher.id
+    );
 
-const assignmentText =
-  assignments
+if (gradesResult.error) {
+  throw gradesResult.error;
+}
+
+const areas =
+  areasResult.data || [];
+
+const teacherGrades =
+  gradesResult.data || [];
+
+const areaText =
+  areas
+    .filter(function(item) {
+      return item.learning_areas;
+    })
+    .map(function(item) {
+      return item.learning_areas.name;
+    })
+    .join(", ");
+
+const gradeText =
+  teacherGrades
+    .filter(function(item) {
+      return item.grades;
+    })
     .map(function(item) {
       return (
         "Grade " +
-        item.grades.grade_number +
-        " - " +
-        item.learning_areas.name
+        item.grades.grade_number
       );
+    })
+    .filter(function(value, index, array) {
+      return array.indexOf(value) === index;
     })
     .join(", ");
 
@@ -8841,33 +8866,23 @@ html += `
 
     <td>
       ${
-        assignments.length > 0
-          ? assignmentText
+        areaText
+          ? areaText
           : "—"
       }
     </td>
 
     <td>
       ${
-        assignments.length > 0
-          ? assignments
-              .map(function(item) {
-                return (
-                  "Grade " +
-                  item.grades.grade_number
-                );
-              })
-              .filter(function(value, index, array) {
-                return array.indexOf(value) === index;
-              })
-              .join(", ")
+        gradeText
+          ? gradeText
           : "—"
       }
     </td>
 
   </tr>
 
-`;
+`; 
 
     }
 

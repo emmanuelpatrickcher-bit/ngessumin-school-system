@@ -4292,68 +4292,75 @@ async function setupAssessment() {
 
       /* If Teacher, keep only assigned learning areas */
 
-      if (role === "Teacher") {
+            if (role === "Teacher") {
 
-        const teacherResult =
-          await db
-            .from("teachers")
-            .select("id")
-            .eq("user_id", userId)
-            .single();
+        /*
+          Use the exact teacher + grade +
+          learning area assignments.
+        */
 
-        if (teacherResult.error) {
-
-          console.error(
-            "TEACHER RECORD ERROR:",
-            teacherResult.error
-          );
-
-          return;
-        }
-
-        const teacherId =
-          teacherResult.data.id;
-
-
-        const areaAssignmentResult =
-          await db
-            .from("teacher_learning_areas")
-            .select("learning_area_id")
-            .eq(
-              "teacher_id",
-              teacherId
-            );
-
-        if (areaAssignmentResult.error) {
-
-          console.error(
-            "TEACHER LEARNING AREA ERROR:",
-            areaAssignmentResult.error
-          );
-
-          return;
-        }
+        const teacherAssignments =
+          window.teacherAssignments || [];
 
 
         const assignedAreaIds =
-          (areaAssignmentResult.data || [])
-            .map(function(item) {
-              return item.learning_area_id;
-            });
+          teacherAssignments
+            .filter(
+              function(item) {
+
+                return item.grade_id ===
+                  this.value;
+
+              },
+              this
+            )
+            .map(
+              function(item) {
+
+                return item.learning_area_id;
+
+              }
+            );
+
+
+        if (assignedAreaIds.length === 0) {
+          return;
+        }
+
+
+        /*
+          Get the names of the learning areas
+          assigned for this specific grade.
+        */
+
+        const areaResult =
+          await db
+            .from("learning_areas")
+            .select(`
+              id,
+              name
+            `)
+            .in(
+              "id",
+              assignedAreaIds
+            );
+
+
+        if (areaResult.error) {
+
+          console.error(
+            "TEACHER ASSIGNED AREA ERROR:",
+            areaResult.error
+          );
+
+          return;
+        }
 
 
         availableAreas =
-          availableAreas.filter(
-            function(item) {
-
-              return assignedAreaIds.includes(
-                item.learning_area_id
-              );
+          areaResult.data || [];
 
             }
-          );
-
-      }
 
 
       /* Fill Learning Area dropdown */

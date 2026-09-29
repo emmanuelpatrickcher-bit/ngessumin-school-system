@@ -8819,65 +8819,86 @@ message.textContent =
       const teacher of teachers
     ) {
 
-      const areasResult =
-        await db
-          .from("teacher_learning_areas")
-          .select(`
-            learning_area_id,
-            learning_areas (
-              name
-            )
-          `)
-          .eq(
-            "teacher_id",
-            teacher.id
-          );
+      const assignmentsResult =
+  await db
+    .from("teacher_grade_learning_areas")
+    .select(`
+      grade_id,
+      learning_area_id,
+      grades (
+        grade_number
+      ),
+      learning_areas (
+        name
+      )
+    `)
+    .eq(
+      "teacher_id",
+      teacher.id
+    );
 
-      if (areasResult.error) {
-        throw areasResult.error;
+if (assignmentsResult.error) {
+  throw assignmentsResult.error;
+}
+
+const assignments =
+  (assignmentsResult.data || [])
+    .filter(function(item) {
+      return (
+        item.grades &&
+        item.learning_areas
+      );
+    });
+
+const assignmentText =
+  assignments
+    .map(function(item) {
+      return (
+        "Grade " +
+        item.grades.grade_number +
+        " - " +
+        item.learning_areas.name
+      );
+    })
+    .join(", ");
+
+html += `
+
+  <tr>
+
+    <td>
+      ${teacher.full_name}
+    </td>
+
+    <td>
+      ${
+        assignments.length > 0
+          ? assignmentText
+          : "—"
       }
-      const gradesResult =
-        await db
-          .from("teacher_grades")
-          .select(`
-            grade_id,
-            grades (
-              grade_number
-            )
-          `)
-          .eq(
-            "teacher_id",
-            teacher.id
-          );
+    </td>
 
-      if (gradesResult.error) {
-        throw gradesResult.error;
+    <td>
+      ${
+        assignments.length > 0
+          ? assignments
+              .map(function(item) {
+                return (
+                  "Grade " +
+                  item.grades.grade_number
+                );
+              })
+              .filter(function(value, index, array) {
+                return array.indexOf(value) === index;
+              })
+              .join(", ")
+          : "—"
       }
+    </td>
 
-      const areas =
-        (areasResult.data || [])
-          .filter(
-            item =>
-              item.learning_areas
-          )
-          .map(
-            item =>
-              item.learning_areas.name
-          );
+  </tr>
 
-      const grades =
-        (gradesResult.data || [])
-          .filter(
-            item =>
-              item.grades
-          )
-          .map(
-            item =>
-              "Grade " +
-              item.grades.grade_number
-          );
-
-      html += `
+`;
 
         <tr>
 

@@ -2230,5 +2230,147 @@ if (selectedGradeNumber === 9) {
     level = "BE2";
   }
     
+  <table style="width:100%; border-collapse:collapse;">
+    <thead>
+      <tr>
+        <th style="border:1px solid #ccc; padding:8px; text-align:left;">
+          Learning Area
+        </th>
+        <th style="border:1px solid #ccc; padding:8px;">
+          Score
+        </th>
+        <th style="border:1px solid #ccc; padding:8px;">
+          Level
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      ${
+       gradeLearningAreas.map(function(item) {
+
+  const learningAreaId =
+    item.learning_area_id;
+
+  const result =
+    bestResultsByArea[learningAreaId];
+
+  return `
+    <tr>
+      <td style="border:1px solid #ccc; padding:8px;">
+        ${escapeHtml(
+          item.learning_areas?.name || "-"
+        )}
+      </td>
+
+      <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+        ${
+          result && result.score !== null
+            ? result.score
+            : "—"
+        }
+      </td>
+
+      <td style="border:1px solid #ccc; padding:8px; text-align:center;">
+        ${
+  result && result.score !== null && result.achievement_level
+    ? result.achievement_level
+    : "—"
+        }
+      </td>
+    </tr>
+  `;
+
+}).join("") 
+      }
+
+    </tbody>
+  </table>
+
+  <hr>
+
+  <h3>
+    Performance Summary
+  </h3>
+
+  <p>
+    <strong>Total Marks:</strong>
+    ${totalMarks}/${totalPossible}
+  </p>
+
+  <p>
+    <strong>Percentage:</strong>
+    ${percentage}%
+  </p>
+
+  <p>
+  <strong>Achievement Level:</strong>
+  ${level}
+</p>
+
+<p>
+  <strong>Class Position:</strong>
+  ${classPosition} of ${classSize}
+</p>
+
+<p>
+  <strong>School Closing Date:</strong>
+  ${
+    termClosingDate
+      ? new Date(termClosingDate).toLocaleDateString("en-KE")
+      : "—"
+  }
+</p>
+
+<p>
+  <strong>School Opening Date:</strong>
+  ${
+    nextTermOpeningDate
+      ? nextTermOpeningDate
+      : "—"
+  }
+</p>
+
+<p>
+  <strong>Class Teacher's Signature:</strong>
+  ______________________________
+</p>
+
+<p>
+  <strong>School Official Stamp:</strong>
+</p>
+
+<div
+  style="
+    width:120px;
+    height:80px;
+    border:2px solid #999;
+    margin-top:8px;
+  "
+></div>
+
+<div style="margin-top:20px;">
+  <button
+    type="button"
+    class="primary-btn"
+    onclick="printReportCard()"
+  >
+    Print Report Card
+  </button>
+</div>
+
+></div>
+`;
+
+  message.textContent =
+    "Report card generated successfully.";
+
+}
+
+  /* =========================================================
+     SHOW LEARNERS
+  ========================================================= */
+    
   
   

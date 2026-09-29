@@ -1474,3 +1474,109 @@
       <!-- ===================================================== -->
       <!-- USERS -->
       <!-- ===================================================== -->
+       LOGIN
+  ========================================================= */
+
+  async function login(event) {
+
+    event.preventDefault();
+
+    const email =
+      document
+        .getElementById("email")
+        .value
+        .trim();
+
+    const password =
+      document
+        .getElementById("password")
+        .value;
+
+    const message =
+      document
+        .getElementById("loginMessage");
+
+    const button =
+      document
+        .getElementById("loginButton");
+
+
+    message.textContent =
+      "Signing in...";
+
+    button.disabled = true;
+
+
+    try {
+
+      const result =
+        await db.auth.signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
+
+      if (result.error) {
+
+        console.error(
+          "LOGIN ERROR:",
+          result.error
+        );
+
+        message.textContent =
+          result.error.message;
+
+        button.disabled = false;
+
+        return;
+
+      }
+
+
+      if (
+        !result.data ||
+        !result.data.session
+      ) {
+
+        message.textContent =
+          "Login failed. No session was created.";
+
+        button.disabled = false;
+
+        return;
+
+      }
+
+
+      message.textContent =
+        "Login successful.";
+
+      showDashboard();
+
+
+    } catch (error) {
+
+      console.error(
+        "LOGIN EXCEPTION:",
+        error
+      );
+
+      message.textContent =
+        "Login error: " +
+        error.message;
+
+    }
+
+
+    button.disabled = false;
+
+  }
+
+
+  /* =========================================================
+     SHOW LOGIN
+  ========================================================= */
+  

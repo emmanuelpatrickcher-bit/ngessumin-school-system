@@ -4365,30 +4365,28 @@ async function setupAssessment() {
 
       /* Fill Learning Area dropdown */
 
-      availableAreas.forEach(
-        function(item) {
+availableAreas.forEach(
+  function(item) {
 
-          if (!item.learning_areas) {
-            return;
-          }
-
-          const option =
-            document.createElement("option");
-
-          option.value =
-            item.learning_areas.id;
-
-          option.textContent =
-            item.learning_areas.name;
-
-          areaSelect.appendChild(option);
-
-        }
-      );
-
-    };
-
+    if (!item) {
+      return;
     }
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      item.id;
+
+    option.textContent =
+      item.name;
+
+    areaSelect.appendChild(
+      option
+    );
+
+  }
+);
 
 
 document.addEventListener(

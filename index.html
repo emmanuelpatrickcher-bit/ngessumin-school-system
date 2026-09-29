@@ -2069,5 +2069,166 @@
   /* =========================================================
      LOAD LEARNERS
   ========================================================= */
+        }
+
+    }
+
+  }
+
+} catch (nextTermError) {
+
+  console.error(
+    "NEXT TERM DATE ERROR:",
+    nextTermError
+  );
+
+}
+let totalMarks = 0;
+let totalPossible = 0;
+
+const bestResultsByArea = {};
+
+results.forEach(
+  function(result) {
+
+    if (
+      String(result.assessments?.term_id) !==
+      String(selectedTermId)
+    ) {
+      return;
+    }
+
+    const learningAreaId =
+      result.assessments?.learning_area_id;
+
+    if (!learningAreaId) {
+      return;
+    }
+
+    const score =
+      result.score === null
+        ? null
+        : Number(result.score);
+
+    /*
+     * Only scored assessments are considered.
+     * The latest scored assessment becomes
+     * the official result for the learning area.
+     */
+
+    if (score === null) {
+      return;
+    }
+
+    const createdAt =
+      result.assessments?.created_at || "";
+
+    const current =
+      bestResultsByArea[learningAreaId];
+
+    if (
+      !current ||
+      createdAt > current.createdAt
+    ) {
+
+      bestResultsByArea[learningAreaId] = {
+        score: score,
+        achievement_level:
+          result.achievement_level,
+        createdAt: createdAt
+      };
+
+    }
+
+  }
+);
+
+/*
+ * Add the best available score from each
+ * learning area.
+ */
+Object.keys(bestResultsByArea).forEach(
+  function(learningAreaId) {
+
+    const result =
+      bestResultsByArea[learningAreaId];
+
+    totalMarks +=
+      result.score === null
+        ? 0
+        : result.score;
+
+  }
+);
+
+/*
+ * Set total possible marks according
+ * to the learner's grade.
+ */
+const reportGradeNumber =
+  Number(learner.grades?.grade_number);
+
+if (
+  reportGradeNumber >= 1 &&
+  reportGradeNumber <= 3
+) {
+
+  totalPossible = 600;
+
+} else if (
+  reportGradeNumber >= 4 &&
+  reportGradeNumber <= 6
+) {
+
+  totalPossible = 700;
+
+} else if (
+  reportGradeNumber >= 7 &&
+  reportGradeNumber <= 9
+) {
+
+  totalPossible = 900;
+
+}
+  
+
+  let percentage = 0;
+
+  if (totalPossible > 0) {
+
+    percentage =
+      (totalMarks / totalPossible) * 100;
+
+  }
+
+  percentage =
+    Math.round(percentage);
+
+  
+let level = "";
+
+const selectedGradeNumber =
+  Number(learner.grades?.grade_number);
+
+if (selectedGradeNumber === 9) {
+
+  if (totalMarks >= 802) {
+    level = "EE1";
+  } else if (totalMarks >= 667) {
+    level = "EE2";
+  } else if (totalMarks >= 514) {
+    level = "ME1";
+  } else if (totalMarks >= 361) {
+    level = "ME2";
+  } else if (totalMarks >= 271) {
+    level = "AE1";
+  } else if (totalMarks >= 181) {
+    level = "AE2";
+  } else if (totalMarks >= 91) {
+    level = "BE1";
+  } else {
+    level = "BE2";
+  }
+    
   
   

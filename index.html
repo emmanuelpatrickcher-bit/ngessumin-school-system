@@ -4138,6 +4138,7 @@ async function setupAssessment() {
 
   /* If Teacher, keep only assigned grades */
 
+  
   if (role === "Teacher") {
 
     const teacherResult =
@@ -4161,10 +4162,18 @@ async function setupAssessment() {
       teacherResult.data.id;
 
 
+    /*
+      Get the teacher's exact
+      grade + learning area assignments.
+    */
+
     const assignmentResult =
       await db
-        .from("teacher_grades")
-        .select("grade_id")
+        .from("teacher_grade_learning_areas")
+        .select(`
+          grade_id,
+          learning_area_id
+        `)
         .eq(
           "teacher_id",
           teacherId
@@ -4173,31 +4182,47 @@ async function setupAssessment() {
     if (assignmentResult.error) {
 
       console.error(
-        "TEACHER GRADE ERROR:",
+        "TEACHER ASSIGNMENT ERROR:",
         assignmentResult.error
       );
 
       return;
     }
 
+
+    const teacherAssignments =
+      assignmentResult.data || [];
+
+
     const assignedGradeIds =
-      (assignmentResult.data || [])
-        .map(function(item) {
+      teacherAssignments.map(
+        function(item) {
           return item.grade_id;
-        });
+        }
+      );
 
 
     availableGrades =
       availableGrades.filter(
         function(grade) {
+
           return assignedGradeIds.includes(
             grade.id
           );
+
         }
       );
 
-  }
 
+    /*
+      Keep the exact grade + learning area
+      combinations for the next step.
+    */
+
+    window.teacherAssignments =
+      teacherAssignments;
+
+  }
 
   /* Store available grades */
 

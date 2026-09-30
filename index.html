@@ -4170,10 +4170,7 @@ async function setupAssessment() {
     const assignmentResult =
       await db
         .from("teacher_grades")
-        .select(`
-          grade_id,
-          learning_area_id
-        `)
+        .select("grade_id")
         .eq(
           "teacher_id",
           teacherId

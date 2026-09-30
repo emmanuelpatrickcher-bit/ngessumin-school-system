@@ -4136,36 +4136,227 @@ async function setupAssessment() {
     gradeResult.data || [];
 
 
-  /* If Teacher, keep only assigned learning areas */
+  /* If Teacher, keep only assigned grades */
 
-if (role === "Teacher") {
+  
+  if (role === "Teacher") {
 
-  const assignedAreaIds =
-    (window.teacherAssignments || [])
-      .filter(function(item) {
+    const teacherResult =
+      await db
+        .from("teachers")
+        .select("id")
+        .eq("user_id", userId)
+        .single();
 
-        return item.grade_id === gradeSelect.value;
+    if (teacherResult.error) {
 
-      })
-      .map(function(item) {
+      console.error(
+        "TEACHER RECORD ERROR:",
+        teacherResult.error
+      );
 
-        return item.learning_area_id;
+      return;
+    }
 
-      });
+    const teacherId =
+      teacherResult.data.id;
 
 
-  availableAreas =
-    availableAreas.filter(
-      function(item) {
+    /*
+      Get the teacher's exact
+      grade + learning area assignments.
+    */
 
-        return assignedAreaIds.includes(
-          item.learning_area_id
+    const assignmentResult =
+      await db
+        .from("teacher_grade_learning_areas")
+        .select(`
+          grade_id,
+          learning_area_id
+        `)
+        .eq(
+          "teacher_id",
+          teacherId
         );
 
-      }
-    );
+    if (assignmentResult.error) {
 
-              }
+      console.error(
+        "TEACHER ASSIGNMENT ERROR:",
+        assignmentResult.error
+      );
+
+      return;
+    }
+
+
+    const teacherAssignments =
+      assignmentResult.data || [];
+
+
+    const assignedGradeIds =
+      teacherAssignments.map(
+        function(item) {
+          return item.grade_id;
+        }
+      );
+
+
+    availableGrades =
+      availableGrades.filter(
+        function(grade) {
+
+          return assignedGradeIds.includes(
+            grade.id
+          );
+
+        }
+      );
+
+
+    /*
+      Keep the exact grade + learning area
+      combinations for the next step.
+    */
+
+    window.teacherAssignments =
+      teacherAssignments;
+
+  }
+
+  /* Store available grades */
+
+  grades =
+    availableGrades;
+
+
+  /* Fill Grade dropdown */
+
+  grades.forEach(function(grade) {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      grade.id;
+
+    option.textContent =
+      "Grade " + grade.grade_number;
+
+    gradeSelect.appendChild(option);
+
+  });
+
+
+  /* Grade selection */
+
+  gradeSelect.onchange =
+    async function() {
+
+      areaSelect.innerHTML =
+        '<option value="">Select Learning Area</option>';
+
+      if (!this.value) {
+        return;
+      }
+
+
+      /* Get learning areas for selected grade */
+
+      const result =
+        await db
+          .from("grade_learning_areas")
+          .select(`
+            learning_area_id,
+            learning_areas (
+              id,
+              name
+            )
+          `)
+          .eq(
+            "grade_id",
+            this.value
+          );
+
+      if (result.error) {
+
+        console.error(result.error);
+
+        return;
+      }
+
+
+      let availableAreas =
+        result.data || [];
+
+
+      /* If Teacher, keep only assigned learning areas */
+
+      if (role === "Teacher") {
+
+        const teacherResult =
+          await db
+            .from("teachers")
+            .select("id")
+            .eq("user_id", userId)
+            .single();
+
+        if (teacherResult.error) {
+
+          console.error(
+            "TEACHER RECORD ERROR:",
+            teacherResult.error
+          );
+
+          return;
+        }
+
+        const teacherId =
+          teacherResult.data.id;
+
+
+        const areaAssignmentResult =
+          await db
+            .from("teacher_learning_areas")
+            .select("learning_area_id")
+            .eq(
+              "teacher_id",
+              teacherId
+            );
+
+        if (areaAssignmentResult.error) {
+
+          console.error(
+            "TEACHER LEARNING AREA ERROR:",
+            areaAssignmentResult.error
+          );
+
+          return;
+        }
+
+
+        const assignedAreaIds =
+          (areaAssignmentResult.data || [])
+            .map(function(item) {
+              return item.learning_area_id;
+            });
+
+
+        availableAreas =
+          availableAreas.filter(
+            function(item) {
+
+              return assignedAreaIds.includes(
+                item.learning_area_id
+              );
+
+            }
+          );
+
+      }
+
+
+      /* Fill Learning Area dropdown */
 
       availableAreas.forEach(
         function(item) {

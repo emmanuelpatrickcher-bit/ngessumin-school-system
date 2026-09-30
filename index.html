@@ -4191,26 +4191,14 @@ async function setupAssessment() {
 
 
     const teacherAssignments =
-      assignmentResult.data || [];
+  assignmentResult.data || [];
 
 
-    const assignedGradeIds =
-teacherAssignments.map(
-function(item) {
-return item.grade_id;
-}
-);
+/* TEST ONLY:
+   temporarily allow all grades */
 
-availableGrades =  
-  availableGrades.filter(  
-    function(grade) {  
-
-      return assignedGradeIds.includes(  
-        grade.id  
-      );  
-
-    }  
-  );
+availableGrades =
+  gradeResult.data || [];
 
 
     /*

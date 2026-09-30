@@ -4195,23 +4195,22 @@ async function setupAssessment() {
 
 
     const assignedGradeIds =
-      teacherAssignments.map(
-        function(item) {
-          return item.grade_id;
-        }
-      );
+teacherAssignments.map(
+function(item) {
+return item.grade_id;
+}
+);
 
+availableGrades =  
+  availableGrades.filter(  
+    function(grade) {  
 
-    availableGrades =
-      availableGrades.filter(
-        function(grade) {
+      return assignedGradeIds.includes(  
+        grade.id  
+      );  
 
-          return assignedGradeIds.includes(
-            grade.id
-          );
-
-        }
-      );
+    }  
+  );
 
 
     /*

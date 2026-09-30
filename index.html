@@ -4278,9 +4278,13 @@ async function setupAssessment() {
             this.value
           );
 
+
       if (result.error) {
 
-        console.error(result.error);
+        console.error(
+          "GRADE LEARNING AREAS ERROR:",
+          result.error
+        );
 
         return;
       }
@@ -4290,55 +4294,27 @@ async function setupAssessment() {
         result.data || [];
 
 
-      /* If Teacher, keep only assigned learning areas */
+      /* If Teacher, keep ONLY the learning areas
+         assigned to this teacher for THIS grade */
 
       if (role === "Teacher") {
 
-        const teacherResult =
-          await db
-            .from("teachers")
-            .select("id")
-            .eq("user_id", userId)
-            .single();
-
-        if (teacherResult.error) {
-
-          console.error(
-            "TEACHER RECORD ERROR:",
-            teacherResult.error
-          );
-
-          return;
-        }
-
-        const teacherId =
-          teacherResult.data.id;
+        const teacherAssignments =
+          window.teacherAssignments || [];
 
 
-        const areaAssignmentResult =
-          await db
-            .from("teacher_learning_areas")
-            .select("learning_area_id")
-            .eq(
-              "teacher_id",
-              teacherId
-            );
+        const assignedAreaIdsForGrade =
+          teacherAssignments
+            .filter(function(item) {
 
-        if (areaAssignmentResult.error) {
+              return item.grade_id ===
+                this.value;
 
-          console.error(
-            "TEACHER LEARNING AREA ERROR:",
-            areaAssignmentResult.error
-          );
-
-          return;
-        }
-
-
-        const assignedAreaIds =
-          (areaAssignmentResult.data || [])
+            }, this)
             .map(function(item) {
+
               return item.learning_area_id;
+
             });
 
 
@@ -4346,7 +4322,7 @@ async function setupAssessment() {
           availableAreas.filter(
             function(item) {
 
-              return assignedAreaIds.includes(
+              return assignedAreaIdsForGrade.includes(
                 item.learning_area_id
               );
 

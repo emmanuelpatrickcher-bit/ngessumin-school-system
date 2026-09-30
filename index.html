@@ -4169,7 +4169,7 @@ async function setupAssessment() {
 
     const assignmentResult =
       await db
-        .from("teacher_grade_learning_areas")
+        .from("teacher_grades")
         .select(`
           grade_id,
           learning_area_id

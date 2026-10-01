@@ -457,9 +457,13 @@
   class="section active"
 >
 
-  <div class="dashboard-header">
+  <div class="dashboard-top">
 
     <div>
+      <div class="dashboard-label">
+        SCHOOL MANAGEMENT SYSTEM
+      </div>
+
       <h1>Dashboard</h1>
 
       <p class="dashboard-welcome">
@@ -474,24 +478,30 @@
   </div>
 
 
+  <!-- DASHBOARD STATISTICS -->
+
   <div class="dashboard-cards">
 
     <div class="dashboard-card">
 
-      <div class="dashboard-card-icon">
+      <div class="dashboard-icon">
         📅
       </div>
 
       <div class="dashboard-card-content">
 
-        <h3>Academic Year</h3>
+        <span>Academic Year</span>
 
-        <div
+        <strong
           id="yearValue"
           class="dashboard-number"
         >
           2026
-        </div>
+        </strong>
+
+        <small>
+          Current academic year
+        </small>
 
       </div>
 
@@ -500,20 +510,24 @@
 
     <div class="dashboard-card">
 
-      <div class="dashboard-card-icon">
+      <div class="dashboard-icon">
         🎓
       </div>
 
       <div class="dashboard-card-content">
 
-        <h3>Grades</h3>
+        <span>Grades</span>
 
-        <div
+        <strong
           id="gradeCount"
           class="dashboard-number"
         >
           0
-        </div>
+        </strong>
+
+        <small>
+          Grade 1 – Grade 9
+        </small>
 
       </div>
 
@@ -522,20 +536,24 @@
 
     <div class="dashboard-card">
 
-      <div class="dashboard-card-icon">
+      <div class="dashboard-icon">
         📚
       </div>
 
       <div class="dashboard-card-content">
 
-        <h3>Learning Areas</h3>
+        <span>Learning Areas</span>
 
-        <div
+        <strong
           id="areaCount"
           class="dashboard-number"
         >
           0
-        </div>
+        </strong>
+
+        <small>
+          Curriculum learning areas
+        </small>
 
       </div>
 
@@ -544,20 +562,24 @@
 
     <div class="dashboard-card">
 
-      <div class="dashboard-card-icon">
+      <div class="dashboard-icon">
         👨‍🎓
       </div>
 
       <div class="dashboard-card-content">
 
-        <h3>Learners</h3>
+        <span>Learners</span>
 
-        <div
+        <strong
           id="learnerCount"
           class="dashboard-number"
         >
           0
-        </div>
+        </strong>
+
+        <small>
+          Registered learners
+        </small>
 
       </div>
 
@@ -566,11 +588,33 @@
   </div>
 
 
+  <!-- DASHBOARD INFORMATION -->
+
   <div class="dashboard-info">
 
-    <div class="dashboard-panel">
 
-      <h2>School Overview</h2>
+    <div class="dashboard-panel overview-panel">
+
+      <div class="panel-heading">
+
+        <div>
+
+          <span class="panel-label">
+            SCHOOL INFORMATION
+          </span>
+
+          <h2>
+            School Overview
+          </h2>
+
+        </div>
+
+        <div class="panel-icon">
+          🏫
+        </div>
+
+      </div>
+
 
       <p>
         Welcome to the Ngessumin Comprehensive School
@@ -579,41 +623,147 @@
 
       <p>
         Use the navigation menu to manage learners,
-        assessments, results, report cards and school
-        information.
+        assessments, results, report cards, fees and
+        school information.
       </p>
+
+
+      <div class="dashboard-divider"></div>
+
+
+      <div class="system-status">
+
+        <span class="status-dot"></span>
+
+        <span>
+          System connected and ready
+        </span>
+
+      </div>
 
     </div>
 
 
     <div class="dashboard-panel">
 
-      <h2>Quick Information</h2>
+      <div class="panel-heading">
+
+        <div>
+
+          <span class="panel-label">
+            QUICK INFORMATION
+          </span>
+
+          <h2>
+            School Details
+          </h2>
+
+        </div>
+
+        <div class="panel-icon">
+          ℹ️
+        </div>
+
+      </div>
+
 
       <div class="quick-info">
 
-        <div>
-          <span>School</span>
-          <strong>
-            Ngessumin Comprehensive School
-          </strong>
+
+        <div class="quick-info-row">
+
+          <div class="quick-info-icon">
+            🏫
+          </div>
+
+          <div>
+
+            <span>
+              School
+            </span>
+
+            <strong>
+              Ngessumin Comprehensive School
+            </strong>
+
+          </div>
+
         </div>
 
-        <div>
-          <span>Grades</span>
-          <strong>Grade 1 – Grade 9</strong>
+
+        <div class="quick-info-row">
+
+          <div class="quick-info-icon">
+            🎓
+          </div>
+
+          <div>
+
+            <span>
+              Grades
+            </span>
+
+            <strong>
+              Grade 1 – Grade 9
+            </strong>
+
+          </div>
+
         </div>
 
-        <div>
-          <span>Curriculum</span>
-          <strong>Competency Based Education</strong>
+
+        <div class="quick-info-row">
+
+          <div class="quick-info-icon">
+            📖
+          </div>
+
+          <div>
+
+            <span>
+              Curriculum
+            </span>
+
+            <strong>
+              Competency Based Education
+            </strong>
+
+          </div>
+
         </div>
+
 
       </div>
 
     </div>
 
   </div>
+
+
+  <!-- DASHBOARD HELP -->
+
+  <div class="dashboard-bottom">
+
+    <div class="dashboard-bottom-icon">
+      💡
+    </div>
+
+    <div>
+
+      <strong>
+        School Management
+      </strong>
+
+      <p>
+        Use the navigation menu to access learners,
+        assessments, results, report cards, fees and
+        school administration features.
+      </p>
+
+    </div>
+
+  </div>
+
 
       </section>
 

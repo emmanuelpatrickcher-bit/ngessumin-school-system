@@ -4312,13 +4312,20 @@ availableGrades =
           teacherResult.data.id;
 
 
-        const areaAssignmentResult =
+      const areaAssignmentResult =
           await db
-            .from("teacher_learning_areas")
-            .select("learning_area_id")
+            .from("teacher_grade_learning_areas")
+            .select(`
+              learning_area_id,
+              grade_id
+            `)
             .eq(
               "teacher_id",
               teacherId
+            )
+            .eq(
+              "grade_id",
+              this.value
             );
 
         if (areaAssignmentResult.error) {

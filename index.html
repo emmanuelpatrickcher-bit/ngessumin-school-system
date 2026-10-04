@@ -1980,25 +1980,49 @@
 </section>
 
 
-      <!-- ===================================================== -->
-      <!-- REPORTS -->
-      <!-- ===================================================== -->
+    <!-- ===================================================== -->
+<!-- REPORTS -->
+<!-- ===================================================== -->
 
-    
-             <section
+<section
   id="reports"
   class="section"
 >
 
   <h1>Reports / Report Cards</h1>
 
+
+  <!-- ================================================= -->
   <!-- LEARNER REPORT CARD -->
+  <!-- ================================================= -->
 
   <div class="panel">
 
     <h2>Generate Learner Report Card</h2>
 
     <div class="form-grid">
+
+
+      <!-- GRADE -->
+
+      <div>
+
+        <label for="reportGrade">
+          Grade
+        </label>
+
+        <select id="reportGrade">
+
+          <option value="">
+            Select Grade
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- LEARNER -->
 
       <div>
 
@@ -2009,12 +2033,15 @@
         <select id="reportLearner">
 
           <option value="">
-            Select Learner
+            Select Grade First
           </option>
 
         </select>
 
       </div>
+
+
+      <!-- TERM -->
 
       <div>
 
@@ -2046,6 +2073,7 @@
 
     </div>
 
+
     <button
       type="button"
       class="primary-btn"
@@ -2054,6 +2082,7 @@
       Generate Report Card
     </button>
 
+
     <div
       id="reportMessage"
       class="message"
@@ -2061,25 +2090,34 @@
 
   </div>
 
+
+  <!-- INDIVIDUAL REPORT CARD RESULT -->
+
   <div
     class="panel"
     id="reportCardResult"
   >
 
     <p>
-      Select a learner and term to generate a report card.
+      Select a grade, learner and term to generate a report card.
     </p>
 
   </div>
 
 
+
+  <!-- ================================================= -->
   <!-- CLASS PERFORMANCE REPORT -->
+  <!-- ================================================= -->
 
   <div class="panel">
 
     <h2>Class Performance Report</h2>
 
     <div class="form-grid">
+
+
+      <!-- GRADE -->
 
       <div>
 
@@ -2096,6 +2134,9 @@
         </select>
 
       </div>
+
+
+      <!-- TERM -->
 
       <div>
 
@@ -2125,6 +2166,9 @@
 
       </div>
 
+
+      <!-- LEARNING AREA -->
+
       <div>
 
         <label for="classReportArea">
@@ -2143,6 +2187,7 @@
 
     </div>
 
+
     <button
       type="button"
       class="primary-btn"
@@ -2151,12 +2196,16 @@
       Generate Class Performance Report
     </button>
 
+
     <div
       id="classReportMessage"
       class="message"
     ></div>
 
   </div>
+
+
+  <!-- CLASS PERFORMANCE RESULT -->
 
   <div
     class="panel"
@@ -2169,7 +2218,8 @@
 
   </div>
 
-             </section> 
+
+</section>  
       <!-- ===================================================== -->
 <!-- TEACHERS & STAFF -->
 <!-- ===================================================== -->

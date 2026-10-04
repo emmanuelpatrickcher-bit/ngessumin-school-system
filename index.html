@@ -2244,7 +2244,97 @@
     </p>
 
   </div>
+<!-- ================================================= -->
+<!-- MERIT LIST -->
+<!-- ================================================= -->
 
+<div class="panel">
+
+  <h2>Merit List</h2>
+
+  <div class="form-grid">
+
+    <!-- GRADE -->
+
+    <div>
+
+      <label for="meritGrade">
+        Grade
+      </label>
+
+      <select id="meritGrade">
+
+        <option value="">
+          Select Grade
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <!-- TERM -->
+
+    <div>
+
+      <label for="meritTerm">
+        Term
+      </label>
+
+      <select id="meritTerm">
+
+        <option value="">
+          Select Term
+        </option>
+
+        <option value="1">
+          Term 1
+        </option>
+
+        <option value="2">
+          Term 2
+        </option>
+
+        <option value="3">
+          Term 3
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+
+  <button
+    type="button"
+    class="primary-btn"
+    onclick="generateMeritList()"
+  >
+    Generate Merit List
+  </button>
+
+
+  <div
+    id="meritMessage"
+    class="message"
+  ></div>
+
+</div>
+
+
+<!-- MERIT LIST RESULT -->
+
+<div
+  class="panel"
+  id="meritListResult"
+>
+
+  <p>
+    Select a grade and term to generate the merit list.
+  </p>
+
+</div>
 
 </section>  
       <!-- ===================================================== -->

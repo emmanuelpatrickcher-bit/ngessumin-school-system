@@ -4668,7 +4668,238 @@ if (!classResultsResult.error) {
     "Report card generated successfully.";
 
 }
+async function generateAllReportCards() {
 
+  const gradeSelect =
+    document.getElementById("reportGrade");
+
+  const termSelect =
+    document.getElementById("reportTerm");
+
+  const message =
+    document.getElementById("batchReportMessage");
+
+  const resultContainer =
+    document.getElementById("reportCardResult");
+
+  const gradeId =
+    gradeSelect.value;
+
+  const termNumber =
+    termSelect.value;
+
+  if (!gradeId || !termNumber) {
+
+    message.textContent =
+      "Please select a grade and term first.";
+
+    return;
+  }
+
+  message.textContent =
+    "Loading learners...";
+
+  const learnersResult =
+    await db
+      .from("learners")
+      .select(`
+        id,
+        full_name,
+        assessment_number
+      `)
+      .eq(
+        "grade_id",
+        gradeId
+      )
+      .order(
+        "full_name"
+      );
+
+  if (learnersResult.error) {
+
+    console.error(
+      "BATCH LEARNERS ERROR:",
+      learnersResult.error
+    );
+
+    message.textContent =
+      "Unable to load learners.";
+
+    return;
+  }
+
+  const learners =
+    learnersResult.data || [];
+
+  if (learners.length === 0) {
+
+    message.textContent =
+      "No learners found in the selected grade.";
+
+    return;
+  }
+
+  message.textContent =
+    "Generating report cards... Please wait.";
+
+  const reportCards = [];
+
+  for (
+    let i = 0;
+    i < learners.length;
+    i++
+  ) {
+
+    const learner =
+      learners[i];
+
+    document.getElementById(
+      "reportLearner"
+    ).value = learner.id;
+
+    document.getElementById(
+      "reportTerm"
+    ).value = termNumber;
+
+    await generateReportCard();
+
+    const reportHTML =
+      resultContainer.innerHTML;
+
+    if (
+      reportHTML &&
+      !reportHTML.includes(
+        "Loading results"
+      )
+    ) {
+
+      reportCards.push(
+        reportHTML
+      );
+
+    }
+
+  }
+
+  if (reportCards.length === 0) {
+
+    message.textContent =
+      "No report cards could be generated.";
+
+    return;
+  }
+
+  const printWindow =
+    window.open(
+      "",
+      "_blank"
+    );
+
+  if (!printWindow) {
+
+    message.textContent =
+      "The print window was blocked. Please allow pop-ups for this site.";
+
+    return;
+  }
+
+  printWindow.document.open();
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+
+    <html>
+
+    <head>
+
+      <title>
+        Report Cards
+      </title>
+
+      <style>
+
+        body {
+          font-family: Arial, sans-serif;
+          margin: 20px;
+        }
+
+        .report-card-page {
+          page-break-after: always;
+          break-after: page;
+        }
+
+        .report-card-page:last-child {
+          page-break-after: auto;
+          break-after: auto;
+        }
+
+        button {
+          display: none !important;
+        }
+
+        @media print {
+
+          body {
+            margin: 0;
+          }
+
+          .report-card-page {
+            page-break-after: always;
+            break-after: page;
+          }
+
+          .report-card-page:last-child {
+            page-break-after: auto;
+            break-after: auto;
+          }
+
+        }
+
+      </style>
+
+    </head>
+
+    <body>
+
+      ${
+        reportCards
+          .map(
+            function(card) {
+
+              return `
+                <div class="report-card-page">
+                  ${card}
+                </div>
+              `;
+
+            }
+          )
+          .join("")
+      }
+
+    </body>
+
+    </html>
+  `);
+
+  printWindow.document.close();
+
+  message.textContent =
+    reportCards.length +
+    " report cards generated successfully.";
+
+  setTimeout(
+    function() {
+
+      printWindow.focus();
+
+      printWindow.print();
+
+    },
+    1000
+  );
+
+}
   /* =========================================================
      SHOW LEARNERS
   ========================================================= */

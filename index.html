@@ -4990,6 +4990,367 @@ async function generateAllReportCards() {
   );
 
 }
+  async function generateMeritList() {
+
+  const gradeId =
+    document.getElementById("meritGrade").value;
+
+  const termNumber =
+    document.getElementById("meritTerm").value;
+
+  const message =
+    document.getElementById("meritMessage");
+
+  const resultContainer =
+    document.getElementById("meritListResult");
+
+  if (!gradeId || !termNumber) {
+
+    message.textContent =
+      "Please select a grade and term.";
+
+    return;
+  }
+
+  message.textContent =
+    "Generating merit list...";
+
+  resultContainer.innerHTML =
+    "<p>Loading results...</p>";
+
+  /* =========================
+     GET LEARNERS
+  ========================= */
+
+  const learnersResult =
+    await db
+      .from("learners")
+      .select(`
+        id,
+        assessment_number,
+        full_name
+      `)
+      .eq(
+        "grade_id",
+        gradeId
+      )
+      .order(
+        "full_name"
+      );
+
+  if (learnersResult.error) {
+
+    console.error(
+      "MERIT LEARNERS ERROR:",
+      learnersResult.error
+    );
+
+    message.textContent =
+      "Unable to load learners.";
+
+    return;
+  }
+
+  const learners =
+    learnersResult.data || [];
+
+  if (learners.length === 0) {
+
+    message.textContent =
+      "No learners found in this grade.";
+
+    resultContainer.innerHTML =
+      "<p>No learners found.</p>";
+
+    return;
+  }
+
+  /* =========================
+     GET TERM
+  ========================= */
+
+  const termResult =
+    await db
+      .from("terms")
+      .select(`
+        id,
+        term_number
+      `)
+      .eq(
+        "term_number",
+        Number(termNumber)
+      )
+      .limit(1)
+      .maybeSingle();
+
+  if (termResult.error) {
+
+    console.error(
+      "MERIT TERM ERROR:",
+      termResult.error
+    );
+
+    message.textContent =
+      "Unable to load term.";
+
+    return;
+  }
+
+  if (!termResult.data) {
+
+    message.textContent =
+      "Selected term was not found.";
+
+    return;
+  }
+
+  const termId =
+    termResult.data.id;
+
+  /* =========================
+     GET RESULTS
+  ========================= */
+
+  const learnerIds =
+    learners.map(
+      function(learner) {
+        return learner.id;
+      }
+    );
+
+  const resultsResult =
+    await db
+      .from("results")
+      .select(`
+        learner_id,
+        score,
+        assessment_id,
+        assessments (
+          term_id
+        )
+      `)
+      .in(
+        "learner_id",
+        learnerIds
+      );
+
+  if (resultsResult.error) {
+
+    console.error(
+      "MERIT RESULTS ERROR:",
+      resultsResult.error
+    );
+
+    message.textContent =
+      "Unable to load results.";
+
+    return;
+  }
+
+  const results =
+    resultsResult.data || [];
+
+  /* =========================
+     CALCULATE TOTALS
+  ========================= */
+
+  const totals = {};
+
+  learners.forEach(
+    function(learner) {
+
+      totals[learner.id] = 0;
+
+    }
+  );
+
+  results.forEach(
+    function(row) {
+
+      if (
+        !row.assessments ||
+        row.assessments.term_id !== termId
+      ) {
+        return;
+      }
+
+      const score =
+        Number(row.score);
+
+      if (
+        Number.isFinite(score)
+      ) {
+
+        totals[row.learner_id] +=
+          score;
+
+      }
+
+    }
+  );
+
+  /* =========================
+     BUILD MERIT DATA
+  ========================= */
+
+  const meritData =
+    learners.map(
+      function(learner) {
+
+        return {
+          id:
+            learner.id,
+
+          assessment_number:
+            learner.assessment_number,
+
+          full_name:
+            learner.full_name,
+
+          total:
+            totals[learner.id] || 0
+        };
+
+      }
+    );
+
+  /* =========================
+     SORT HIGHEST FIRST
+  ========================= */
+
+  meritData.sort(
+    function(a, b) {
+
+      return b.total - a.total;
+
+    }
+  );
+
+  /* =========================
+     SHARED POSITIONS
+  ========================= */
+
+  let previousTotal =
+    null;
+
+  let position =
+    0;
+
+  meritData.forEach(
+    function(row, index) {
+
+      if (
+        row.total !==
+        previousTotal
+      ) {
+
+        position =
+          index + 1;
+
+      }
+
+      row.position =
+        position;
+
+      previousTotal =
+        row.total;
+
+    }
+  );
+
+  /* =========================
+     DISPLAY MERIT LIST
+  ========================= */
+
+  let html = "";
+
+  html += `
+    <div style="overflow-x:auto;">
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Position
+            </th>
+
+            <th>
+              Assessment Number
+            </th>
+
+            <th>
+              Learner Name
+            </th>
+
+            <th>
+              Total Marks
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+  `;
+
+  meritData.forEach(
+    function(row) {
+
+      html += `
+        <tr>
+
+          <td>
+            ${row.position}
+          </td>
+
+          <td>
+            ${row.assessment_number || "-"}
+          </td>
+
+          <td>
+            ${row.full_name}
+          </td>
+
+          <td>
+            ${row.total}
+          </td>
+
+        </tr>
+      `;
+
+    }
+  );
+
+  html += `
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div style="margin-top:20px;">
+
+      <button
+        type="button"
+        class="primary-btn"
+        onclick="printMeritList()"
+      >
+        Print Merit List
+      </button>
+
+    </div>
+  `;
+
+  resultContainer.innerHTML =
+    html;
+
+  message.textContent =
+    "Merit list generated successfully.";
+
+  }
   /* =========================================================
      SHOW LEARNERS
   ========================================================= */

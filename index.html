@@ -5351,6 +5351,65 @@ async function generateAllReportCards() {
     "Merit list generated successfully.";
 
   }
+  async function setupMeritListGrades() {
+
+  const gradeSelect =
+    document.getElementById("meritGrade");
+
+  if (!gradeSelect) {
+    return;
+  }
+
+  gradeSelect.innerHTML =
+    '<option value="">Loading grades...</option>';
+
+  const gradesResult =
+    await db
+      .from("grades")
+      .select(
+        "id, grade_number"
+      )
+      .order(
+        "grade_number"
+      );
+
+  if (gradesResult.error) {
+
+    console.error(
+      "MERIT GRADES ERROR:",
+      gradesResult.error
+    );
+
+    gradeSelect.innerHTML =
+      '<option value="">Unable to load grades</option>';
+
+    return;
+  }
+
+  gradeSelect.innerHTML =
+    '<option value="">Select Grade</option>';
+
+  (gradesResult.data || []).forEach(
+    function(grade) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        grade.id;
+
+      option.textContent =
+        "Grade " +
+        grade.grade_number;
+
+      gradeSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+  }
   /* =========================================================
      SHOW LEARNERS
   ========================================================= */

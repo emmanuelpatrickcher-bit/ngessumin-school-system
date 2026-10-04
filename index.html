@@ -3519,12 +3519,22 @@
   const learnerSelect =
     document.getElementById("reportLearner");
 
-  if (!learnerSelect) {
+  const gradeSelect =
+    document.getElementById("reportGrade");
+
+
+  /* -----------------------------------------
+     CHECK REQUIRED ELEMENTS
+     ----------------------------------------- */
+
+  if (!learnerSelect || !gradeSelect) {
     return;
   }
 
-  learnerSelect.innerHTML =
-    '<option value="">Loading learners...</option>';
+
+  /* -----------------------------------------
+     LOAD SCHOOL
+     ----------------------------------------- */
 
   const schoolResult =
     await db
@@ -3536,31 +3546,16 @@
       )
       .single();
 
+
   if (schoolResult.error) {
-    learnerSelect.innerHTML =
-      '<option value="">Unable to find school</option>';
-    return;
-  }
 
-  const result =
-    await db
-      .from("learners")
-      .select(
-        "id, assessment_number, full_name"
-      )
-      .eq(
-        "school_id",
-        schoolResult.data.id
-      )
-      .order(
-        "full_name"
-      );
-
-  if (result.error) {
     console.error(
-      "REPORT CARD LEARNERS ERROR:",
-      result.error
+      "REPORT CARD SCHOOL ERROR:",
+      schoolResult.error
     );
+
+    gradeSelect.innerHTML =
+      '<option value="">Unable to find school</option>';
 
     learnerSelect.innerHTML =
       '<option value="">Unable to load learners</option>';
@@ -3568,27 +3563,192 @@
     return;
   }
 
-  learnerSelect.innerHTML =
-    '<option value="">Select Learner</option>';
 
-  (result.data || []).forEach(
-    function(learner) {
+  const schoolId =
+    schoolResult.data.id;
+
+
+  /* -----------------------------------------
+     LOAD GRADES
+     ----------------------------------------- */
+
+  gradeSelect.innerHTML =
+    '<option value="">Loading grades...</option>';
+
+
+  const gradesResult =
+    await db
+      .from("grades")
+      .select(
+        "id, grade_number"
+      )
+      .order(
+        "grade_number"
+      );
+
+
+  if (gradesResult.error) {
+
+    console.error(
+      "REPORT CARD GRADES ERROR:",
+      gradesResult.error
+    );
+
+    gradeSelect.innerHTML =
+      '<option value="">Unable to load grades</option>';
+
+    learnerSelect.innerHTML =
+      '<option value="">Select Grade First</option>';
+
+    return;
+  }
+
+
+  gradeSelect.innerHTML =
+    '<option value="">Select Grade</option>';
+
+
+  (gradesResult.data || []).forEach(
+    function(grade) {
 
       const option =
         document.createElement("option");
 
+
       option.value =
-        learner.id;
+        grade.id;
+
 
       option.textContent =
-        (learner.assessment_number || "-") +
-        " — " +
-        learner.full_name;
+        "Grade " +
+        grade.grade_number;
 
-      learnerSelect.appendChild(option);
+
+      gradeSelect.appendChild(
+        option
+      );
 
     }
   );
+
+
+  /* -----------------------------------------
+     INITIAL LEARNER STATE
+     ----------------------------------------- */
+
+  learnerSelect.innerHTML =
+    '<option value="">Select Grade First</option>';
+
+
+  /* -----------------------------------------
+     WHEN GRADE IS SELECTED
+     ----------------------------------------- */
+
+  gradeSelect.onchange =
+    async function() {
+
+      const selectedGradeId =
+        gradeSelect.value;
+
+
+      if (!selectedGradeId) {
+
+        learnerSelect.innerHTML =
+          '<option value="">Select Grade First</option>';
+
+        return;
+      }
+
+
+      learnerSelect.innerHTML =
+        '<option value="">Loading learners...</option>';
+
+
+      /* ---------------------------------------
+         LOAD LEARNERS FOR SELECTED GRADE
+         --------------------------------------- */
+
+      const result =
+        await db
+          .from("learners")
+          .select(
+            "id, assessment_number, full_name"
+          )
+          .eq(
+            "school_id",
+            schoolId
+          )
+          .eq(
+            "grade_id",
+            selectedGradeId
+          )
+          .order(
+            "full_name"
+          );
+
+
+      if (result.error) {
+
+        console.error(
+          "REPORT CARD LEARNERS ERROR:",
+          result.error
+        );
+
+        learnerSelect.innerHTML =
+          '<option value="">Unable to load learners</option>';
+
+        return;
+      }
+
+
+      /* ---------------------------------------
+         DISPLAY LEARNERS
+         --------------------------------------- */
+
+      learnerSelect.innerHTML =
+        '<option value="">Select Learner</option>';
+
+
+      (result.data || []).forEach(
+        function(learner) {
+
+          const option =
+            document.createElement("option");
+
+
+          option.value =
+            learner.id;
+
+
+          option.textContent =
+            (learner.assessment_number || "-") +
+            " — " +
+            learner.full_name;
+
+
+          learnerSelect.appendChild(
+            option
+          );
+
+        }
+      );
+
+
+      /* ---------------------------------------
+         NO LEARNERS FOUND
+         --------------------------------------- */
+
+      if (
+        !result.data ||
+        result.data.length === 0
+      ) {
+
+        learnerSelect.innerHTML =
+          '<option value="">No learners found in this grade</option>';
+
+      }
+
+    };
 
   }
   document.addEventListener(

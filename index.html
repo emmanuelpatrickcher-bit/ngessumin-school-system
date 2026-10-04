@@ -5008,6 +5008,7 @@ async function generateAllReportCards() {
   const resultContainer =
     document.getElementById("meritListResult");
 
+
   if (!gradeId || !termNumber) {
 
     message.textContent =
@@ -5016,11 +5017,13 @@ async function generateAllReportCards() {
     return;
   }
 
+
   message.textContent =
     "Generating merit list...";
 
   resultContainer.innerHTML =
     "<p>Loading results...</p>";
+
 
   /* =========================
      GET LEARNERS
@@ -5042,6 +5045,7 @@ async function generateAllReportCards() {
         "full_name"
       );
 
+
   if (learnersResult.error) {
 
     console.error(
@@ -5055,8 +5059,10 @@ async function generateAllReportCards() {
     return;
   }
 
+
   const learners =
     learnersResult.data || [];
+
 
   if (learners.length === 0) {
 
@@ -5068,6 +5074,7 @@ async function generateAllReportCards() {
 
     return;
   }
+
 
   /* =========================
      GET TERM
@@ -5087,6 +5094,7 @@ async function generateAllReportCards() {
       .limit(1)
       .maybeSingle();
 
+
   if (termResult.error) {
 
     console.error(
@@ -5100,6 +5108,7 @@ async function generateAllReportCards() {
     return;
   }
 
+
   if (!termResult.data) {
 
     message.textContent =
@@ -5108,8 +5117,10 @@ async function generateAllReportCards() {
     return;
   }
 
+
   const termId =
     termResult.data.id;
+
 
   /* =========================
      GET RESULTS
@@ -5118,9 +5129,12 @@ async function generateAllReportCards() {
   const learnerIds =
     learners.map(
       function(learner) {
+
         return learner.id;
+
       }
     );
+
 
   const resultsResult =
     await db
@@ -5138,6 +5152,7 @@ async function generateAllReportCards() {
         learnerIds
       );
 
+
   if (resultsResult.error) {
 
     console.error(
@@ -5151,8 +5166,10 @@ async function generateAllReportCards() {
     return;
   }
 
+
   const results =
     resultsResult.data || [];
+
 
   /* =========================
      CALCULATE TOTALS
@@ -5160,13 +5177,21 @@ async function generateAllReportCards() {
 
   const totals = {};
 
+  const resultCounts = {};
+
+
   learners.forEach(
     function(learner) {
 
-      totals[learner.id] = 0;
+      totals[learner.id] =
+        0;
+
+      resultCounts[learner.id] =
+        0;
 
     }
   );
+
 
   results.forEach(
     function(row) {
@@ -5175,11 +5200,14 @@ async function generateAllReportCards() {
         !row.assessments ||
         row.assessments.term_id !== termId
       ) {
+
         return;
       }
 
+
       const score =
         Number(row.score);
+
 
       if (
         Number.isFinite(score)
@@ -5188,10 +5216,13 @@ async function generateAllReportCards() {
         totals[row.learner_id] +=
           score;
 
+        resultCounts[row.learner_id]++;
+
       }
 
     }
   );
+
 
   /* =========================
      BUILD MERIT DATA
@@ -5201,7 +5232,62 @@ async function generateAllReportCards() {
     learners.map(
       function(learner) {
 
+        const total =
+          totals[learner.id] || 0;
+
+        const count =
+          resultCounts[learner.id] || 0;
+
+
+        const average =
+          count > 0
+            ? total / count
+            : 0;
+
+
+        /* =========================
+           ACHIEVEMENT LEVEL
+        ========================= */
+
+        let achievementLevel =
+          "-";
+
+
+        if (count > 0) {
+
+          if (average >= 76) {
+
+            achievementLevel =
+              "EE";
+
+          }
+
+          else if (average >= 41) {
+
+            achievementLevel =
+              "ME";
+
+          }
+
+          else if (average >= 21) {
+
+            achievementLevel =
+              "AE";
+
+          }
+
+          else {
+
+            achievementLevel =
+              "BE";
+
+          }
+
+        }
+
+
         return {
+
           id:
             learner.id,
 
@@ -5212,11 +5298,19 @@ async function generateAllReportCards() {
             learner.full_name,
 
           total:
-            totals[learner.id] || 0
+            total,
+
+          average:
+            average,
+
+          achievementLevel:
+            achievementLevel
+
         };
 
       }
     );
+
 
   /* =========================
      SORT HIGHEST FIRST
@@ -5230,6 +5324,7 @@ async function generateAllReportCards() {
     }
   );
 
+
   /* =========================
      SHARED POSITIONS
   ========================= */
@@ -5239,6 +5334,7 @@ async function generateAllReportCards() {
 
   let position =
     0;
+
 
   meritData.forEach(
     function(row, index) {
@@ -5253,8 +5349,10 @@ async function generateAllReportCards() {
 
       }
 
+
       row.position =
         position;
+
 
       previousTotal =
         row.total;
@@ -5262,13 +5360,16 @@ async function generateAllReportCards() {
     }
   );
 
+
   /* =========================
      DISPLAY MERIT LIST
   ========================= */
 
   let html = "";
 
+
   html += `
+
     <div style="overflow-x:auto;">
 
       <table>
@@ -5293,17 +5394,28 @@ async function generateAllReportCards() {
               Total Marks
             </th>
 
+            <th>
+              Average
+            </th>
+
+            <th>
+              Achievement Level
+            </th>
+
           </tr>
 
         </thead>
 
         <tbody>
+
   `;
+
 
   meritData.forEach(
     function(row) {
 
       html += `
+
         <tr>
 
           <td>
@@ -5322,18 +5434,30 @@ async function generateAllReportCards() {
             ${row.total}
           </td>
 
+          <td>
+            ${row.average.toFixed(2)}
+          </td>
+
+          <td>
+            ${row.achievementLevel}
+          </td>
+
         </tr>
+
       `;
 
     }
   );
 
+
   html += `
+
         </tbody>
 
       </table>
 
     </div>
+
 
     <div style="margin-top:20px;">
 
@@ -5346,15 +5470,18 @@ async function generateAllReportCards() {
       </button>
 
     </div>
+
   `;
+
 
   resultContainer.innerHTML =
     html;
 
+
   message.textContent =
     "Merit list generated successfully.";
 
-  }
+    }
   async function setupMeritListGrades() {
 
   const gradeSelect =

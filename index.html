@@ -7185,16 +7185,9 @@ async function setupResultsAnalysis() {
     return;
   }
 
-  const gradeResult =
-    await db
-      .from("grades")
-      .select("id, grade_number")
-      .order("grade_number");
-
-  if (gradeResult.error) {
-    console.error(gradeResult.error);
-    return;
-  }
+  grades.sort(function(a, b) {
+  return a.grade_number - b.grade_number;
+});
 
   gradeSelect.innerHTML =
     '<option value="">Select Grade</option>';

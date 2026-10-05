@@ -3082,21 +3082,25 @@
      SHOW DASHBOARD
   ========================================================= */
 
-  async function showDashboard() {
+async function showDashboard() {
 
-    document
-      .getElementById("loginPage")
-      .style.display = "none";
+  document
+    .getElementById("loginPage")
+    .style.display = "none";
 
-    document
-      .getElementById("appDashboard")
-      .style.display = "block";
+  document
+    .getElementById("appDashboard")
+    .style.display = "block";
 
-    showSection("dashboard");
+  showSection("dashboard");
 
-    await loadDashboardData();
+  await loadDashboardData();
 
-  }
+  /* Load teacher-specific assessment assignments
+     after the user has logged in */
+  await setupAssessment();
+
+  }  
 
 
   /* =========================================================

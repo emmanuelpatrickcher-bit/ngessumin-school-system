@@ -3482,14 +3482,39 @@ function setupManageResultsFilters() {
 
   /* Terms */
 
+termSelect.innerHTML =
+  '<option value="">Loading Terms...</option>';
+
+const termsResult =
+  await db
+    .from("terms")
+    .select(`
+      id,
+      term_number,
+      academic_years (
+        id,
+        year
+      )
+    `)
+    .order("term_number");
+
+if (termsResult.error) {
+
+  console.error(
+    "MANAGE RESULTS TERMS ERROR:",
+    termsResult.error
+  );
+
+  termSelect.innerHTML =
+    '<option value="">Unable to load Terms</option>';
+
+} else {
+
   termSelect.innerHTML =
     '<option value="">Select Term</option>';
 
-  const terms = [
-    "Term 1",
-    "Term 2",
-    "Term 3"
-  ];
+  const terms =
+    termsResult.data || [];
 
   terms.forEach(function(term) {
 
@@ -3497,37 +3522,20 @@ function setupManageResultsFilters() {
       document.createElement("option");
 
     option.value =
-      term;
+      term.id;
 
     option.textContent =
-      term;
+      "Term " +
+      term.term_number +
+      " (" +
+      (term.academic_years?.year || "") +
+      ")";
 
     termSelect.appendChild(option);
 
   });
 
-
-  /* Learning Areas */
-
-  areaSelect.innerHTML =
-    '<option value="">Select Learning Area</option>';
-
-  areas.forEach(function(area) {
-
-    const option =
-      document.createElement("option");
-
-    option.value =
-      area.id;
-
-    option.textContent =
-      area.name;
-
-    areaSelect.appendChild(option);
-
-  });
-
-}
+  }
 
   /* =========================================================
      GRADE SELECTS

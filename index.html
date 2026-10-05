@@ -742,12 +742,7 @@
       >
         Assessments & Results
       </button>
-      <button
-        type="button"
-        data-section="manage-results"
-      >
-        Manage Results
-      </button>
+
       <button
         type="button"
         data-section="analysis"
@@ -1553,92 +1548,7 @@
 
       </section>
 
-      <!-- ===================================================== -->
-      <!-- MANAGE RESULTS -->
-      <!-- ===================================================== -->
 
-      <section
-        id="manage-results"
-        class="section"
-      >
-
-        <h1>Manage Results</h1>
-
-        <div class="panel">
-
-          <div class="form-grid">
-
-            <div>
-              <label for="manageResultsGrade">
-                Grade
-              </label>
-
-              <select id="manageResultsGrade">
-                <option value="">
-                  Select Grade
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label for="manageResultsTerm">
-                Term
-              </label>
-
-              <select id="manageResultsTerm">
-                <option value="">
-                  Select Term
-                </option>
-              </select>
-            </div>
-
-            <div>
-              <label for="manageResultsLearningArea">
-                Learning Area
-              </label>
-
-              <select id="manageResultsLearningArea">
-                <option value="">
-                  Select Learning Area
-                </option>
-              </select>
-            </div>
-
-          </div>
-
-          <div style="margin-top:20px;">
-
-            <button
-              type="button"
-              id="loadManageResultsButton"
-            >
-              Load Results
-            </button>
-
-          </div>
-
-        </div>
-
-        <div
-          id="manageResultsMessage"
-          class="message"
-          style="margin-top:15px;"
-        ></div>
-
-        <div
-          id="manageResultsTableContainer"
-          class="panel"
-          style="margin-top:20px;"
-        >
-
-          <p>
-            Select a grade, term and learning area,
-            then click "Load Results".
-          </p>
-
-        </div>
-
-      </section>
       <!-- ===================================================== -->
       <!-- ANALYSIS -->
       <!-- ===================================================== -->
@@ -3278,13 +3188,7 @@ async function showDashboard() {
     }
 
   }
-if (
-  sectionId === "manage-results"
-) {
 
-  setupManageResultsFilters();
-
-}
 
   /* =========================================================
      DASHBOARD DATA
@@ -3413,7 +3317,6 @@ if (
         .getElementById("statusMessage")
         .textContent =
         "Connected to Ngessumin Comprehensive School database.";
-      setupManageResultsFilters();
 
     } catch (error) {
 
@@ -3427,106 +3330,7 @@ if (
     }
 
   }
-/* =====================================================
-   MANAGE RESULTS - LOAD FILTERS
-   ===================================================== */
 
-function setupManageResultsFilters() {
-
-  const gradeSelect =
-    document.getElementById(
-      "manageResultsGrade"
-    );
-
-  const termSelect =
-    document.getElementById(
-      "manageResultsTerm"
-    );
-
-  const areaSelect =
-    document.getElementById(
-      "manageResultsLearningArea"
-    );
-
-
-  if (!gradeSelect ||
-      !termSelect ||
-      !areaSelect) {
-
-    return;
-
-  }
-
-
-  /* Grades */
-
-  gradeSelect.innerHTML =
-    '<option value="">Select Grade</option>';
-
-  grades.forEach(function(grade) {
-
-    const option =
-      document.createElement("option");
-
-    option.value =
-      grade.id;
-
-    option.textContent =
-      "Grade " +
-      grade.grade_number;
-
-    gradeSelect.appendChild(option);
-
-  });
-
-
-  /* Terms */
-
-termSelect.innerHTML =
-'<option value="">Select Term</option>';
-
-const terms = [
-"Term 1",
-"Term 2",
-"Term 3"
-];
-
-terms.forEach(function(term) {
-
-const option =  
-  document.createElement("option");  
-
-option.value =  
-  term;  
-
-option.textContent =  
-  term;  
-
-termSelect.appendChild(option);
-
-});
-
-/* Learning Areas */
-
-areaSelect.innerHTML =
-'<option value="">Select Learning Area</option>';
-
-areas.forEach(function(area) {
-
-const option =  
-  document.createElement("option");  
-
-option.value =  
-  area.id;  
-
-option.textContent =  
-  area.name;  
-
-areaSelect.appendChild(option);
-
-});
-
-  }
 
   /* =========================================================
      GRADE SELECTS
@@ -7185,15 +6989,21 @@ async function setupResultsAnalysis() {
     return;
   }
 
-  gradeSelect.innerHTML =
-  '<option value="">Select Grade</option>';
+  const gradeResult =
+    await db
+      .from("grades")
+      .select("id, grade_number")
+      .order("grade_number");
 
-(gradeResult.data || []).forEach(
+  if (gradeResult.error) {
+    console.error(gradeResult.error);
+    return;
+  }
 
   gradeSelect.innerHTML =
     '<option value="">Select Grade</option>';
 
-  grades.forEach(
+  (gradeResult.data || []).forEach(
     function (grade) {
 
       const option =
@@ -9595,7 +9405,7 @@ if (gradesResult.error) {
 gradeSelect.innerHTML =
   '<option value="">Select Grade</option>';
 
-grades.forEach(
+(gradesResult.data || []).forEach(
   function(grade) {
 
     const option =

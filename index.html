@@ -3420,7 +3420,107 @@ async function showDashboard() {
     }
 
   }
+/* =====================================================
+   MANAGE RESULTS - LOAD FILTERS
+   ===================================================== */
 
+function setupManageResultsFilters() {
+
+  const gradeSelect =
+    document.getElementById(
+      "manageResultsGrade"
+    );
+
+  const termSelect =
+    document.getElementById(
+      "manageResultsTerm"
+    );
+
+  const areaSelect =
+    document.getElementById(
+      "manageResultsLearningArea"
+    );
+
+
+  if (!gradeSelect ||
+      !termSelect ||
+      !areaSelect) {
+
+    return;
+
+  }
+
+
+  /* Grades */
+
+  gradeSelect.innerHTML =
+    '<option value="">Select Grade</option>';
+
+  grades.forEach(function(grade) {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      grade.id;
+
+    option.textContent =
+      "Grade " +
+      grade.grade_number;
+
+    gradeSelect.appendChild(option);
+
+  });
+
+
+  /* Terms */
+
+  termSelect.innerHTML =
+    '<option value="">Select Term</option>';
+
+  const terms = [
+    "Term 1",
+    "Term 2",
+    "Term 3"
+  ];
+
+  terms.forEach(function(term) {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      term;
+
+    option.textContent =
+      term;
+
+    termSelect.appendChild(option);
+
+  });
+
+
+  /* Learning Areas */
+
+  areaSelect.innerHTML =
+    '<option value="">Select Learning Area</option>';
+
+  areas.forEach(function(area) {
+
+    const option =
+      document.createElement("option");
+
+    option.value =
+      area.id;
+
+    option.textContent =
+      area.name;
+
+    areaSelect.appendChild(option);
+
+  });
+
+}
 
   /* =========================================================
      GRADE SELECTS

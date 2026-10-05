@@ -3483,57 +3483,48 @@ function setupManageResultsFilters() {
   /* Terms */
 
 termSelect.innerHTML =
-  '<option value="">Loading Terms...</option>';
+'<option value="">Select Term</option>';
 
-const termsResult =
-  await db
-    .from("terms")
-    .select(`
-      id,
-      term_number,
-      academic_years (
-        id,
-        year
-      )
-    `)
-    .order("term_number");
+const terms = [
+"Term 1",
+"Term 2",
+"Term 3"
+];
 
-if (termsResult.error) {
+terms.forEach(function(term) {
 
-  console.error(
-    "MANAGE RESULTS TERMS ERROR:",
-    termsResult.error
-  );
+const option =  
+  document.createElement("option");  
 
-  termSelect.innerHTML =
-    '<option value="">Unable to load Terms</option>';
+option.value =  
+  term;  
 
-} else {
+option.textContent =  
+  term;  
 
-  termSelect.innerHTML =
-    '<option value="">Select Term</option>';
+termSelect.appendChild(option);
 
-  const terms =
-    termsResult.data || [];
+});
 
-  terms.forEach(function(term) {
+/* Learning Areas */
 
-    const option =
-      document.createElement("option");
+areaSelect.innerHTML =
+'<option value="">Select Learning Area</option>';
 
-    option.value =
-      term.id;
+areas.forEach(function(area) {
 
-    option.textContent =
-      "Term " +
-      term.term_number +
-      " (" +
-      (term.academic_years?.year || "") +
-      ")";
+const option =  
+  document.createElement("option");  
 
-    termSelect.appendChild(option);
+option.value =  
+  area.id;  
 
-  });
+option.textContent =  
+  area.name;  
+
+areaSelect.appendChild(option);
+
+});
 
   }
 

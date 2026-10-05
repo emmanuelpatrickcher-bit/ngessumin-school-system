@@ -7192,7 +7192,7 @@ async function setupResultsAnalysis() {
   gradeSelect.innerHTML =
     '<option value="">Select Grade</option>';
 
-  (gradeResult.data || []).forEach(
+  grades.forEach(
     function (grade) {
 
       const option =

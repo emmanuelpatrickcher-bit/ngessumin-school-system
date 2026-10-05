@@ -7185,9 +7185,10 @@ async function setupResultsAnalysis() {
     return;
   }
 
-  grades.sort(function(a, b) {
-  return a.grade_number - b.grade_number;
-});
+  gradeSelect.innerHTML =
+  '<option value="">Select Grade</option>';
+
+(gradeResult.data || []).forEach(
 
   gradeSelect.innerHTML =
     '<option value="">Select Grade</option>';

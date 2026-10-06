@@ -5250,44 +5250,123 @@ async function generateAllReportCards() {
 
 
         /* =========================
-           ACHIEVEMENT LEVEL
-        ========================= */
+   ACHIEVEMENT LEVEL
+========================= */
 
-        let achievementLevel =
-          "-";
+let achievementLevel =
+  "-";
 
 
-        if (count > 0) {
+const meritGradeNumber =
+  Number(
+    document.getElementById("meritGrade").value
+  );
 
-          if (average >= 76) {
 
-            achievementLevel =
-              "EE";
+if (count > 0) {
 
-          }
+  /* =========================
+     GRADE 9
+     EE1 - BE2
+  ========================= */
 
-          else if (average >= 41) {
+  if (meritGradeNumber === 9) {
 
-            achievementLevel =
-              "ME";
+    if (total >= 802) {
 
-          }
+      achievementLevel =
+        "EE1";
 
-          else if (average >= 21) {
+    }
 
-            achievementLevel =
-              "AE";
+    else if (total >= 667) {
 
-          }
+      achievementLevel =
+        "EE2";
 
-          else {
+    }
 
-            achievementLevel =
-              "BE";
+    else if (total >= 514) {
 
-          }
+      achievementLevel =
+        "ME1";
 
-        }
+    }
+
+    else if (total >= 361) {
+
+      achievementLevel =
+        "ME2";
+
+    }
+
+    else if (total >= 271) {
+
+      achievementLevel =
+        "AE1";
+
+    }
+
+    else if (total >= 181) {
+
+      achievementLevel =
+        "AE2";
+
+    }
+
+    else if (total >= 91) {
+
+      achievementLevel =
+        "BE1";
+
+    }
+
+    else {
+
+      achievementLevel =
+        "BE2";
+
+    }
+
+  }
+
+  /* =========================
+     GRADES 1 - 8
+  ========================= */
+
+  else {
+
+    if (average >= 76) {
+
+      achievementLevel =
+        "EE";
+
+    }
+
+    else if (average >= 41) {
+
+      achievementLevel =
+        "ME";
+
+    }
+
+    else if (average >= 21) {
+
+      achievementLevel =
+        "AE";
+
+    }
+
+    else {
+
+      achievementLevel =
+        "BE";
+
+    }
+
+  }
+
+}
 
 
         return {

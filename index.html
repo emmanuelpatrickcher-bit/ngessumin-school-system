@@ -5257,9 +5257,16 @@ let achievementLevel =
   "-";
 
 
+const selectedMeritGrade =
+  grades.find(
+    function(grade) {
+      return String(grade.id) === String(gradeId);
+    }
+  );
+
 const meritGradeNumber =
   Number(
-    document.getElementById("meritGrade").value
+    selectedMeritGrade?.grade_number
   );
 
 

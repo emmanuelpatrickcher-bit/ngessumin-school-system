@@ -5647,6 +5647,94 @@ if (count > 0) {
   );
 
   }
+  async function setupMeritListAssessments() {
+
+  const gradeId =
+    document.getElementById("meritGrade").value;
+
+  const termNumber =
+    document.getElementById("meritTerm").value;
+
+  const assessmentSelect =
+    document.getElementById("meritAssessment");
+
+  if (!assessmentSelect) {
+    return;
+  }
+
+  assessmentSelect.innerHTML =
+    '<option value="">Select Assessment</option>';
+
+  if (!gradeId || !termNumber) {
+    return;
+  }
+
+  const assessmentResult =
+    await db
+      .from("assessments")
+      .select(
+        "assessment_name, term_id"
+      )
+      .eq(
+        "grade_id",
+        gradeId
+      );
+
+  if (assessmentResult.error) {
+
+    console.error(
+      "MERIT ASSESSMENT ERROR:",
+      assessmentResult.error
+    );
+
+    assessmentSelect.innerHTML =
+      '<option value="">Unable to load assessments</option>';
+
+    return;
+  }
+
+  const names = [];
+
+  (assessmentResult.data || []).forEach(
+    function(row) {
+
+      const name =
+        String(
+          row.assessment_name || ""
+        ).trim();
+
+      if (
+        name &&
+        !names.includes(name)
+      ) {
+        names.push(name);
+      }
+
+    }
+  );
+
+  names.sort();
+
+  names.forEach(
+    function(name) {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        name;
+
+      option.textContent =
+        name;
+
+      assessmentSelect.appendChild(
+        option
+      );
+
+    }
+  );
+
+  }
   function printMeritList() {
 
   const resultContainer =

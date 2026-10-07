@@ -5735,6 +5735,19 @@ if (count > 0) {
   );
 
   }
+  document
+  .getElementById("meritGrade")
+  .addEventListener(
+    "change",
+    setupMeritListAssessments
+  );
+
+document
+  .getElementById("meritTerm")
+  .addEventListener(
+    "change",
+    setupMeritListAssessments
+  );
   function printMeritList() {
 
   const resultContainer =

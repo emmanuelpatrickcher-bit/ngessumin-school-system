@@ -5018,7 +5018,15 @@ async function generateAllReportCards() {
 
   const gradeId =
     document.getElementById("meritGrade").value;
+const gradeSelect =
+  document.getElementById("meritGrade");
 
+const selectedGrade =
+  gradeSelect &&
+  gradeSelect.selectedOptions &&
+  gradeSelect.selectedOptions.length > 0
+    ? gradeSelect.selectedOptions[0].textContent.trim()
+    : "";
   const termNumber =
     document.getElementById("meritTerm").value;
 

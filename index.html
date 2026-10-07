@@ -4243,12 +4243,25 @@ const bestResultsByArea = {};
 results.forEach(
   function(result) {
 
-    if (
-      String(result.assessments?.term_id) !==
-      String(selectedTermId)
-    ) {
-      return;
-    }
+    const selectedTermNumber =
+  Number(termNumber);
+
+const expectedAssessmentName =
+  `END TERM ${selectedTermNumber}`;
+
+const resultAssessmentName =
+  String(
+    result.assessments?.assessment_name || ""
+  )
+    .trim()
+    .toUpperCase();
+
+if (
+  resultAssessmentName !==
+  expectedAssessmentName
+) {
+  return;
+}
 
     const learningAreaId =
       result.assessments?.learning_area_id;

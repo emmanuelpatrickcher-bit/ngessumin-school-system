@@ -5693,9 +5693,124 @@ if (count > 0) {
     return;
   }
 
-  const names = [];
+  /*
+   * Get the term IDs actually used by
+   * assessments for this grade.
+   */
+  const termIds =
+    [];
 
   (assessmentResult.data || []).forEach(
+    function(row) {
+
+      if (
+        row.term_id &&
+        !termIds.includes(row.term_id)
+      ) {
+        termIds.push(row.term_id);
+      }
+
+    }
+  );
+
+  /*
+   * Find the selected term using the
+   * terms table.
+   */
+  const termResult =
+    await db
+      .from("terms")
+      .select(
+        "id, term_number"
+      )
+      .eq(
+        "term_number",
+        Number(termNumber)
+      );
+
+  if (termResult.error) {
+
+    console.error(
+      "MERIT TERM ERROR:",
+      termResult.error
+    );
+
+    return;
+  }
+
+  const selectedTerm =
+    (termResult.data || [])[0];
+
+  if (!selectedTerm) {
+    return;
+  }
+
+  /*
+   * Normally the assessment term_id
+   * should match the selected term.
+   */
+  let matchingRows =
+    (assessmentResult.data || []).filter(
+      function(row) {
+
+        return (
+          row.term_id === selectedTerm.id
+        );
+
+      }
+    );
+
+  /*
+   * If the database uses a different
+   * term ID for the grade's assessments,
+   * use the term ID that is actually
+   * associated with the grade's assessments.
+   */
+  if (matchingRows.length === 0) {
+
+    const assessmentTermIds =
+      [];
+
+    (assessmentResult.data || []).forEach(
+      function(row) {
+
+        if (
+          row.term_id &&
+          !assessmentTermIds.includes(
+            row.term_id
+          )
+        ) {
+          assessmentTermIds.push(
+            row.term_id
+          );
+        }
+
+      }
+    );
+
+    if (
+      assessmentTermIds.length === 1
+    ) {
+
+      matchingRows =
+        (assessmentResult.data || []).filter(
+          function(row) {
+
+            return (
+              row.term_id ===
+              assessmentTermIds[0]
+            );
+
+          }
+        );
+
+    }
+
+  }
+
+  const names = [];
+
+  matchingRows.forEach(
     function(row) {
 
       const name =

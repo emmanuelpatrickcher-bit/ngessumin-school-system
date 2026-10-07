@@ -5199,19 +5199,22 @@ message.textContent =
 
 
       const rowAssessment =
-        String(
-          row.assessments.assessment_name || ""
-        )
-          .trim()
-          .toLowerCase();
+  row.assessments &&
+  row.assessments.assessment_name
+    ? String(
+        row.assessments.assessment_name
+      )
+        .trim()
+        .toLowerCase()
+    : "";
 
 
-      const selectedAssessment =
-        String(
-          assessmentName || ""
-        )
-          .trim()
-          .toLowerCase();
+const selectedAssessment =
+  String(
+    assessmentName || ""
+  )
+    .trim()
+    .toLowerCase();
 
 
       if (

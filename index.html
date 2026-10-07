@@ -5119,38 +5119,44 @@ async function generateAllReportCards() {
 
 
   const resultsResult =
-    await db
-      .from("results")
-      .select(`
-        learner_id,
-        score,
-        assessment_id,
-        assessments:assessment_id (
-          assessment_name
-        )
-      `)
-      .in(
-        "learner_id",
-        learnerIds
-      );
-
-
-  if (resultsResult.error) {
-
-    console.error(
-      "MERIT RESULTS ERROR:",
-      resultsResult.error
+  await db
+    .from("results")
+    .select(`
+      learner_id,
+      score,
+      assessment_id,
+      assessments (
+        assessment_name
+      )
+    `)
+    .in(
+      "learner_id",
+      learnerIds
     );
 
-    message.textContent =
-      "Unable to load results.";
 
-    return;
-  }
+if (resultsResult.error) {
+
+  console.error(
+    "MERIT RESULTS ERROR:",
+    resultsResult.error
+  );
+
+  message.textContent =
+    "Results error: " +
+    resultsResult.error.message;
+
+  resultContainer.innerHTML =
+    "<p>" +
+    resultsResult.error.message +
+    "</p>";
+
+  return;
+}
 
 
-  const results =
-    resultsResult.data || [];
+const results =
+  resultsResult.data || [];
 
 
   /* =========================

@@ -5022,6 +5022,9 @@ async function generateAllReportCards() {
   const termNumber =
     document.getElementById("meritTerm").value;
 
+  const assessmentName =
+    document.getElementById("meritAssessment").value;
+
   const message =
     document.getElementById("meritMessage");
 
@@ -5029,10 +5032,14 @@ async function generateAllReportCards() {
     document.getElementById("meritListResult");
 
 
-  if (!gradeId || !termNumber) {
+  if (
+    !gradeId ||
+    !termNumber ||
+    !assessmentName
+  ) {
 
     message.textContent =
-      "Please select a grade and term.";
+      "Please select a grade, term and assessment.";
 
     return;
   }
@@ -5087,7 +5094,7 @@ async function generateAllReportCards() {
   if (learners.length === 0) {
 
     message.textContent =
-      "No learners found in this grade.";
+      "No learners found for this grade.";
 
     resultContainer.innerHTML =
       "<p>No learners found.</p>";
@@ -5097,53 +5104,8 @@ async function generateAllReportCards() {
 
 
   /* =========================
-     GET TERM
-  ========================= */
-
-  const termResult =
-    await db
-      .from("terms")
-      .select(`
-        id,
-        term_number
-      `)
-      .eq(
-        "term_number",
-        Number(termNumber)
-      )
-      .limit(1)
-      .maybeSingle();
-
-
-  if (termResult.error) {
-
-    console.error(
-      "MERIT TERM ERROR:",
-      termResult.error
-    );
-
-    message.textContent =
-      "Unable to load term.";
-
-    return;
-  }
-
-
-  if (!termResult.data) {
-
-    message.textContent =
-      "Selected term was not found.";
-
-    return;
-  }
-
-
-  const termId =
-    termResult.data.id;
-
-
-  /* =========================
      GET RESULTS
+     FILTER BY ASSESSMENT
   ========================= */
 
   const learnerIds =
@@ -5164,7 +5126,7 @@ async function generateAllReportCards() {
         score,
         assessment_id,
         assessments (
-          term_id
+          assessment_name
         )
       `)
       .in(
@@ -5193,6 +5155,7 @@ async function generateAllReportCards() {
 
   /* =========================
      CALCULATE TOTALS
+     FOR SELECTED ASSESSMENT ONLY
   ========================= */
 
   const totals = {};
@@ -5217,8 +5180,32 @@ async function generateAllReportCards() {
     function(row) {
 
       if (
-        !row.assessments ||
-        row.assessments.term_id !== termId
+        !row.assessments
+      ) {
+
+        return;
+      }
+
+
+      const rowAssessment =
+        String(
+          row.assessments.assessment_name || ""
+        )
+          .trim()
+          .toLowerCase();
+
+
+      const selectedAssessment =
+        String(
+          assessmentName || ""
+        )
+          .trim()
+          .toLowerCase();
+
+
+      if (
+        rowAssessment !==
+        selectedAssessment
       ) {
 
         return;
@@ -5266,130 +5253,138 @@ async function generateAllReportCards() {
 
 
         /* =========================
-   ACHIEVEMENT LEVEL
-========================= */
+           ACHIEVEMENT LEVEL
+        ========================= */
 
-let achievementLevel =
-  "-";
-
-
-const selectedMeritGrade =
-  grades.find(
-    function(grade) {
-      return String(grade.id) === String(gradeId);
-    }
-  );
-
-const meritGradeNumber =
-  Number(
-    selectedMeritGrade?.grade_number
-  );
+        let achievementLevel =
+          "—";
 
 
-if (count > 0) {
+        /*
+         * GRADE 9
+         * Achievement is based
+         * on TOTAL MARKS.
+         */
 
-  /* =========================
-     GRADE 9
-     EE1 - BE2
-  ========================= */
+        const selectedGrade =
+          document
+            .getElementById("meritGrade")
+            .selectedOptions[0]
+            ?.textContent || "";
 
-  if (meritGradeNumber === 9) {
 
-    if (total >= 802) {
+        const gradeNumber =
+          Number(
+            selectedGrade
+              .replace(
+                "Grade ",
+                ""
+              )
+          );
 
-      achievementLevel =
-        "EE1";
 
-    }
+        if (
+          gradeNumber === 9 &&
+          count > 0
+        ) {
 
-    else if (total >= 667) {
+          if (total >= 802) {
 
-      achievementLevel =
-        "EE2";
+            achievementLevel =
+              "EE1";
 
-    }
+          }
 
-    else if (total >= 514) {
+          else if (total >= 667) {
 
-      achievementLevel =
-        "ME1";
+            achievementLevel =
+              "EE2";
 
-    }
+          }
 
-    else if (total >= 361) {
+          else if (total >= 514) {
 
-      achievementLevel =
-        "ME2";
+            achievementLevel =
+              "ME1";
 
-    }
+          }
 
-    else if (total >= 271) {
+          else if (total >= 361) {
 
-      achievementLevel =
-        "AE1";
+            achievementLevel =
+              "ME2";
 
-    }
+          }
 
-    else if (total >= 181) {
+          else if (total >= 271) {
 
-      achievementLevel =
-        "AE2";
+            achievementLevel =
+              "AE1";
 
-    }
+          }
 
-    else if (total >= 91) {
+          else if (total >= 181) {
 
-      achievementLevel =
-        "BE1";
+            achievementLevel =
+              "AE2";
 
-    }
+          }
 
-    else {
+          else if (total >= 91) {
 
-      achievementLevel =
-        "BE2";
+            achievementLevel =
+              "BE1";
 
-    }
+          }
 
-  }
+          else {
 
-  /* =========================
-     GRADES 1 - 8
-  ========================= */
+            achievementLevel =
+              "BE2";
 
-  else {
+          }
 
-    if (average >= 76) {
+        }
 
-      achievementLevel =
-        "EE";
+        /*
+         * GRADE 7–8
+         */
 
-    }
+        else if (
+          (gradeNumber === 7 ||
+           gradeNumber === 8) &&
+          count > 0
+        ) {
 
-    else if (average >= 41) {
+          if (total >= 676) {
 
-      achievementLevel =
-        "ME";
+            achievementLevel =
+              "EE";
 
-    }
+          }
 
-    else if (average >= 21) {
+          else if (total >= 361) {
 
-      achievementLevel =
-        "AE";
+            achievementLevel =
+              "ME";
 
-    }
+          }
 
-    else {
+          else if (total >= 181) {
 
-      achievementLevel =
-        "BE";
+            achievementLevel =
+              "AE";
 
-    }
+          }
 
-  }
+          else {
 
-}
+            achievementLevel =
+              "BE";
+
+          }
+
+        }
 
 
         return {
@@ -5475,6 +5470,30 @@ if (count > 0) {
 
 
   html += `
+
+    <div style="margin-bottom:15px;">
+
+      <strong>
+        Grade:
+      </strong>
+      ${selectedGrade}
+
+      &nbsp;&nbsp;
+
+      <strong>
+        Term:
+      </strong>
+      ${termNumber}
+
+      &nbsp;&nbsp;
+
+      <strong>
+        Assessment:
+      </strong>
+      ${assessmentName}
+
+    </div>
+
 
     <div style="overflow-x:auto;">
 
@@ -5587,7 +5606,7 @@ if (count > 0) {
   message.textContent =
     "Merit list generated successfully.";
 
-    }
+  }
   async function setupMeritListGrades() {
 
   const gradeSelect =

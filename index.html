@@ -7563,10 +7563,16 @@ const assessmentId =
         "assessments.grade_id",
         gradeId
       )
+      
       .eq(
         "assessments.learning_area_id",
         areaId
+      )
+      .eq(
+        "assessment_id",
+        assessmentId
       );
+    
 
   if (result.error) {
 

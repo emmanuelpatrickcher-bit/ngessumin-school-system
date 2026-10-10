@@ -7345,6 +7345,7 @@ levelSelect.value =
 
  /* ================= RESULTS ANALYSIS ================= */
 
+
 async function setupResultsAnalysis() {
 
   const gradeSelect =
@@ -7353,15 +7354,21 @@ async function setupResultsAnalysis() {
   const areaSelect =
     document.getElementById("analysisArea");
 
-  if (!gradeSelect || !areaSelect) {
+  const assessmentSelect =
+    document.getElementById("analysisAssessment");
+
+  if (
+    !gradeSelect ||
+    !areaSelect ||
+    !assessmentSelect
+  ) {
     return;
   }
 
-  const gradeResult =
-    await db
-      .from("grades")
-      .select("id, grade_number")
-      .order("grade_number");
+  const gradeResult = await db
+    .from("grades")
+    .select("id, grade_number")
+    .order("grade_number");
 
   if (gradeResult.error) {
     console.error(gradeResult.error);
@@ -7373,74 +7380,113 @@ async function setupResultsAnalysis() {
 
   (gradeResult.data || []).forEach(
     function (grade) {
-
       const option =
         document.createElement("option");
 
       option.value = grade.id;
-
       option.textContent =
         "Grade " + grade.grade_number;
 
       gradeSelect.appendChild(option);
-
     }
   );
 
-  gradeSelect.onchange =
-    async function () {
+  gradeSelect.onchange = async function () {
 
-      areaSelect.innerHTML =
-        '<option value="">Select Learning Area</option>';
+    areaSelect.innerHTML =
+      '<option value="">Select Learning Area</option>';
 
-      if (!this.value) {
-        return;
-      }
+    assessmentSelect.innerHTML =
+      '<option value="">Select Examination</option>';
 
-      const result =
-        await db
-          .from("grade_learning_areas")
-          .select(`
-            learning_area_id,
-            learning_areas (
-              id,
-              name
-            )
-          `)
-          .eq(
-            "grade_id",
-            this.value
-          );
+    document.getElementById("analysisResults").innerHTML =
+      "<p>Select a learning area and examination.</p>";
 
-      if (result.error) {
-        console.error(result.error);
-        return;
-      }
+    if (!this.value) {
+      return;
+    }
 
-      (result.data || []).forEach(
-        function (item) {
+    const result = await db
+      .from("grade_learning_areas")
+      .select(`
+        learning_area_id,
+        learning_areas (
+          id,
+          name
+        )
+      `)
+      .eq("grade_id", this.value);
 
-          if (!item.learning_areas) {
-            return;
-          }
+    if (result.error) {
+      console.error(result.error);
+      return;
+    }
 
-          const option =
-            document.createElement("option");
-
-          option.value =
-            item.learning_areas.id;
-
-          option.textContent =
-            item.learning_areas.name;
-
-          areaSelect.appendChild(option);
-
+    (result.data || []).forEach(
+      function (item) {
+        if (!item.learning_areas) {
+          return;
         }
+
+        const option =
+          document.createElement("option");
+
+        option.value =
+          item.learning_areas.id;
+
+        option.textContent =
+          item.learning_areas.name;
+
+        areaSelect.appendChild(option);
+      }
+    );
+  };
+
+  areaSelect.onchange = async function () {
+
+    assessmentSelect.innerHTML =
+      '<option value="">Select Examination</option>';
+
+    document.getElementById("analysisResults").innerHTML =
+      "<p>Select an examination to view its analysis.</p>";
+
+    if (!gradeSelect.value || !this.value) {
+      return;
+    }
+
+    const result = await db
+      .from("assessments")
+      .select("id, assessment_name, created_at")
+      .eq("grade_id", gradeSelect.value)
+      .eq("learning_area_id", this.value)
+      .order("created_at");
+
+    if (result.error) {
+      console.error(
+        "ASSESSMENT LIST ERROR:",
+        result.error
       );
+      return;
+    }
 
-    };
+    (result.data || []).forEach(
+      function (assessment) {
+        const option =
+          document.createElement("option");
 
+        option.value = assessment.id;
+        option.textContent =
+          assessment.assessment_name;
+
+        assessmentSelect.appendChild(option);
+      }
+    );
+  };
+
+  assessmentSelect.onchange =
+    loadResultsAnalysis;
 }
+  
 
 
 document.addEventListener(

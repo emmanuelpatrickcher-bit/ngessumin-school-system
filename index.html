@@ -2210,6 +2210,24 @@
 
       </div>
 
+      <!-- EXAMINATION -->
+
+      <div>
+
+        <label for="classReportExamination">
+          Examination
+        </label>
+
+        <select id="classReportExamination">
+
+          <option value="">
+            Select Examination
+          </option>
+
+        </select>
+
+      </div>
+
     </div>
 
 
@@ -4759,23 +4777,17 @@ if (!classResultsResult.error) {
   }
 </p>
 
-<p>
-  <strong>Class Teacher's Signature:</strong>
-  ______________________________
-</p>
+<div class="report-signoff">
+  <div class="signature-block">
+    <p><strong>Class Teacher's Signature:</strong></p>
+    <div class="signature-line">________________________________</div>
+  </div>
 
-<p>
-  <strong>School Official Stamp:</strong>
-</p>
-
-<div
-  style="
-    width:120px;
-    height:80px;
-    border:2px solid #999;
-    margin-top:8px;
-  "
-></div>
+  <div class="stamp-block">
+    <p><strong>School Official Stamp:</strong></p>
+    <div class="stamp-box"></div>
+  </div>
+</div>
 
 <div style="margin-top:20px;">
   <button
@@ -4943,10 +4955,21 @@ async function generateAllReportCards() {
       </title>
 
       <style>
+        @page {
+          size: A4 portrait;
+          margin: 9mm;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
 
         body {
           font-family: Arial, sans-serif;
-          margin: 20px;
+          margin: 0;
+          color: #000;
+          font-size: 10px;
+          text-transform: uppercase;
         }
 
         .report-card-page {
@@ -4959,12 +4982,62 @@ async function generateAllReportCards() {
           break-after: auto;
         }
 
+        .report-card-sheet {
+          width: 100%;
+          margin: 0 auto;
+          padding: 5mm;
+          border: 1.5px solid #174a2e;
+        }
+
+        .report-signoff {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12mm;
+          margin-top: 10px;
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+
+        .signature-block,
+        .stamp-block {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .signature-line {
+          margin-top: 10px;
+          white-space: nowrap;
+        }
+
+        .stamp-box {
+          width: 32mm;
+          height: 22mm;
+          border: 1.5px solid #777;
+          margin-top: 5px;
+        }
+
+        p {
+          margin: 3px 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 7px;
+          margin-bottom: 7px;
+        }
+
+        th, td {
+          border: 1px solid #000;
+          padding: 4px;
+        }
+
         button {
           display: none !important;
         }
 
         @media print {
-
           body {
             margin: 0;
           }
@@ -4979,8 +5052,20 @@ async function generateAllReportCards() {
             break-after: auto;
           }
 
-        }
+          .report-card-sheet {
+            padding: 5mm;
+          }
 
+          .report-signoff {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+
+          tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+        }
       </style>
 
     </head>
@@ -4994,7 +5079,9 @@ async function generateAllReportCards() {
 
               return `
                 <div class="report-card-page">
-                  ${card}
+                  <main class="report-card-sheet">
+                    ${card}
+                  </main>
                 </div>
               `;
 
@@ -6989,60 +7076,87 @@ if (duplicateAssessment.error) {
   throw duplicateAssessment.error;
 }
 
+// Reuse an existing assessment when its name matches, so this form can
+// correct marks without creating a duplicate exam or duplicate assessment.
+let assessmentId;
+
 if (duplicateAssessment.data) {
-  message.textContent =
-    "This assessment already exists for this grade and learning area. Please use a different assessment name.";
-  return;
+  assessmentId = duplicateAssessment.data.id;
+} else {
+  const assessmentResult =
+    await db
+      .from("assessments")
+      .insert({
+        school_id: schoolResult.data.id,
+        academic_year_id: yearResult.data.id,
+        term_id: termResult.data.id,
+        grade_id: gradeId,
+        learning_area_id: areaId,
+        assessment_name: assessmentName,
+        assessment_date: assessmentDate || null
+      })
+      .select("id")
+      .single();
+
+  if (assessmentResult.error) {
+    throw assessmentResult.error;
+  }
+
+  assessmentId = assessmentResult.data.id;
 }
-    const assessmentResult =
-      await db
-        .from("assessments")
-        .insert({
-          school_id: schoolResult.data.id,
-          academic_year_id: yearResult.data.id,
-          term_id: termResult.data.id,
-          grade_id: gradeId,
-          learning_area_id: areaId,
-          assessment_name: assessmentName,
-          assessment_date: assessmentDate || null
-        })
-        .select()
-        .single();
 
-    if (assessmentResult.error) {
-      throw assessmentResult.error;
+// Update a learner's existing result; insert only when that learner has no
+// result yet for this assessment. Blank learners are left unchanged.
+const existingResultsResult = await db
+  .from("results")
+  .select("id, learner_id")
+  .eq("assessment_id", assessmentId)
+  .in("learner_id", resultsToSave.map(function(item) { return item.learner_id; }));
+
+if (existingResultsResult.error) {
+  throw existingResultsResult.error;
+}
+
+const existingResultsByLearner = {};
+(existingResultsResult.data || []).forEach(function(row) {
+  existingResultsByLearner[row.learner_id] = row.id;
+});
+
+for (const item of resultsToSave) {
+  const values = {
+    score: item.score,
+    achievement_level: item.achievement_level
+  };
+  const existingResultId = existingResultsByLearner[item.learner_id];
+
+  if (existingResultId) {
+    const updateResult = await db
+      .from("results")
+      .update(values)
+      .eq("id", existingResultId);
+
+    if (updateResult.error) {
+      throw updateResult.error;
     }
-
-    const rows =
-      resultsToSave.map(function (item) {
-
-        return {
-          assessment_id:
-            assessmentResult.data.id,
-
-          learner_id:
-            item.learner_id,
-
-          score:
-            item.score,
-
-          achievement_level:
-            item.achievement_level
-        };
-
+  } else {
+    const insertResult = await db
+      .from("results")
+      .insert({
+        assessment_id: assessmentId,
+        learner_id: item.learner_id,
+        score: item.score,
+        achievement_level: item.achievement_level
       });
 
-    const resultInsert =
-      await db
-        .from("results")
-        .insert(rows);
-
-    if (resultInsert.error) {
-      throw resultInsert.error;
+    if (insertResult.error) {
+      throw insertResult.error;
     }
+  }
+}
 
-    message.textContent =
-      "Results saved successfully.";
+message.textContent = duplicateAssessment.data
+  ? "Existing assessment results updated successfully."
+  : "Results saved successfully.";
 
   } catch (error) {
 
@@ -10057,12 +10171,58 @@ document.addEventListener(
 
       <style>
 
+        @page {
+          size: A4 portrait;
+          margin: 9mm;
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
         body {
           font-family: Arial, sans-serif;
-          margin: 20mm;
+          margin: 0;
           color: #000;
-          font-size: 12px;
+          font-size: 11px;
           text-transform: uppercase;
+        }
+
+        .report-card-sheet {
+          width: 100%;
+          margin: 0 auto;
+          padding: 6mm;
+          border: 1.5px solid #174a2e;
+          border-radius: 2px;
+          box-sizing: border-box;
+        }
+
+        .report-signoff {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12mm;
+          margin-top: 12px;
+          page-break-inside: avoid;
+          break-inside: avoid;
+        }
+
+        .signature-block,
+        .stamp-block {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .signature-line {
+          margin-top: 12px;
+          white-space: nowrap;
+        }
+
+        .stamp-box {
+          width: 32mm;
+          height: 22mm;
+          border: 1.5px solid #777;
+          margin-top: 5px;
         }
 
         h2 {
@@ -10111,43 +10271,57 @@ document.addEventListener(
         }
 
         @media print {
+          body {
+            margin: 0;
+            font-size: 10px;
+          }
 
-  body {
-    margin: 10mm;
-    font-size: 10px;
-  }
+          .report-card-sheet {
+            padding: 5mm;
+            border: 1.5px solid #174a2e;
+          }
 
-  h2 {
-    font-size: 17px;
-    margin-bottom: 2px;
-  }
+          h2 {
+            font-size: 17px;
+            margin-bottom: 2px;
+          }
 
-  h3 {
-    font-size: 14px;
-    margin-top: 2px;
-    margin-bottom: 10px;
-  }
+          h3 {
+            font-size: 14px;
+            margin-top: 2px;
+            margin-bottom: 8px;
+          }
 
-  p {
-    margin: 4px 0;
-  }
+          p {
+            margin: 3px 0;
+          }
 
-  table {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    page-break-inside: avoid;
-  }
+          table {
+            width: 100%;
+            margin-top: 7px;
+            margin-bottom: 7px;
+            page-break-inside: auto;
+          }
 
-  th,
-  td {
-    padding: 5px;
-  }
+          tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
 
-  div {
-    page-break-inside: avoid;
-  }
+          th,
+          td {
+            padding: 4px;
+          }
 
-}
+          .report-signoff {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+
+          button {
+            display: none !important;
+          }
+        }
 
       </style>
 
@@ -10155,7 +10329,9 @@ document.addEventListener(
 
     <body>
 
-      ${reportCard.innerHTML}
+      <main class="report-card-sheet">
+        ${reportCard.innerHTML}
+      </main>
 
     </body>
 
@@ -10171,134 +10347,146 @@ document.addEventListener(
   }, 500);
 
     }
-    async function setupClassPerformanceReport() {
+    async function populateClassReportExaminations() {
 
-  const gradeSelect =
-    document.getElementById("classReportGrade");
+  const gradeId =
+    document.getElementById("classReportGrade")?.value;
 
-  const areaSelect =
-    document.getElementById("classReportArea");
+  const termNumber =
+    document.getElementById("classReportTerm")?.value;
 
-  if (!gradeSelect || !areaSelect) {
-    return;
-  }
+  const areaId =
+    document.getElementById("classReportArea")?.value;
 
-  const result =
-    await db
-      .from("grades")
-      .select("id, grade_number")
-      .order("grade_number");
+  const examinationSelect =
+    document.getElementById("classReportExamination");
 
-  if (result.error) {
+  if (!examinationSelect) return;
 
-    console.error(
-      "CLASS REPORT GRADES ERROR:",
-      result.error
-    );
+  examinationSelect.innerHTML =
+    '<option value="">Select Examination</option>';
 
-    return;
-  }
+  if (!gradeId || !termNumber || !areaId) return;
 
-  gradeSelect.innerHTML =
-    '<option value="">Select Grade</option>';
+  try {
+    const schoolResult = await db
+      .from("schools")
+      .select("id")
+      .eq("name", "Ngessumin Comprehensive School")
+      .single();
 
-  (result.data || []).forEach(
-    function (grade) {
+    if (schoolResult.error) throw schoolResult.error;
 
-      const option =
-        document.createElement("option");
+    const yearResult = await db
+      .from("academic_years")
+      .select("id")
+      .eq("school_id", schoolResult.data.id)
+      .eq("is_current", true)
+      .single();
 
-      option.value = grade.id;
+    if (yearResult.error) throw yearResult.error;
 
-      option.textContent =
-        "Grade " + grade.grade_number;
+    const termResult = await db
+      .from("terms")
+      .select("id")
+      .eq("academic_year_id", yearResult.data.id)
+      .eq("term_number", Number(termNumber))
+      .single();
 
-      gradeSelect.appendChild(option);
+    if (termResult.error) throw termResult.error;
 
+    const assessmentsResult = await db
+      .from("assessments")
+      .select("id, assessment_name, created_at")
+      .eq("grade_id", gradeId)
+      .eq("term_id", termResult.data.id)
+      .eq("learning_area_id", areaId)
+      .order("created_at", { ascending: false });
+
+    if (assessmentsResult.error) throw assessmentsResult.error;
+
+    const seen = new Set();
+    (assessmentsResult.data || []).forEach(function (assessment) {
+      if (!assessment.id) return;
+      const option = document.createElement("option");
+      option.value = assessment.id;
+      option.textContent = assessment.assessment_name || "Unnamed Examination";
+      examinationSelect.appendChild(option);
+    });
+
+    if (examinationSelect.options.length === 2) {
+      examinationSelect.selectedIndex = 1;
     }
-  );
 
-
-  gradeSelect.addEventListener(
-    "change",
-    async function () {
-
-      areaSelect.innerHTML =
-        '<option value="">Select Learning Area</option>';
-
-      if (!this.value) {
-        return;
-      }
-
-      const areaResult =
-        await db
-          .from("grade_learning_areas")
-          .select(`
-            learning_area_id,
-            learning_areas (
-              id,
-              name
-            )
-          `)
-          .eq(
-            "grade_id",
-            this.value
-          );
-
-      if (areaResult.error) {
-
-        console.error(
-          "CLASS REPORT AREAS ERROR:",
-          areaResult.error
-        );
-
-        return;
-      }
-
-      (areaResult.data || []).forEach(
-        function (item) {
-
-          if (!item.learning_areas) {
-            return;
-          }
-
-          const option =
-            document.createElement("option");
-
-          option.value =
-            item.learning_areas.id;
-
-          option.textContent =
-            item.learning_areas.name;
-
-          areaSelect.appendChild(option);
-
-        }
-      );
-
-    }
-  );
-
+  } catch (error) {
+    console.error("CLASS REPORT EXAMINATIONS ERROR:", error);
+  }
 }
 
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
+async function setupClassPerformanceReport() {
 
-    setupClassPerformanceReport();
+  const gradeSelect = document.getElementById("classReportGrade");
+  const areaSelect = document.getElementById("classReportArea");
+  const termSelect = document.getElementById("classReportTerm");
+  const examinationSelect = document.getElementById("classReportExamination");
 
+  if (!gradeSelect || !areaSelect || !termSelect || !examinationSelect) return;
+
+  const result = await db
+    .from("grades")
+    .select("id, grade_number")
+    .order("grade_number");
+
+  if (result.error) {
+    console.error("CLASS REPORT GRADES ERROR:", result.error);
+    return;
   }
-);
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function () {
+  gradeSelect.innerHTML = '<option value="">Select Grade</option>';
+  (result.data || []).forEach(function (grade) {
+    const option = document.createElement("option");
+    option.value = grade.id;
+    option.textContent = "Grade " + grade.grade_number;
+    gradeSelect.appendChild(option);
+  });
 
-    setupClassPerformanceReport();
+  gradeSelect.addEventListener("change", async function () {
+    areaSelect.innerHTML = '<option value="">Select Learning Area</option>';
+    examinationSelect.innerHTML = '<option value="">Select Examination</option>';
 
-  }
-);
+    if (!this.value) return;
+
+    const areaResult = await db
+      .from("grade_learning_areas")
+      .select(`learning_area_id, learning_areas ( id, name )`)
+      .eq("grade_id", this.value);
+
+    if (areaResult.error) {
+      console.error("CLASS REPORT AREAS ERROR:", areaResult.error);
+      return;
+    }
+
+    (areaResult.data || []).forEach(function (item) {
+      if (!item.learning_areas) return;
+      const option = document.createElement("option");
+      option.value = item.learning_areas.id;
+      option.textContent = item.learning_areas.name;
+      areaSelect.appendChild(option);
+    });
+
+    await populateClassReportExaminations();
+  });
+
+  termSelect.addEventListener("change", populateClassReportExaminations);
+  areaSelect.addEventListener("change", populateClassReportExaminations);
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  setupClassPerformanceReport();
+});
+
     async function generateClassPerformanceReport() {
 
   const gradeId =
@@ -10310,16 +10498,23 @@ document.addEventListener(
   const areaId =
     document.getElementById("classReportArea").value;
 
+  const examinationId =
+    document.getElementById("classReportExamination").value;
+
+  const examinationName =
+    document.getElementById("classReportExamination")
+      .selectedOptions[0]?.textContent || "";
+
   const resultContainer =
     document.getElementById("classPerformanceResult");
 
   const message =
     document.getElementById("classReportMessage");
 
-  if (!gradeId || !termNumber || !areaId) {
+  if (!gradeId || !termNumber || !areaId || !examinationId) {
 
     message.textContent =
-      "Please select Grade, Term and Learning Area.";
+      "Please select Grade, Term, Learning Area and Examination.";
 
     return;
   }
@@ -10461,9 +10656,11 @@ document.addEventListener(
           score,
           achievement_level,
           assessments!inner (
+            id,
             grade_id,
             term_id,
             learning_area_id,
+            assessment_name,
             created_at
           )
         `)
@@ -10478,6 +10675,10 @@ document.addEventListener(
         .eq(
           "assessments.learning_area_id",
           areaId
+        )
+        .eq(
+          "assessments.id",
+          examinationId
         );
 
     if (resultsResult.error) {
@@ -10489,53 +10690,18 @@ document.addEventListener(
       resultsResult.data || [];
 
 
-    /* Keep only the latest scored
-       assessment for each learner */
+    /* Use results from the specifically selected examination only. */
 
     const latestResults = {};
 
+    results.forEach(function (row) {
+      if (row.score === null || row.score === undefined) return;
 
-    results.forEach(
-      function (row) {
-
-        if (
-          row.score === null ||
-          row.score === undefined
-        ) {
-          return;
-        }
-
-        const learnerId =
-          row.learner_id;
-
-        const createdAt =
-          row.assessments?.created_at || "";
-
-        const current =
-          latestResults[learnerId];
-
-        if (
-          !current ||
-          createdAt > current.createdAt
-        ) {
-
-          latestResults[learnerId] = {
-
-            score:
-              Number(row.score),
-
-            achievement_level:
-              row.achievement_level,
-
-            createdAt:
-              createdAt
-
-          };
-
-        }
-
-      }
-    );
+      latestResults[row.learner_id] = {
+        score: Number(row.score),
+        achievement_level: row.achievement_level
+      };
+    });
 
 
     /* Build learner report */
@@ -10703,6 +10869,11 @@ document.addEventListener(
       <p>
         <strong>LEARNING AREA:</strong>
         ${areaResult.data.name}
+      </p>
+
+      <p>
+        <strong>EXAMINATION:</strong>
+        ${examinationName}
       </p>
 
       <p>

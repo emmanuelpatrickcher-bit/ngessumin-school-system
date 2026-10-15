@@ -4989,6 +4989,23 @@ async function generateAllReportCards() {
           border: 1.5px solid #174a2e;
         }
 
+        /* Keep the school heading, address and report-card title aligned
+           consistently in the Print All window. */
+        .report-card-sheet > h2:first-child,
+        .report-card-sheet > p:first-of-type,
+        .report-card-sheet > h3:first-of-type {
+          text-align: center;
+        }
+
+        .report-card-sheet > h2:first-child {
+          margin-top: 0;
+          margin-bottom: 2px;
+        }
+
+        .report-card-sheet > h3:first-of-type {
+          margin-top: 4px;
+        }
+
         .report-signoff {
           display: flex;
           align-items: flex-start;

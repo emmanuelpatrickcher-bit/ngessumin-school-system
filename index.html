@@ -12301,7 +12301,42 @@ async function applyRolePermissions() {
       rows.forEach(row => {
         const rowElement = learnersContainer.querySelector('[data-result-id="' + CSS.escape(String(row.id)) + '"]');
         const levelSelect = rowElement && rowElement.querySelector(".edit-mark-level");
+        const scoreInput = rowElement && rowElement.querySelector(".edit-mark-score");
         if (levelSelect) levelSelect.value = row.achievement_level || "";
+
+        // Recalculate achievement level whenever an edited score changes.
+        // Grades 1–8 use EE/ME/AE/BE; Grade 9 uses the eight-level scale.
+        if (scoreInput && levelSelect) {
+          scoreInput.addEventListener("input", () => {
+            const raw = scoreInput.value.trim();
+            if (raw === "") {
+              levelSelect.value = "";
+              return;
+            }
+            const score = Number(raw);
+            if (!Number.isFinite(score) || score < 0 || score > 100) return;
+
+            const selectedGradeText = gradeSelect.options[gradeSelect.selectedIndex]?.textContent || "";
+            const gradeNumber = parseInt(selectedGradeText.replace(/\D/g, ""), 10);
+            let level = "";
+            if (gradeNumber === 9) {
+              if (score >= 90) level = "EE1";
+              else if (score >= 75) level = "EE2";
+              else if (score >= 58) level = "ME1";
+              else if (score >= 41) level = "ME2";
+              else if (score >= 31) level = "AE1";
+              else if (score >= 21) level = "AE2";
+              else if (score >= 11) level = "BE1";
+              else level = "BE2";
+            } else {
+              if (score >= 76) level = "EE";
+              else if (score >= 41) level = "ME";
+              else if (score >= 21) level = "AE";
+              else level = "BE";
+            }
+            levelSelect.value = level;
+          });
+        }
       });
       loadedAssessmentId = assessmentId;
       document.getElementById("saveEditedMarksButton").addEventListener("click", saveEditedMarks);

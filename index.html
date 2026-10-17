@@ -676,9 +676,44 @@
 
     </form>
 
+    <div style="text-align:right; margin-top:10px;">
+      <button
+        type="button"
+        id="showForgotPasswordButton"
+        style="background:transparent; color:#174a2e; padding:6px 0; text-decoration:underline;"
+      >Forgot Password?</button>
+    </div>
+
+    <div id="forgotPasswordPanel" style="display:none; margin-top:18px; border-top:1px solid #e5e7eb; padding-top:16px;">
+      <h2 style="font-size:20px; margin:0 0 8px; color:#174a2e;">Reset your password</h2>
+      <p style="margin:0 0 12px; text-align:left;">Enter your registered email address and we'll send you a password-reset link.</p>
+      <form id="forgotPasswordForm">
+        <label for="recoveryEmail">Email address</label>
+        <input type="email" id="recoveryEmail" placeholder="Enter your registered email" autocomplete="email" required>
+        <button type="submit" class="primary-btn" id="sendRecoveryButton">Send Reset Link</button>
+        <button type="button" id="cancelForgotPasswordButton" style="width:100%; margin-top:8px; background:#eef2f0; color:#174a2e;">Back to Login</button>
+      </form>
+      <div id="forgotPasswordMessage" class="message" role="status" aria-live="polite"></div>
+    </div>
+
+    <div id="newPasswordPanel" style="display:none; margin-top:18px; border-top:1px solid #e5e7eb; padding-top:16px;">
+      <h2 style="font-size:20px; margin:0 0 8px; color:#174a2e;">Choose a new password</h2>
+      <p style="margin:0 0 12px; text-align:left;">Enter and confirm your new password.</p>
+      <form id="newPasswordForm">
+        <label for="newPassword">New password</label>
+        <input type="password" id="newPassword" autocomplete="new-password" minlength="8" required>
+        <label for="confirmNewPassword">Confirm new password</label>
+        <input type="password" id="confirmNewPassword" autocomplete="new-password" minlength="8" required>
+        <button type="submit" class="primary-btn" id="saveNewPasswordButton">Save New Password</button>
+      </form>
+      <div id="newPasswordMessage" class="message" role="status" aria-live="polite"></div>
+    </div>
+
     <div
       id="loginMessage"
       class="message"
+      role="status"
+      aria-live="polite"
     ></div>
 
   </div>
@@ -2900,6 +2935,7 @@
   let grades = [];
   let learners = [];
   let areas = [];
+  let passwordRecoveryActive = false;
 
 
   /* =========================================================
@@ -2925,6 +2961,22 @@
           "click",
           logout
         );
+
+      document
+        .getElementById("showForgotPasswordButton")
+        .addEventListener("click", showForgotPasswordForm);
+
+      document
+        .getElementById("cancelForgotPasswordButton")
+        .addEventListener("click", showLoginForm);
+
+      document
+        .getElementById("forgotPasswordForm")
+        .addEventListener("submit", sendPasswordResetEmail);
+
+      document
+        .getElementById("newPasswordForm")
+        .addEventListener("submit", saveNewPassword);
 
       document
         .getElementById("learnerForm")
@@ -2968,22 +3020,30 @@
         );
 
 
-      /* Check existing login */
+      /* Handle a password-recovery link before normal session routing. */
+      const queryParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(
+        window.location.hash.replace(/^#/, "")
+      );
+      const isRecoveryCallback =
+        hashParams.get("type") === "recovery" ||
+        queryParams.get("type") === "recovery" ||
+        queryParams.has("code");
 
-      const sessionResult =
-        await db.auth.getSession();
-
-      if (
-        sessionResult.data &&
-        sessionResult.data.session
-      ) {
-
-        showDashboard();
-
+      if (isRecoveryCallback || passwordRecoveryActive) {
+        showPasswordResetForm();
       } else {
+        /* Check existing login without changing normal login behaviour. */
+        const sessionResult = await db.auth.getSession();
 
-        showLogin();
-
+        if (
+          sessionResult.data &&
+          sessionResult.data.session
+        ) {
+          showDashboard();
+        } else {
+          showLogin();
+        }
       }
 
     }
@@ -3094,6 +3154,135 @@
 
 
   /* =========================================================
+     PASSWORD RECOVERY
+  ========================================================= */
+
+  function showForgotPasswordForm() {
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("showForgotPasswordButton").style.display = "none";
+    document.getElementById("loginMessage").textContent = "";
+    document.getElementById("forgotPasswordPanel").style.display = "block";
+    document.getElementById("newPasswordPanel").style.display = "none";
+    document.getElementById("forgotPasswordMessage").textContent = "";
+    document.getElementById("recoveryEmail").value =
+      document.getElementById("email").value.trim();
+  }
+
+  function showLoginForm() {
+    passwordRecoveryActive = false;
+    document.getElementById("forgotPasswordPanel").style.display = "none";
+    document.getElementById("newPasswordPanel").style.display = "none";
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("showForgotPasswordButton").style.display = "inline-block";
+    document.getElementById("forgotPasswordMessage").textContent = "";
+    document.getElementById("newPasswordMessage").textContent = "";
+  }
+
+  function showPasswordResetForm() {
+    passwordRecoveryActive = true;
+    document.getElementById("loginPage").style.display = "flex";
+    document.getElementById("appDashboard").style.display = "none";
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("showForgotPasswordButton").style.display = "none";
+    document.getElementById("forgotPasswordPanel").style.display = "none";
+    document.getElementById("newPasswordPanel").style.display = "block";
+    document.getElementById("loginMessage").textContent = "";
+  }
+
+  async function sendPasswordResetEmail(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("recoveryEmail").value.trim();
+    const message = document.getElementById("forgotPasswordMessage");
+    const button = document.getElementById("sendRecoveryButton");
+
+    if (!email) {
+      message.textContent = "Please enter your registered email address.";
+      return;
+    }
+
+    button.disabled = true;
+    message.textContent = "Sending password-reset email...";
+
+    try {
+      const redirectTo = window.location.origin + window.location.pathname;
+      const result = await db.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectTo
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      /* Use a neutral message to avoid revealing whether an email is registered. */
+      message.textContent =
+        "If an account exists for that email address, a password-reset link will be sent. Check your inbox and spam folder.";
+    } catch (error) {
+      console.error("PASSWORD RESET REQUEST ERROR:", error);
+      message.textContent =
+        "We couldn't send the reset email. Please check your connection and try again.";
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function saveNewPassword(event) {
+    event.preventDefault();
+
+    const password = document.getElementById("newPassword").value;
+    const confirmation = document.getElementById("confirmNewPassword").value;
+    const message = document.getElementById("newPasswordMessage");
+    const button = document.getElementById("saveNewPasswordButton");
+
+    if (password.length < 8) {
+      message.textContent = "Please use a password with at least 8 characters.";
+      return;
+    }
+
+    if (password !== confirmation) {
+      message.textContent = "The passwords do not match. Please try again.";
+      return;
+    }
+
+    button.disabled = true;
+    message.textContent = "Saving your new password...";
+
+    try {
+      const result = await db.auth.updateUser({ password: password });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      /* End the recovery session so the user returns to the normal login screen. */
+      try {
+        await db.auth.signOut();
+      } catch (signOutError) {
+        console.warn("Could not end recovery session automatically:", signOutError);
+      }
+
+      passwordRecoveryActive = false;
+      document.getElementById("newPasswordPanel").style.display = "none";
+      document.getElementById("loginForm").style.display = "block";
+      document.getElementById("showForgotPasswordButton").style.display = "inline-block";
+      document.getElementById("newPassword").value = "";
+      document.getElementById("confirmNewPassword").value = "";
+      document.getElementById("loginMessage").textContent =
+        "Password updated successfully. Please sign in with your new password.";
+
+      /* Remove recovery tokens/codes from the visible address after processing. */
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (error) {
+      console.error("PASSWORD UPDATE ERROR:", error);
+      message.textContent =
+        "We couldn't update the password. The reset link may have expired or already been used. Request a new link and try again.";
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+
+  /* =========================================================
      SHOW LOGIN
   ========================================================= */
 
@@ -3159,6 +3348,10 @@ async function showDashboard() {
         "AUTH EVENT:",
         event
       );
+
+      if (event === "PASSWORD_RECOVERY") {
+        showPasswordResetForm();
+      }
 
     }
   );
@@ -4987,23 +5180,6 @@ async function generateAllReportCards() {
           margin: 0 auto;
           padding: 5mm;
           border: 1.5px solid #174a2e;
-        }
-
-        /* Keep the school heading, address and report-card title aligned
-           consistently in the Print All window. */
-        .report-card-sheet > h2:first-child,
-        .report-card-sheet > p:first-of-type,
-        .report-card-sheet > h3:first-of-type {
-          text-align: center;
-        }
-
-        .report-card-sheet > h2:first-child {
-          margin-top: 0;
-          margin-bottom: 2px;
-        }
-
-        .report-card-sheet > h3:first-of-type {
-          margin-top: 4px;
         }
 
         .report-signoff {

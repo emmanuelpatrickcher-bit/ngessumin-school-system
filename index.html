@@ -4041,7 +4041,7 @@ async function showDashboard() {
         await db
           .from("learners")
           .select(
-            "id, assessment_number, full_name"
+            "id, assessment_number, full_name, status"
           )
           .eq(
             "school_id",
@@ -4050,6 +4050,10 @@ async function showDashboard() {
           .eq(
             "grade_id",
             selectedGradeId
+          )
+          .eq(
+            "status",
+            "Active"
           )
           .order(
             "full_name"
@@ -4161,6 +4165,7 @@ async function generateReportCard() {
       .from("learners")
       .select(`
         id,
+        school_id,
         assessment_number,
         full_name,
         grade_id,
@@ -4188,6 +4193,7 @@ async function generateReportCard() {
       achievement_level,
       assessments (
   term_id,
+  grade_id,
   assessment_name,
   learning_area_id,
   created_at,
@@ -4696,29 +4702,32 @@ try {
     const classLearners =
       classLearnersResult.data || [];
 
-    /* Get all results for this grade and selected term */
-    const classResultsResult =
-  await db
-    .from("results")
-    .select(`
-      learner_id,
-      score,
-      assessments!inner (
-        grade_id,
-        term_id,
-        learning_area_id,
-        created_at,
-        assessment_date
-      )
-    `)
-    .eq(
-      "assessments.grade_id",
-      learner.grade_id
-    )
-    .eq(
-      "assessments.term_id",
-      selectedTermId
-    );
+    /* Find the grade used when this learner's selected-term results were recorded.
+       Learners may have been promoted since those historical results were entered. */
+    const historicalGradeId = (results || []).find(function(row) {
+      return String(row.assessments?.term_id) === String(selectedTermId) &&
+        row.assessments?.grade_id;
+    })?.assessments?.grade_id;
+
+    /* Use historical assessment grade for results, but current grade for the
+       active class group after promotion. */
+    const classResultsResult = historicalGradeId
+      ? await db
+          .from("results")
+          .select(`
+            learner_id,
+            score,
+            assessments!inner (
+              grade_id,
+              term_id,
+              learning_area_id,
+              created_at,
+              assessment_date
+            )
+          `)
+          .eq("assessments.grade_id", historicalGradeId)
+          .eq("assessments.term_id", selectedTermId)
+      : { data: [], error: null };
 
 if (!classResultsResult.error) {
 

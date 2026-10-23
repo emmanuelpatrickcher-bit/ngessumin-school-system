@@ -4253,12 +4253,14 @@ const termResult =
       term_number,
       opening_date,
       closing_date,
-      academic_years (
-  id,
-  year
-)
+      academic_years!inner (
+        id,
+        year,
+        is_current
+      )
     `)
     .eq("term_number", Number(termNumber))
+    .eq("academic_years.is_current", true)
     .single();
 
 if (termResult.error) {

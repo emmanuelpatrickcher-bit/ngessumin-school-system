@@ -1401,6 +1401,22 @@
 
             </div>
 
+            <div>
+
+              <label for="learnerStatusFilter">
+                Filter by Status
+              </label>
+
+              <select id="learnerStatusFilter">
+                <option value="Active" selected>Active Learners Only</option>
+                <option value="Graduated">Graduated Learners</option>
+                <option value="Transferred">Transferred Learners</option>
+                <option value="Inactive">Inactive Learners</option>
+                <option value="">All Statuses</option>
+              </select>
+
+            </div>
+
           </div>
 
 
@@ -1579,43 +1595,6 @@
       class="message"
     ></div>
 
-  </div>
-
-  <!-- EDIT EXISTING MARKS: separate workflow, preserving the original entry form -->
-  <div class="panel" id="editMarksPanel">
-    <h2>Edit Existing Marks</h2>
-    <p>Select the exact academic year, term, grade, learning area and examination. This loads saved marks for correction without creating a new assessment.</p>
-
-    <div class="form-grid">
-      <div>
-        <label for="editMarksYear">Academic Year</label>
-        <select id="editMarksYear"><option value="">Loading years...</option></select>
-      </div>
-      <div>
-        <label for="editMarksTerm">Term</label>
-        <select id="editMarksTerm"><option value="">Select academic year first</option></select>
-      </div>
-      <div>
-        <label for="editMarksGrade">Grade</label>
-        <select id="editMarksGrade"><option value="">Loading grades...</option></select>
-      </div>
-      <div>
-        <label for="editMarksArea">Learning Area</label>
-        <select id="editMarksArea"><option value="">Select grade first</option></select>
-      </div>
-      <div>
-        <label for="editMarksAssessment">Examination</label>
-        <select id="editMarksAssessment"><option value="">Select term, grade and learning area</option></select>
-      </div>
-    </div>
-
-    <div style="margin:12px 0">
-      <button type="button" id="loadExistingMarksButton">Load Existing Marks</button>
-    </div>
-    <div id="editMarksLearners" class="panel">
-      <p>Select the filters above, then load the saved marks.</p>
-    </div>
-    <div id="editMarksMessage" class="message" role="status" aria-live="polite"></div>
   </div>
 
       </section>
@@ -3031,6 +3010,13 @@
 
       document
         .getElementById("learnerGradeFilter")
+        .addEventListener(
+          "change",
+          showLearners
+        );
+
+      document
+        .getElementById("learnerStatusFilter")
         .addEventListener(
           "change",
           showLearners
@@ -6386,6 +6372,8 @@ document
         )
         .value;
 
+    const statusFilter =
+      document.getElementById("learnerStatusFilter").value;
 
     tbody.innerHTML = "";
 
@@ -6408,10 +6396,13 @@ document
             !gradeFilter ||
             learner.grade_id === gradeFilter;
 
+          const matchesStatus =
+            !statusFilter || learner.status === statusFilter;
 
           return (
             matchesSearch &&
-            matchesGrade
+            matchesGrade &&
+            matchesStatus
           );
 
         }
@@ -12122,313 +12113,6 @@ async function applyRolePermissions() {
   }
 
 }
-
-
-/* =========================================================
-   EDIT EXISTING MARKS
-   Separate workflow: updates only existing result rows for the
-   selected examination. Does not create a new assessment.
-========================================================= */
-(function setupEditMarks() {
-  const yearSelect = document.getElementById("editMarksYear");
-  const termSelect = document.getElementById("editMarksTerm");
-  const gradeSelect = document.getElementById("editMarksGrade");
-  const areaSelect = document.getElementById("editMarksArea");
-  const assessmentSelect = document.getElementById("editMarksAssessment");
-  const learnersContainer = document.getElementById("editMarksLearners");
-  const message = document.getElementById("editMarksMessage");
-  const loadButton = document.getElementById("loadExistingMarksButton");
-  if (!yearSelect || !termSelect || !gradeSelect || !areaSelect ||
-      !assessmentSelect || !learnersContainer || !message || !loadButton) return;
-
-  let editSchoolId = null;
-  let loadedAssessmentId = null;
-
-  function setOptions(select, firstLabel, rows, valueFn, labelFn) {
-    select.innerHTML = "";
-    const first = document.createElement("option");
-    first.value = "";
-    first.textContent = firstLabel;
-    select.appendChild(first);
-    (rows || []).forEach(row => {
-      const option = document.createElement("option");
-      option.value = valueFn(row);
-      option.textContent = labelFn(row);
-      select.appendChild(option);
-    });
-  }
-
-  function resetLearners(text) {
-    loadedAssessmentId = null;
-    learnersContainer.innerHTML = "<p>" + escapeHtml(text || "Select the filters, then load saved marks.") + "</p>";
-  }
-
-  async function initEditMarks() {
-    try {
-      const schoolResult = await db.from("schools")
-        .select("id")
-        .eq("name", "Ngessumin Comprehensive School")
-        .single();
-      if (schoolResult.error) throw schoolResult.error;
-      editSchoolId = schoolResult.data.id;
-
-      const [yearsResult, gradesResult] = await Promise.all([
-        db.from("academic_years").select("id, year")
-          .eq("school_id", editSchoolId).order("year", { ascending: false }),
-        db.from("grades").select("id, grade_number")
-          .eq("school_id", editSchoolId).order("grade_number")
-      ]);
-      if (yearsResult.error) throw yearsResult.error;
-      if (gradesResult.error) throw gradesResult.error;
-      setOptions(yearSelect, "Select Academic Year", yearsResult.data,
-        row => row.id, row => String(row.year));
-      setOptions(gradeSelect, "Select Grade", gradesResult.data,
-        row => row.id, row => "Grade " + row.grade_number);
-      message.textContent = "";
-    } catch (error) {
-      console.error("EDIT MARKS INITIALIZATION ERROR:", error);
-      message.textContent = "Unable to load edit filters: " + (error.message || error);
-    }
-  }
-
-  async function loadEditTerms() {
-    setOptions(termSelect, "Select Term", []);
-    setOptions(assessmentSelect, "Select Examination", []);
-    resetLearners();
-    if (!yearSelect.value) return;
-    try {
-      const result = await db.from("terms").select("id, term_number")
-        .eq("academic_year_id", yearSelect.value).order("term_number");
-      if (result.error) throw result.error;
-      setOptions(termSelect, "Select Term", result.data,
-        row => row.id, row => "Term " + row.term_number);
-      await loadEditAssessments();
-    } catch (error) {
-      message.textContent = "Unable to load terms: " + (error.message || error);
-    }
-  }
-
-  async function loadEditAreas() {
-    setOptions(areaSelect, "Select Learning Area", []);
-    setOptions(assessmentSelect, "Select Examination", []);
-    resetLearners();
-    if (!gradeSelect.value) return;
-    try {
-      const result = await db.from("grade_learning_areas")
-        .select("learning_area_id, learning_areas (id, name)")
-        .eq("grade_id", gradeSelect.value);
-      if (result.error) throw result.error;
-      const rows = (result.data || []).filter(row => row.learning_areas && row.learning_areas.id);
-      setOptions(areaSelect, "Select Learning Area", rows,
-        row => row.learning_areas.id, row => row.learning_areas.name);
-      await loadEditAssessments();
-    } catch (error) {
-      message.textContent = "Unable to load learning areas: " + (error.message || error);
-    }
-  }
-
-  async function loadEditAssessments() {
-    setOptions(assessmentSelect, "Select Examination", []);
-    resetLearners();
-    if (!yearSelect.value || !termSelect.value || !gradeSelect.value || !areaSelect.value) return;
-    try {
-      const result = await db.from("assessments")
-        .select("id, assessment_name, assessment_date, created_at")
-        .eq("school_id", editSchoolId)
-        .eq("academic_year_id", yearSelect.value)
-        .eq("term_id", termSelect.value)
-        .eq("grade_id", gradeSelect.value)
-        .eq("learning_area_id", areaSelect.value)
-        .order("created_at", { ascending: false });
-      if (result.error) throw result.error;
-      setOptions(assessmentSelect, "Select Examination", result.data,
-        row => row.id, row => row.assessment_name || "Unnamed Examination");
-    } catch (error) {
-      message.textContent = "Unable to load examinations: " + (error.message || error);
-    }
-  }
-
-  async function loadSavedMarks() {
-    message.textContent = "";
-    resetLearners("Loading saved marks...");
-    const assessmentId = assessmentSelect.value;
-    if (!assessmentId) {
-      resetLearners("Please select an examination first.");
-      return;
-    }
-    try {
-      const result = await db.from("results")
-        .select("id, learner_id, score, achievement_level, learners (id, assessment_number, full_name)")
-        .eq("assessment_id", assessmentId);
-      if (result.error) throw result.error;
-      const rows = (result.data || []).filter(row => row.learners);
-      rows.sort((a, b) => String(a.learners.full_name || "").localeCompare(String(b.learners.full_name || "")));
-      if (!rows.length) {
-        resetLearners("No saved result rows were found for this examination.");
-        message.textContent = "No existing marks were found for the selected examination.";
-        return;
-      }
-
-      let html = "<h3>Saved marks — edit the required values</h3><div class='results-list'>";
-      rows.forEach(row => {
-        const learnerName = escapeHtml(row.learners.full_name || "");
-        const assessmentNumber = escapeHtml(row.learners.assessment_number || "");
-        const scoreValue = row.score === null || row.score === undefined ? "" : String(row.score);
-        html += `<div class="result-row" data-result-id="${escapeHtml(row.id)}"
-          data-original-score="${escapeHtml(scoreValue)}"
-          data-original-level="${escapeHtml(row.achievement_level || "")}">
-          <strong>${learnerName}</strong><small>${assessmentNumber}</small>
-          <div class="score-entry">
-            <label>Score (0–100)</label>
-            <input type="number" class="edit-mark-score" min="0" max="100" step="1"
-              value="${escapeHtml(scoreValue)}" aria-label="Score for ${learnerName}">
-            <label>Achievement level</label>
-            <select class="edit-mark-level" aria-label="Achievement level for ${learnerName}">
-              <option value="">Not set</option>
-              <option value="EE">EE — Exceeding Expectations</option>
-              <option value="ME">ME — Meeting Expectations</option>
-              <option value="AE">AE — Approaching Expectations</option>
-              <option value="BE">BE — Below Expectations</option>
-              <option value="EE1">EE1</option><option value="EE2">EE2</option>
-              <option value="ME1">ME1</option><option value="ME2">ME2</option>
-              <option value="AE1">AE1</option><option value="AE2">AE2</option>
-              <option value="BE1">BE1</option><option value="BE2">BE2</option>
-            </select>
-          </div></div>`;
-      });
-      html += "</div><div style='margin-top:12px'><button type='button' id='saveEditedMarksButton'>Save Mark Changes</button></div>";
-      learnersContainer.innerHTML = html;
-      rows.forEach(row => {
-        const rowElement = learnersContainer.querySelector('[data-result-id="' + CSS.escape(String(row.id)) + '"]');
-        const levelSelect = rowElement && rowElement.querySelector(".edit-mark-level");
-        const scoreInput = rowElement && rowElement.querySelector(".edit-mark-score");
-        if (levelSelect) levelSelect.value = row.achievement_level || "";
-
-        // Recalculate achievement level whenever an edited score changes.
-        // Grades 1–8 use EE/ME/AE/BE; Grade 9 uses the eight-level scale.
-        if (scoreInput && levelSelect) {
-          scoreInput.addEventListener("input", () => {
-            const raw = scoreInput.value.trim();
-            if (raw === "") {
-              levelSelect.value = "";
-              return;
-            }
-            const score = Number(raw);
-            if (!Number.isFinite(score) || score < 0 || score > 100) return;
-
-            const selectedGradeText = gradeSelect.options[gradeSelect.selectedIndex]?.textContent || "";
-            const gradeNumber = parseInt(selectedGradeText.replace(/\D/g, ""), 10);
-            let level = "";
-            if (gradeNumber === 9) {
-              if (score >= 90) level = "EE1";
-              else if (score >= 75) level = "EE2";
-              else if (score >= 58) level = "ME1";
-              else if (score >= 41) level = "ME2";
-              else if (score >= 31) level = "AE1";
-              else if (score >= 21) level = "AE2";
-              else if (score >= 11) level = "BE1";
-              else level = "BE2";
-            } else {
-              if (score >= 76) level = "EE";
-              else if (score >= 41) level = "ME";
-              else if (score >= 21) level = "AE";
-              else level = "BE";
-            }
-            levelSelect.value = level;
-          });
-        }
-      });
-      loadedAssessmentId = assessmentId;
-      document.getElementById("saveEditedMarksButton").addEventListener("click", saveEditedMarks);
-      message.textContent = rows.length + " saved result(s) loaded. Change a score or achievement level, then save.";
-    } catch (error) {
-      console.error("LOAD SAVED MARKS ERROR:", error);
-      resetLearners("Unable to load saved marks.");
-      message.textContent = "Unable to load marks: " + (error.message || error);
-    }
-  }
-
-  async function saveEditedMarks() {
-    const assessmentId = assessmentSelect.value;
-    const rows = Array.from(learnersContainer.querySelectorAll("[data-result-id]"));
-    if (!assessmentId || assessmentId !== loadedAssessmentId || !rows.length) {
-      message.textContent = "Load the selected examination's existing marks before saving changes.";
-      return;
-    }
-    const button = document.getElementById("saveEditedMarksButton");
-    const changes = [];
-    // Validate all rows before writing anything.
-    for (const row of rows) {
-      const scoreInput = row.querySelector(".edit-mark-score");
-      const levelSelect = row.querySelector(".edit-mark-level");
-      const rawScore = scoreInput.value.trim();
-      if (rawScore !== "") {
-        const score = Number(rawScore);
-        if (!Number.isFinite(score) || score < 0 || score > 100) {
-          message.textContent = "Every entered score must be between 0 and 100. No changes have been saved.";
-          scoreInput.focus();
-          return;
-        }
-      }
-      const originalScore = row.getAttribute("data-original-score") || "";
-      const originalLevel = row.getAttribute("data-original-level") || "";
-      const currentScore = rawScore === "" ? "" : String(Number(rawScore));
-      const currentLevel = levelSelect.value || "";
-      const normalOriginalScore = originalScore === "" ? "" : String(Number(originalScore));
-      if (currentScore !== normalOriginalScore || currentLevel !== originalLevel) {
-        changes.push({
-          row,
-          resultId: row.getAttribute("data-result-id"),
-          values: { score: currentScore === "" ? null : Number(currentScore), achievement_level: currentLevel || null },
-          currentScore,
-          currentLevel
-        });
-      }
-    }
-    if (!changes.length) {
-      message.textContent = "No changes detected. No records were updated.";
-      return;
-    }
-    if (button) button.disabled = true;
-    message.textContent = "Saving " + changes.length + " changed result row(s)...";
-    let updated = 0;
-    try {
-      for (const change of changes) {
-        const updateResult = await db.from("results")
-          .update(change.values)
-          .eq("id", change.resultId)
-          .eq("assessment_id", assessmentId)
-          .select("id");
-        if (updateResult.error) throw updateResult.error;
-        if (!updateResult.data || updateResult.data.length !== 1) {
-          throw new Error("A result row was not updated. Check the user's permissions and database policies.");
-        }
-        updated++;
-        change.row.setAttribute("data-original-score", change.currentScore);
-        change.row.setAttribute("data-original-level", change.currentLevel);
-      }
-      message.textContent = "Saved successfully. Updated " + updated + " changed result row(s).";
-    } catch (error) {
-      console.error("SAVE EDITED MARKS ERROR:", error);
-      message.textContent = "Saved " + updated + " of " + changes.length + " changed row(s) before an error: " + (error.message || error) + ". Please reload the marks to verify before trying again.";
-    } finally {
-      if (button) button.disabled = false;
-    }
-  }
-
-  yearSelect.addEventListener("change", loadEditTerms);
-  termSelect.addEventListener("change", loadEditAssessments);
-  gradeSelect.addEventListener("change", loadEditAreas);
-  areaSelect.addEventListener("change", loadEditAssessments);
-  assessmentSelect.addEventListener("change", () => resetLearners());
-  loadButton.addEventListener("click", loadSavedMarks);
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initEditMarks, { once: true });
-  } else {
-    initEditMarks();
-  }
-})();
 
 
 applyRolePermissions();

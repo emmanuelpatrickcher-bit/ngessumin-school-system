@@ -11267,130 +11267,57 @@ document.addEventListener("DOMContentLoaded", function () {
     `;
 
 
-    /* Grade 9 levels */
+    /* Summarise the same per-learning-area levels displayed in the table.
+       Grade 9 overall bands (EE1–BE2) require total marks across learning areas,
+       so they should not be inferred from one learning-area score. */
 
-    if (gradeNumber === 9) {
+    html += `
 
-  html += `
+      <h3>
+        ACHIEVEMENT LEVEL SUMMARY
+      </h3>
 
-    <h3>
-      ACHIEVEMENT LEVEL SUMMARY
-    </h3>
+      <table>
 
-    <table>
+        <thead>
 
-      <thead>
+          <tr>
 
-        <tr>
+            <th>ACHIEVEMENT LEVEL</th>
 
-          <th>ACHIEVEMENT LEVEL</th>
+            <th>NUMBER OF LEARNERS</th>
 
-          <th>NUMBER OF LEARNERS</th>
+          </tr>
 
-        </tr>
+        </thead>
 
-      </thead>
+        <tbody>
 
-      <tbody>
+          <tr>
+            <td>EE</td>
+            <td>${levelCounts.EE}</td>
+          </tr>
 
-        <tr>
-          <td>EE1</td>
-          <td>${levelCounts.EE1}</td>
-        </tr>
+          <tr>
+            <td>ME</td>
+            <td>${levelCounts.ME}</td>
+          </tr>
 
-        <tr>
-          <td>EE2</td>
-          <td>${levelCounts.EE2}</td>
-        </tr>
+          <tr>
+            <td>AE</td>
+            <td>${levelCounts.AE}</td>
+          </tr>
 
-        <tr>
-          <td>ME1</td>
-          <td>${levelCounts.ME1}</td>
-        </tr>
+          <tr>
+            <td>BE</td>
+            <td>${levelCounts.BE}</td>
+          </tr>
 
-        <tr>
-          <td>ME2</td>
-          <td>${levelCounts.ME2}</td>
-        </tr>
+        </tbody>
 
-        <tr>
-          <td>AE1</td>
-          <td>${levelCounts.AE1}</td>
-        </tr>
+      </table>
 
-        <tr>
-          <td>AE2</td>
-          <td>${levelCounts.AE2}</td>
-        </tr>
-
-        <tr>
-          <td>BE1</td>
-          <td>${levelCounts.BE1}</td>
-        </tr>
-
-        <tr>
-          <td>BE2</td>
-          <td>${levelCounts.BE2}</td>
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  `;
-
-} else {
-
-  html += `
-
-    <h3>
-      ACHIEVEMENT LEVEL SUMMARY
-    </h3>
-
-    <table>
-
-      <thead>
-
-        <tr>
-
-          <th>ACHIEVEMENT LEVEL</th>
-
-          <th>NUMBER OF LEARNERS</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody>
-
-        <tr>
-          <td>EE</td>
-          <td>${levelCounts.EE}</td>
-        </tr>
-
-        <tr>
-          <td>ME</td>
-          <td>${levelCounts.ME}</td>
-        </tr>
-
-        <tr>
-          <td>AE</td>
-          <td>${levelCounts.AE}</td>
-        </tr>
-
-        <tr>
-          <td>BE</td>
-          <td>${levelCounts.BE}</td>
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  `;
-
-    }
-
+    `;
 
     resultContainer.innerHTML =
   html + `

@@ -5390,8 +5390,10 @@ const selectedGrade =
      GET LEARNERS
   ========================= */
 
-  const learnersResult =
-    await db
+  // For the Grade 9 Term 3 2026 merit list, include only
+  // currently Active Grade 9 learners. Leave other merit lists unchanged.
+  let learnersQuery =
+    db
       .from("learners")
       .select(`
         id,
@@ -5401,10 +5403,18 @@ const selectedGrade =
       .eq(
         "grade_id",
         gradeId
-      )
-      .order(
-        "full_name"
       );
+
+  const selectedGradeNumber = Number(
+    selectedGrade.replace(/[^0-9]/g, "")
+  );
+
+  if (selectedGradeNumber === 9 && String(termNumber) === "3") {
+    learnersQuery = learnersQuery.eq("status", "Active");
+  }
+
+  const learnersResult =
+    await learnersQuery.order("full_name");
 
 
   if (learnersResult.error) {

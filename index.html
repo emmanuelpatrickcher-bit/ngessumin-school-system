@@ -10579,7 +10579,36 @@ document.addEventListener(
   }, 500);
 
     }
-    async function populateClassReportExaminations() {
+    /* For Term 3, 2026, active learners in Grades 8 and 9 were promoted
+   after their marks were recorded. Match those learners to the grade used
+   by their historical assessments, without changing learner records. */
+async function getClassPerformanceAssessmentGradeId(currentGradeId, academicYear, termNumber) {
+  if (Number(academicYear) !== 2026 || Number(termNumber) !== 3) {
+    return currentGradeId;
+  }
+
+  const selectedGradeResult = await db
+    .from("grades")
+    .select("id, grade_number")
+    .eq("id", currentGradeId)
+    .single();
+
+  if (selectedGradeResult.error) throw selectedGradeResult.error;
+
+  const selectedGradeNumber = Number(selectedGradeResult.data.grade_number);
+  if (![8, 9].includes(selectedGradeNumber)) return currentGradeId;
+
+  const historicalGradeResult = await db
+    .from("grades")
+    .select("id")
+    .eq("grade_number", selectedGradeNumber - 1)
+    .single();
+
+  if (historicalGradeResult.error) throw historicalGradeResult.error;
+  return historicalGradeResult.data.id;
+}
+
+async function populateClassReportExaminations() {
 
   const gradeId =
     document.getElementById("classReportGrade")?.value;
@@ -10611,7 +10640,7 @@ document.addEventListener(
 
     const yearResult = await db
       .from("academic_years")
-      .select("id")
+      .select("id, year")
       .eq("school_id", schoolResult.data.id)
       .eq("is_current", true)
       .single();
@@ -10627,10 +10656,16 @@ document.addEventListener(
 
     if (termResult.error) throw termResult.error;
 
+    const assessmentGradeId = await getClassPerformanceAssessmentGradeId(
+      gradeId,
+      yearResult.data.year,
+      termNumber
+    );
+
     const assessmentsResult = await db
       .from("assessments")
       .select("id, assessment_name, created_at")
-      .eq("grade_id", gradeId)
+      .eq("grade_id", assessmentGradeId)
       .eq("term_id", termResult.data.id)
       .eq("learning_area_id", areaId)
       .order("created_at", { ascending: false });
@@ -10810,6 +10845,11 @@ document.addEventListener("DOMContentLoaded", function () {
       throw yearResult.error;
     }
 
+    const assessmentGradeId = await getClassPerformanceAssessmentGradeId(
+      gradeId,
+      yearResult.data.year,
+      termNumber
+    );
 
     const termResult =
       await db
@@ -10898,7 +10938,7 @@ document.addEventListener("DOMContentLoaded", function () {
         `)
         .eq(
           "assessments.grade_id",
-          gradeId
+          assessmentGradeId
         )
         .eq(
           "assessments.term_id",
